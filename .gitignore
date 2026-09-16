@@ -1,0 +1,22 @@
+# Data pack được cấp — KHÔNG commit vào repo nộp bài
+data/
+*.csv
+*.mp4
+tutor_turns*
+k4_messages*
+transcript-*-clean.md
+*slide*.pdf
+Sổ tay*.pdf
+
+# Khảo sát có tên người thật
+evidence/survey/responses*
+evidence/**/*-raw.*
+
+# Môi trường
+.env
+.env.*
+__pycache__/
+.venv/
+venv/
+node_modules/
+.DS_Store
