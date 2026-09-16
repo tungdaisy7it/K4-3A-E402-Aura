@@ -4,14 +4,14 @@
 
 ## 👥 Thành viên nhóm & Phân công vai trò
 
-**Lớp:** 3A · **Phòng:** ____ · **Cụm:** ____ · **Track:** ____
+**Lớp:** 3A · **Phòng:** E402 · **Cụm:** ____ · **Track:** D — đề **D2** (học từ lỗi trước) · **Nhóm:** Aura
 
 | Họ và Tên | Mã Học Viên | Vai trò chính | Phần việc đảm nhiệm trong dự án |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
-|  |  |  |  |
+| **Lê Thanh Tùng** *(nhóm trưởng)* | 2A202602499 | Spec & điều phối | Viết `spec.md` §1–§9; chốt lát cắt một câu và quality bar trước 21:00 17/9; quản repo GitHub; **nộp cả 5 phiếu CP1–CP5 bằng MSSV của mình**; dựng slide pitch CP5 |
+| Đậu Văn Thạch | 2A202602592 | Bằng chứng & người dùng | Mining `tutor_turns.csv` (lọc K4, `is_preset=False`); viết quy tắc đếm để người khác kiểm lại được; gom ≥5 ví dụ nguyên văn dẫn `turn_id`; bảng impact ≥3 ứng viên + lý do loại; tuyển đủ 5 người ngoài nhóm và chủ trì buổi validation |
+| Nguyễn Thu Hằng | 2A202602463 | Chẩn đoán lỗi & kiểm thử | Misconception bank M1–M5 dựng từ câu hỏi token thật; prompt chẩn đoán lỗi + dẫn giải theo bậc (gợi ý → giải thích → mở lời giảng); golden set ≥20 case (≥10 case từ chatlog thật); chạy eval trọn bộ và lập bảng kết quả đối chiếu quality bar; chấm "học viên có giải thích lại đúng không" trong buổi validation |
+| Đinh Quốc Bảo | 2A202602933 | Prototype | Dựng luồng phiên học chạy end-to-end: màn hình bài dự đoán → gọi `tiktoken` thật để đếm token → gọi AI thật ở bước chẩn đoán (có log/trace trong repo); cài 4 đường đi trải nghiệm (happy / low-confidence / failure / correction); quay video thao tác CP3 và video demo dự phòng CP5 |
 
 > Nhóm copy nguyên file README này về repo của mình, rồi điền bảng trên. Cột **Phần việc đảm nhiệm** ghi càng cụ thể càng tốt.
 

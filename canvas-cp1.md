@@ -11,7 +11,7 @@
 | **Lát cắt 1 câu** | **Một học viên** · **trước khi được xem phần giảng về token**, trả lời bài dự đoán "đoạn tiếng Việt ~100 từ này tốn bao nhiêu token — nhiều hay ít hơn số từ, vì sao" · **AI chẩn đoán đúng giả định sai cụ thể** rồi chỉ đưa **một** gợi ý kèm trích dẫn transcript, **không đưa đáp án** · **học viên tự sửa và giải thích lại được** vì sao số token lệch số từ |
 | **Automation** | **Conditional** — AI tự chẩn đoán + gợi ý khi lỗi khớp misconception bank; lỗi lạ / câu trả lời bỏ trống / gõ bừa → **không đoán bừa**, hỏi lại một câu; sau 2 vòng vẫn kẹt → mở lời giảng đầy đủ. AI **không chấm điểm**, giảng viên duyệt bank + lời dẫn giải. *Lý do (cost-of-error):* chẩn đoán sai lỗi khiến học viên sửa nhầm và đóng đinh kiến thức nền sai — đắt hơn hẳn việc không chẩn đoán |
 | **Willing users** | Đã đồng ý thử prototype trước demo, khai tại CP1: ① **Bùi Đăng Khoa** · ② **Nguyễn Trung Kiên** — cả hai ngoài nhóm. Track D yêu cầu **≥5 bạn thực sự học một đoạn** bằng prototype (không phải chỉ bấm thử giao diện), còn thiếu: ③____ ④____ ⑤____ |
-| **Phân công** | Châu: spec + lát cắt · TV2: evidence (mining + log) · TV3: prompt chẩn đoán lỗi + misconception bank · TV4: golden set + eval · TV5: dựng phiên học + validation/demo |
+| **Phân công** | **Lê Thanh Tùng** *(nhóm trưởng)* — spec + lát cắt + quality bar, nộp cả 5 phiếu checkpoint · **Đậu Văn Thạch** — evidence (mining, quy tắc đếm, bảng impact) + tuyển 5 người validation · **Nguyễn Thu Hằng** — misconception bank + prompt chẩn đoán + golden set ≥20 case + eval · **Đinh Quốc Bảo** — prototype end-to-end (`tiktoken` thật + gọi AI thật + 4 đường đi) + video CP3/CP5 |
 
 ---
 
