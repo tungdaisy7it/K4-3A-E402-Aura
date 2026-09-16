@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLearn FailFirst — Mock CP2</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#16181d;--mut:#6b7280;--line:#e5e7eb;
+        --brand:#2f5bea;--warnbg:#fef3c7;--okbg:#ecfdf5;--errbg:#fef2f2;--lock:#9ca3af}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .mockbar{position:sticky;top:0;z-index:10;background:#1f2937;color:#fff;
+           padding:8px 16px;font-size:13px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .mockbar b{background:#f59e0b;color:#1f2937;padding:1px 7px;border-radius:4px;font-size:12px}
+  .mockbar select{margin-left:auto;padding:4px 8px;border-radius:6px;border:0;font-size:13px}
+  .wrap{max-width:780px;margin:0 auto;padding:20px 16px 60px}
+  .crumb{color:var(--mut);font-size:13px;margin-bottom:6px}
+  h1{font-size:21px;margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:18px;margin-bottom:14px}
+  .locked{background:#f3f4f6;border-style:dashed;color:var(--lock);text-align:center;padding:26px}
+  .locked .big{font-size:28px}
+  .para{background:#fbfbfd;border:1px solid var(--line);border-left:3px solid var(--brand);
+        border-radius:6px;padding:12px;font-size:14px;color:#374151}
+  label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px}
+  input[type=number],textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;
+        font:inherit;background:#fff}
+  textarea{min-height:76px;resize:vertical}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  button{padding:10px 16px;border-radius:8px;border:1px solid var(--brand);background:var(--brand);
+         color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  button.ghost{background:#fff;color:var(--brand)}
+  button.quiet{background:#fff;color:var(--mut);border-color:var(--line);font-weight:500}
+  .tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:5px;
+       background:#eef2ff;color:#3730a3;margin-bottom:8px}
+  .box{border-radius:8px;padding:13px;margin-top:12px;font-size:14px}
+  .box.warn{background:var(--warnbg);border:1px solid #fcd34d}
+  .box.ok{background:var(--okbg);border:1px solid #6ee7b7}
+  .box.err{background:var(--errbg);border:1px solid #fecaca}
+  .box.hint{background:#eff6ff;border:1px solid #bfdbfe}
+  .cite{font-size:13px;color:var(--mut);border-left:3px solid #cbd5e1;padding-left:10px;margin-top:10px}
+  .cite code{background:#eef2ff;color:#3730a3;padding:1px 5px;border-radius:4px;font-size:12px}
+  .step{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid #cbd5e1;border-top-color:var(--brand);
+        border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:7px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .log{font-size:13px;color:var(--mut);background:#fff;border:1px dashed var(--line);
+       border-radius:8px;padding:12px;margin-top:14px}
+  .log li{margin:3px 0}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="mockbar">
+  <b>MOCK · CP2</b>
+  <span>Chưa gọi AI thật — chẩn đoán chạy bằng luật từ khoá</span>
+  <select id="scenario" title="Ép kịch bản để quay video">
+    <option value="auto">Kịch bản: tự do (gõ thật)</option>
+    <option value="happy">Happy — sai, chẩn đoán đúng</option>
+    <option value="low">Low-confidence — không đủ để chẩn đoán</option>
+    <option value="fail">Failure — lỗi ngoài bank</option>
+    <option value="corr">Correction — học viên báo chẩn đoán sai</option>
+  </select>
+</div>
+
+<div class="wrap">
+  <div class="crumb">VLearn · Day 01 — Foundation: cách LLM hoạt động</div>
+  <h1>3.2 — Token là gì</h1>
+
+  <section id="s1">
+    <div class="card locked">
+      <div class="big">&#128274;</div>
+      <div><b>Lời giảng phần này đang khoá</b></div>
+      <div style="font-size:13px">Trả lời bài dự đoán bên dưới trước đã — kể cả khi bạn chưa chắc.</div>
+    </div>
+
+    <div class="card">
+      <div class="step">Bài dự đoán · trước khi học</div>
+      <p style="margin:0 0 10px"><b>Đoạn tiếng Việt dưới đây có đúng 100 từ.</b></p>
+      <div class="para">
+        Mô hình ngôn ngữ lớn không đọc chữ giống con người. Trước khi xử lý, toàn bộ câu chữ
+        được cắt thành những mảnh nhỏ gọi là token, rồi mỗi token được chuyển thành một vectơ số.
+        Mô hình dự đoán token tiếp theo dựa trên toàn bộ token đã có trước đó, và cứ thế sinh ra
+        câu trả lời từng mảnh một. Số lượng token quyết định hai thứ rất thực tế: giá tiền bạn
+        trả cho mỗi lần gọi mô hình, và lượng nội dung tối đa bạn nhét được vào một lần hỏi.
+        Vì vậy biết ước lượng số token của một đoạn văn là kỹ năng cơ bản khi xây sản phẩm.
+      </div>
+
+      <label for="guess">Theo bạn <code>tiktoken</code> đếm đoạn này ra bao nhiêu token?</label>
+      <input type="number" id="guess" placeholder="ví dụ: 100" min="1">
+
+      <label for="why">Vì sao bạn nghĩ vậy? <span style="font-weight:400;color:var(--mut)">(bắt buộc — đây là chỗ được chấm)</span></label>
+      <textarea id="why" placeholder="Viết suy nghĩ thật của bạn, sai cũng không sao."></textarea>
+
+      <div class="row">
+        <button id="submit">Nộp dự đoán</button>
+        <button class="quiet" id="shortcut">Cho đáp án luôn đi</button>
+      </div>
+      <div class="box err" id="refuse" hidden></div>
+    </div>
+  </section>
+
+  <section id="s2" hidden>
+    <div class="card"><span class="spin"></span> Đang đối chiếu câu trả lời của bạn với tài liệu bài giảng…</div>
+  </section>
+
+  <section id="s3" hidden>
+    <div class="card">
+      <div id="diagTag" class="tag"></div>
+      <div id="diagBody"></div>
+      <div class="row" id="diagActions"></div>
+    </div>
+  </section>
+
+  <section id="s4" hidden>
+    <div class="card">
+      <div class="step">Chốt hiểu</div>
+      <p style="margin:0 0 4px"><b>Giải thích lại bằng lời của bạn:</b> vì sao số token khác số từ?</p>
+      <textarea id="explain" placeholder="2–3 câu là đủ."></textarea>
+      <div class="row"><button id="checkExplain">Gửi</button></div>
+      <div id="explainOut"></div>
+    </div>
+  </section>
+
+  <section id="s5" hidden>
+    <div class="card">
+      <div class="box ok"><b>&#9989; Mở khoá lời giảng phần 3.2</b><br>
+        Bây giờ bạn xem phần giảng với câu hỏi trong đầu — đó là điểm của cả bài tập này.</div>
+      <div class="cite" style="margin-top:14px">
+        <code>[T06-134]</code> "Đơn vị cơ bản của LLM là cái nãy giờ chúng ta gọi là token…"<br>
+        <code>[T06-155]</code> "Cách tính giá: chúng ta tính cả input token cộng với output token thì ra total cost…"
+      </div>
+      <div class="log">
+        <b>Log phiên gửi giảng viên</b> <span style="font-size:12px">(không công khai cho lớp)</span>
+        <ul id="logList"></ul>
+      </div>
+      <div class="row"><button class="ghost" id="again">Chạy lại từ đầu</button></div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* MOCK: chẩn đoán bằng luật từ khoá. CP3 thay bằng lời gọi AI thật. */
+var TOKEN_THAT = 186;   /* MOCK — CP3 thay bằng tiktoken(o200k_base) chạy thật */
+var LO = 150, HI = 250;
+
+var BANK = {
+  M1:{ ten:'token = từ',
+       chan:'Bạn đang coi một token là một từ, nên ra đúng 100.',
+       goi:'Thử gõ riêng chữ "nghiêng" và chữ "the" vào một bộ đếm token xem mỗi chữ ra mấy token. Chênh lệch đó nói lên điều gì?',
+       cite:'[T06-134]' },
+  M2:{ ten:'token = ký tự',
+       chan:'Bạn đang coi token là từng ký tự, nên con số bị đội lên rất cao.',
+       goi:'Nếu token là ký tự thì đoạn 100 từ này phải ra hơn 500. Vì sao con số thật lại nhỏ hơn thế nhiều?',
+       cite:'[T06-134]' },
+  M3:{ ten:'tiếng Việt và tiếng Anh tốn token như nhau',
+       chan:'Bạn giả định tiếng Việt tốn token ngang tiếng Anh — đây là chỗ sai tốn tiền thật khi tính giá API.',
+       goi:'Bộ tokenizer được huấn luyện chủ yếu trên văn bản tiếng Anh. Điều đó ảnh hưởng gì tới chữ có dấu?',
+       cite:'[T06-136]' },
+  M4:{ ten:'nhầm token đầu vào với token đầu ra',
+       chan:'Bạn đang trộn token đầu vào với token đầu ra. Câu hỏi này chỉ hỏi phần đầu vào.',
+       goi:'Đoạn văn này nằm ở phía bạn gửi đi hay phía mô hình viết ra? Giá hai phía có bằng nhau không?',
+       cite:'[T06-155]' },
+  M5:{ ten:'đúng kết quả nhưng chưa giải thích được',
+       chan:'Con số của bạn nằm trong khoảng đúng, nhưng lý do chưa cho thấy bạn biết vì sao.',
+       goi:'Nếu tôi đổi đoạn này sang tiếng Anh cùng 100 từ, số token tăng hay giảm? Vì sao?',
+       cite:'[T06-134]' }
+};
+
+var S = { lan:0, log:[] };
+function $(id){ return document.getElementById(id); }
+function show(id){ ['s1','s2','s3','s4','s5'].forEach(function(x){ $(x).hidden = (x !== id); }); }
+function ghi(t){ S.log.push(t); }
+
+function chanDoan(so, vi){
+  var ep = $('scenario').value;
+  if (ep === 'low')   return { loai:'low' };
+  if (ep === 'fail')  return { loai:'fail' };
+  if (ep === 'happy') return { loai:'ok', ma:'M1' };
+  if (ep === 'corr')  return { loai:'ok', ma:'M3' };
+
+  var t = (vi || '').toLowerCase().trim();
+  if (t.length < 12 || /^(ko|khong|không|k)\s*bi/.test(t) || /chịu|chiu|đoán bừa|doan bua|random|hên xui/.test(t))
+    return { loai:'low' };
+  if (/ký tự|ki tu|chữ cái|chu cai|character/.test(t))
+    return { loai:'ok', ma:'M2' };
+  if (/như nhau|nhu nhau|giống tiếng anh|giong tieng anh|không khác|khong khac|tương đương|tuong duong/.test(t))
+    return { loai:'ok', ma:'M3' };
+  if (/đầu ra|dau ra|output|đầu vào|dau vao|input|gấp 3|gap 3|gấp 5|gap 5/.test(t))
+    return { loai:'ok', ma:'M4' };
+  if (/mỗi từ|moi tu|bằng số từ|bang so tu|token là từ|token la tu|một từ|mot tu/.test(t) || so === 100)
+    return { loai:'ok', ma:'M1' };
+  if (so >= LO && so <= HI)
+    return { loai:'ok', ma:'M5' };
+  return { loai:'fail' };
+}
+
+function veChanDoan(kq){
+  var tag = $('diagTag'), body = $('diagBody'), act = $('diagActions');
+  act.innerHTML = '';
+
+  if (kq.loai === 'low'){
+    tag.textContent = '② CHƯA ĐỦ ĐỂ CHẨN ĐOÁN';
+    tag.style.background = '#fef3c7'; tag.style.color = '#92400e';
+    body.innerHTML = '<div class="box warn"><b>Tôi chưa xếp được câu trả lời của bạn vào lỗi nào</b><br>' +
+      'Nếu đoán bừa một nhãn lỗi rồi dạy theo nhãn đó, bạn sẽ đi sửa nhầm chỗ. Nên tôi hỏi lại một câu thôi:' +
+      '<br><br><b>Theo bạn, một token dài cỡ một từ, ngắn hơn một từ, hay dài hơn một từ?</b></div>';
+    ghi('Low-confidence: lý do quá ngắn/không rõ → hệ thống hỏi lại, KHÔNG gán nhãn lỗi.');
+    act.innerHTML = '<button id="back">Trả lời lại</button>';
+    $('back').onclick = function(){ show('s1'); };
+    return;
+  }
+
+  if (kq.loai === 'fail'){
+    tag.textContent = '④ LỖI NGOÀI BANK';
+    tag.style.background = '#fef2f2'; tag.style.color = '#991b1b';
+    body.innerHTML = '<div class="box err"><b>Lý do của bạn không khớp nhóm lỗi nào tôi đang có</b><br>' +
+      'Tôi không bịa ra một chẩn đoán cho có. Câu trả lời của bạn được ghi lại để giảng viên xem — ' +
+      'nếu nhiều bạn cùng nghĩ như vậy thì đây là một nhóm lỗi mới cần bổ sung.' +
+      '<div class="cite" style="margin-top:10px">Trong lúc chờ, đọc trước đoạn <code>[T06-134]</code> rồi thử lại.</div></div>';
+    ghi('FAILURE: lý do ngoài bank M1–M5 → ghi nhận cho giảng viên, không gán nhãn bừa.');
+    act.innerHTML = '<button id="back">Thử lại</button>';
+    $('back').onclick = function(){ show('s1'); };
+    return;
+  }
+
+  var m = BANK[kq.ma];
+  tag.textContent = '① CHẨN ĐOÁN: ' + kq.ma + ' — ' + m.ten;
+  tag.style.background = '#eef2ff'; tag.style.color = '#3730a3';
+  body.innerHTML = '<p style="margin:0 0 4px"><b>' + m.chan + '</b></p>' +
+    '<div class="box hint"><b>Gợi ý (bậc 1/3) — chỉ một câu, không có đáp án:</b><br>' + m.goi + '</div>' +
+    '<div class="cite">Đối chiếu: <code>' + m.cite + '</code> trong transcript Day 01.</div>';
+  ghi('Chẩn đoán ' + kq.ma + ' (' + m.ten + ') → dẫn giải bậc 1.');
+
+  act.innerHTML = '<button id="fix">Tôi sửa lại</button>' +
+    '<button class="ghost" id="wrongdiag">Chẩn đoán sai rồi</button>' +
+    '<button class="quiet" id="stuck">Vẫn chưa hiểu</button>';
+
+  $('fix').onclick = function(){ show('s4'); };
+
+  $('wrongdiag').onclick = function(){
+    tag.textContent = '⑤ ĐÃ NHẬN LẠI CHẨN ĐOÁN';
+    tag.style.background = '#ecfdf5'; tag.style.color = '#065f46';
+    body.innerHTML = '<div class="box ok"><b>Tôi xếp sai nhãn lỗi cho bạn.</b><br>' +
+      'Bỏ nhãn <code>' + kq.ma + '</code>. Nói giúp tôi một câu: bạn đang so số token với cái gì — ' +
+      'số từ, số ký tự, hay giá tiền một lần gọi?</div>';
+    ghi('CORRECTION: học viên báo chẩn đoán sai → huỷ nhãn ' + kq.ma + ', hỏi lại, không bảo lưu.');
+    act.innerHTML = '<button id="back2">Trả lời lại</button>';
+    $('back2').onclick = function(){ show('s1'); };
+  };
+
+  $('stuck').onclick = function(){
+    S.lan++;
+    if (S.lan === 1){
+      body.innerHTML = '<p style="margin:0 0 4px"><b>' + m.chan + '</b></p>' +
+        '<div class="box hint"><b>Bậc 2/3 — giải thích:</b><br>' +
+        'Tokenizer cắt theo cụm ký tự hay gặp trong dữ liệu huấn luyện, không cắt theo từ. ' +
+        'Dữ liệu đó chủ yếu là tiếng Anh, nên một chữ tiếng Việt có dấu thường bị cắt làm nhiều mảnh. ' +
+        'Vì thế số token của đoạn tiếng Việt lớn hơn số từ khá nhiều.</div>' +
+        '<div class="cite">Đối chiếu: <code>[T06-136]</code></div>';
+      ghi('Học viên vẫn kẹt → nâng lên bậc 2 (giải thích).');
+      act.innerHTML = '<button id="fix2">Tôi hiểu rồi, sửa lại</button>' +
+        '<button class="quiet" id="stuck2">Vẫn chưa hiểu</button>';
+      $('fix2').onclick = function(){ show('s4'); };
+      $('stuck2').onclick = function(){
+        ghi('Kẹt qua 2 bậc → mở lời giảng đầy đủ (bậc 3).');
+        moKhoa('Học viên kẹt qua 2 bậc — hệ thống mở lời giảng đầy đủ thay vì để học viên bỏ cuộc.');
+      };
+    }
+  };
+}
+
+$('submit').onclick = function(){
+  var so = parseInt($('guess').value, 10);
+  var vi = $('why').value;
+  if (!so && $('scenario').value === 'auto'){ alert('Điền số dự đoán đã — sai cũng được.'); return; }
+  ghi('Học viên dự đoán ' + (so || '—') + ' token (số thật ' + TOKEN_THAT + ' · MOCK).');
+  show('s2');
+  setTimeout(function(){ show('s3'); veChanDoan(chanDoan(so, vi)); }, 850);
+};
+
+$('shortcut').onclick = function(){
+  var r = $('refuse');
+  r.hidden = false;
+  r.innerHTML = '<b>③ Tôi không đưa đáp án ở bước này.</b><br>' +
+    'Không phải để làm khó — bài này chấm chỗ bạn nghĩ sai, mà biết đáp án trước thì không còn chỗ nào để chấm. ' +
+    'Đổi lại tôi thu hẹp giúp bạn: <b>token dài hơn hay ngắn hơn một từ tiếng Việt?</b> ' +
+    'Trả lời được câu đó là bạn đoán được con số.';
+  ghi('Học viên bấm "cho đáp án luôn" → từ chối đưa đáp án, đổi bằng câu hỏi thu hẹp.');
+};
+
+$('checkExplain').onclick = function(){
+  var t = $('explain').value.toLowerCase();
+  var out = $('explainOut');
+  var dat = t.length > 25 &&
+    /cắt|cat |mảnh|manh|cụm|cum |tiếng anh|tieng anh|có dấu|co dau|nhỏ hơn từ|không theo từ/.test(t);
+  if (dat){
+    out.innerHTML = '<div class="box ok"><b>Đạt.</b> Bạn nêu được đúng cơ chế: tokenizer cắt theo cụm ký tự chứ không theo từ.</div>';
+    ghi('Chốt hiểu: ĐẠT — học viên giải thích lại đúng, không cần xem lời giảng đầy đủ.');
+    setTimeout(function(){ moKhoa('Học viên tự sửa và giải thích lại đúng.'); }, 700);
+  } else {
+    out.innerHTML = '<div class="box warn"><b>Chưa đủ.</b> Bạn mới nói kết quả, chưa nói cơ chế. ' +
+      'Một câu thôi: tokenizer cắt theo <i>cái gì</i>, nếu không phải theo từ?</div>';
+    ghi('Chốt hiểu: CHƯA ĐẠT — hỏi ngược đúng chỗ hổng thay vì cho qua.');
+  }
+};
+
+function moKhoa(ly){
+  ghi('Kết phiên: ' + ly);
+  var ul = $('logList');
+  ul.innerHTML = '';
+  S.log.forEach(function(x){
+    var li = document.createElement('li');
+    li.textContent = x;
+    ul.appendChild(li);
+  });
+  show('s5');
+}
+
+$('again').onclick = function(){
+  S = { lan:0, log:[] };
+  $('guess').value = ''; $('why').value = ''; $('explain').value = '';
+  $('explainOut').innerHTML = ''; $('refuse').hidden = true;
+  show('s1');
+};
+</script>
+</body>
+</html>
