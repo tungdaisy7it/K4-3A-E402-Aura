@@ -11,46 +11,70 @@
 
 ```mermaid
 flowchart TD
-    A["Học viên mở phần 3.2 — Token<br/>Lời giảng đang KHOÁ"] --> B["Bài dự đoán:<br/>số token? + vì sao?"]
-    B -->|"bấm 'Cho đáp án luôn'"| X["③ NGOÀI THẨM QUYỀN<br/>Từ chối đưa đáp án<br/>nhưng đưa 1 câu hỏi thu hẹp"]
-    X --> B
-    B --> C{"Câu trả lời có đủ<br/>để chẩn đoán không?"}
+    A["Học viên mở phần 3.2 Token<br/>Lời giảng đang khoá"]
+    B["Bài dự đoán<br/>Đoán số token và nêu lý do"]
+    C{"Phân loại câu trả lời<br/>một lời gọi AI"}
 
-    C -->|"bỏ trống / 'ko biết' / 1 chữ"| D["② LOW-CONFIDENCE<br/>Không gán lỗi bừa —<br/>hỏi lại MỘT câu thu hẹp"]
-    D --> B
+    XIN["XIN - đòi đáp án hoặc dán nguyên đề<br/>Từ chối đưa đáp án<br/>Đổi bằng một câu hỏi thu hẹp"]
+    LOW["LOW - bỏ trống, ko biết, một chữ<br/>Không gán nhãn lỗi<br/>Hỏi lại một câu"]
+    OUT["OUT - lý do rõ nhưng ngoài bank<br/>Nói thẳng là chưa xếp được<br/>Ghi nhận cho giảng viên"]
+    R["Quay lại bài dự đoán"]
 
-    C -->|"có lý do nhưng không khớp bank"| E["④ FAILURE<br/>Nói thẳng: chưa xếp được<br/>lỗi vào nhóm nào<br/>→ ghi nhận cho giảng viên"]
-    E --> B
+    M["M1 đến M5 - có nhãn lỗi<br/>Bậc 1: một gợi ý duy nhất<br/>Có trích dẫn, không có đáp án"]
+    SUA{"Học viên làm gì tiếp"}
+    SAI["Huỷ nhãn cũ, không bảo lưu<br/>Hỏi lại để xếp lại"]
+    B2["Bậc 2: giải thích kèm trích dẫn"]
+    KET{"Còn kẹt nữa không"}
+    B3["Bậc 3: mở lời giảng đầy đủ<br/>Hết đường tắt"]
 
-    C -->|"khớp bank"| F["① CHẨN ĐOÁN<br/>Gán nhãn lỗi M1–M5"]
-    F --> G["BẬC 1 — một gợi ý duy nhất<br/>+ trích dẫn [T06-134]<br/>KHÔNG đưa đáp án"]
+    CHOT["Chốt hiểu<br/>Giải thích lại bằng lời của mình"]
+    DOI{"Giải thích có bám transcript"}
+    HOI["Hỏi ngược đúng chỗ còn hổng"]
+    MO["Mở khoá lời giảng<br/>Ghi log phiên cho giảng viên"]
 
-    G -->|"'chẩn đoán sai rồi, ý tôi là…'"| H["⑤ CORRECTION<br/>Nhận lại, xếp lại nhãn lỗi,<br/>không bảo lưu"]
-    H --> G
+    A --> B
+    B --> C
 
-    G -->|"học viên sửa lại"| I{"Lần sửa thứ mấy?"}
-    I -->|"đúng"| J["CHỐT HIỂU<br/>Giải thích lại bằng lời của bạn"]
-    I -->|"vẫn sai, lần 2"| K["BẬC 2 — giải thích<br/>+ trích dẫn"]
-    K --> I
-    I -->|"vẫn sai, lần 3"| L["BẬC 3 — mở lời giảng đầy đủ<br/>(hết đường tắt)"]
+    C -->|"đòi đáp án"| XIN
+    C -->|"không đủ căn cứ"| LOW
+    C -->|"ngoài bank"| OUT
+    C -->|"khớp bank"| M
+    C -->|"DUNG - đúng cả số lẫn cơ chế"| CHOT
 
-    J --> M{"Giải thích có bám<br/>transcript không?"}
-    M -->|"chưa"| N["Hỏi ngược đúng chỗ hổng"]
-    N --> J
-    M -->|"đạt"| O["✅ MỞ KHOÁ lời giảng<br/>+ log phiên cho giảng viên"]
-    L --> O
+    XIN --> R
+    LOW --> R
+    OUT --> R
+    R --> B
+
+    M --> SUA
+    SUA -->|"báo chẩn đoán sai"| SAI
+    SAI --> R
+    SUA -->|"sửa lại được"| CHOT
+    SUA -->|"vẫn chưa hiểu"| B2
+
+    B2 --> KET
+    KET -->|"hết kẹt"| CHOT
+    KET -->|"vẫn kẹt"| B3
+    B3 --> MO
+
+    CHOT --> DOI
+    DOI -->|"chưa đạt"| HOI
+    HOI --> CHOT
+    DOI -->|"đạt"| MO
 ```
 
 ## 4 đường đi trải nghiệm (R3 yêu cầu đủ 4)
 
 | Đường | Kích hoạt khi | Hệ thống làm gì | Bấm thử trong mock |
 |---|---|---|---|
-| **Happy** | Trả lời sai + nêu được lý do khớp bank | Chẩn đoán đúng nhãn lỗi → bậc 1 một gợi ý → học viên sửa → chốt hiểu → mở lời giảng | Kịch bản `Happy` |
-| **Low-confidence** | Bỏ trống lý do, "ko biết", trả lời một chữ | **Không gán lỗi bừa** — hỏi lại một câu thu hẹp | Kịch bản `Low-confidence` |
-| **Failure** | Lý do rõ ràng nhưng không khớp M1–M5 | Nói thẳng "chưa xếp được lỗi của bạn", ghi nhận cho giảng viên, không bịa nhãn | Kịch bản `Failure` |
-| **Correction** | Học viên bảo "chẩn đoán sai rồi, ý tôi là…" | Nhận lại, xếp lại nhãn, không bảo lưu chẩn đoán cũ | Kịch bản `Correction` |
+| **Happy** | Trả lời sai, nêu được lý do khớp bank | Gán nhãn `M1`–`M5` → bậc 1 một gợi ý → học viên sửa → chốt hiểu → mở lời giảng | Kịch bản `Happy` |
+| **Low-confidence** | Bỏ trống lý do, "ko biết", trả lời một chữ | Nhãn `LOW` — **không gán lỗi bừa**, hỏi lại một câu thu hẹp | Kịch bản `Low-confidence` |
+| **Failure** | Lý do rõ ràng nhưng không khớp bank | Nhãn `OUT` — nói thẳng "chưa xếp được lỗi của bạn", ghi nhận cho giảng viên, không bịa nhãn | Kịch bản `Failure` |
+| **Correction** | Học viên bảo "chẩn đoán sai rồi, ý tôi là…" | Huỷ nhãn cũ, không bảo lưu, hỏi lại để xếp lại | Kịch bản `Correction` |
 
-Cộng thêm đường **③ ngoài thẩm quyền**: bấm "Cho đáp án luôn" → từ chối đưa đáp án nhưng vẫn hữu ích. Đây chính là hành vi đã mining được trong chatlog (103 lượt / 38 học viên dán đề hoặc xin làm hộ).
+Hai nhãn còn lại do bản CP3 bổ sung sau khi chạy eval: `XIN` (đòi đáp án, dán nguyên đề) và `DUNG` (đúng cả số lẫn cơ chế — đi thẳng tới bước chốt hiểu, không gán lỗi).
+
+Nhãn `XIN` phủ **lớp chỗ khó số 3 — ngoài phạm vi / thẩm quyền**: bấm "Cho đáp án luôn" thì hệ thống từ chối nhưng vẫn hữu ích. Đây đúng là hành vi đã mining được trong chatlog: 103 lượt / 38 học viên dán đề hoặc xin làm hộ.
 
 ## Misconception bank dùng trong mock
 
