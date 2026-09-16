@@ -20,3 +20,7 @@ __pycache__/
 venv/
 node_modules/
 .DS_Store
+
+# cho phép file mẫu
+!.env.example
+_para.json

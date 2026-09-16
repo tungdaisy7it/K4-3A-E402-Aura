@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VLearn FailFirst</title>
+<style>
+  :root{--bg:#f6f7f9;--card:#fff;--ink:#16181d;--mut:#6b7280;--line:#e5e7eb;--brand:#2f5bea;
+        --warnbg:#fef3c7;--okbg:#ecfdf5;--errbg:#fef2f2;--lock:#9ca3af}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .bar{position:sticky;top:0;z-index:10;background:#0f172a;color:#fff;padding:8px 16px;
+       font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .bar b{background:#10b981;color:#06251a;padding:1px 7px;border-radius:4px;font-size:12px}
+  .wrap{max-width:780px;margin:0 auto;padding:20px 16px 60px}
+  .crumb{color:var(--mut);font-size:13px;margin-bottom:6px}
+  h1{font-size:21px;margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+  .locked{background:#f3f4f6;border-style:dashed;color:var(--lock);text-align:center;padding:26px}
+  .para{background:#fbfbfd;border:1px solid var(--line);border-left:3px solid var(--brand);
+        border-radius:6px;padding:12px;font-size:14px;color:#374151}
+  label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px}
+  input[type=number],textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
+  textarea{min-height:76px;resize:vertical}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  button{padding:10px 16px;border-radius:8px;border:1px solid var(--brand);background:var(--brand);
+         color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  button.ghost{background:#fff;color:var(--brand)}
+  button.quiet{background:#fff;color:var(--mut);border-color:var(--line);font-weight:500}
+  button:disabled{opacity:.55;cursor:wait}
+  .tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:5px;margin-bottom:8px}
+  .box{border-radius:8px;padding:13px;margin-top:12px;font-size:14px}
+  .box.warn{background:var(--warnbg);border:1px solid #fcd34d}
+  .box.ok{background:var(--okbg);border:1px solid #6ee7b7}
+  .box.err{background:var(--errbg);border:1px solid #fecaca}
+  .box.hint{background:#eff6ff;border:1px solid #bfdbfe}
+  .cite{font-size:13px;color:var(--mut);border-left:3px solid #cbd5e1;padding-left:10px;margin-top:10px}
+  .cite code{background:#eef2ff;color:#3730a3;padding:1px 5px;border-radius:4px;font-size:12px}
+  .step{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+  .meta{font-size:12px;color:var(--mut);margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid #cbd5e1;border-top-color:var(--brand);
+        border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:7px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:10px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left}
+  th{background:#f9fafb}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <b>AI THẬT</b>
+  <span id="barinfo">Chẩn đoán gọi OpenAI · số token do tiktoken đếm thật</span>
+</div>
+
+<div class="wrap">
+  <div class="crumb">VLearn · Day 01 — Foundation: cách LLM hoạt động</div>
+  <h1>3.2 — Token là gì</h1>
+
+  <section id="s1">
+    <div class="card locked">
+      <div style="font-size:28px">&#128274;</div>
+      <div><b>Lời giảng phần này đang khoá</b></div>
+      <div style="font-size:13px">Trả lời bài dự đoán bên dưới trước đã — sai cũng không sao, đó là chủ đích.</div>
+    </div>
+
+    <div class="card">
+      <div class="step">Bài dự đoán · trước khi học</div>
+      <p style="margin:0 0 10px"><b>Đoạn tiếng Việt dưới đây có <span id="ntieng">…</span> tiếng.</b></p>
+      <div class="para" id="para">đang tải…</div>
+
+      <label for="guess">Theo bạn <code>tiktoken</code> (<code>o200k_base</code>) đếm ra bao nhiêu token?</label>
+      <input type="number" id="guess" placeholder="ví dụ: 99" min="1">
+
+      <label for="why">Vì sao bạn nghĩ vậy? <span style="font-weight:400;color:var(--mut)">(bắt buộc — đây là chỗ được chấm)</span></label>
+      <textarea id="why" placeholder="Viết suy nghĩ thật của bạn."></textarea>
+
+      <div class="row">
+        <button id="submit">Nộp dự đoán</button>
+        <button class="quiet" id="shortcut">Cho đáp án luôn đi</button>
+      </div>
+      <div class="box err" id="refuse" hidden></div>
+    </div>
+  </section>
+
+  <section id="s2" hidden>
+    <div class="card"><span class="spin"></span> Đang đối chiếu câu trả lời của bạn với tài liệu bài giảng…</div>
+  </section>
+
+  <section id="s3" hidden>
+    <div class="card">
+      <div id="diagTag" class="tag"></div>
+      <div id="diagBody"></div>
+      <div class="row" id="diagActions"></div>
+      <div class="meta" id="diagMeta"></div>
+    </div>
+  </section>
+
+  <section id="s4" hidden>
+    <div class="card">
+      <div class="step">Chốt hiểu</div>
+      <p style="margin:0 0 4px"><b>Giải thích lại bằng lời của bạn:</b> vì sao số token khác số tiếng?</p>
+      <textarea id="explain" placeholder="2–3 câu là đủ."></textarea>
+      <div class="row"><button id="checkExplain">Gửi</button></div>
+      <div id="explainOut"></div>
+    </div>
+  </section>
+
+  <section id="s5" hidden>
+    <div class="card">
+      <div class="box ok"><b>&#9989; Mở khoá lời giảng phần 3.2</b></div>
+      <div id="suthat"></div>
+      <div class="cite">
+        <code>[T06-134]</code> "Đơn vị cơ bản của LLM là cái nãy giờ chúng ta gọi là token…"<br>
+        <code>[T06-155]</code> "Cách tính giá: tính cả input token cộng output token thì ra total cost…"
+      </div>
+      <label for="thu">Tự thử đi — dán đoạn bất kỳ, tiktoken đếm thật:</label>
+      <textarea id="thu" placeholder="Dán tiếng Việt hoặc tiếng Anh vào đây."></textarea>
+      <div class="row"><button class="ghost" id="dem">Đếm</button><button class="quiet" id="again">Chạy lại từ đầu</button></div>
+      <div id="demOut"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+var NHAN = {
+  M1:'M1 — token = từ/tiếng', M2:'M2 — token = ký tự',
+  M3:'M3 — nghĩ mọi model đếm token như nhau', M4:'M4 — nhầm token vào với token ra',
+  M5:'M5 — số đúng nhưng đang đoán', DUNG:'Đúng — có nêu được cơ chế',
+  LOW:'Chưa đủ để chẩn đoán', OUT:'Lỗi ngoài bank', XIN:'Xin đáp án'
+};
+var lan = 0;
+function $(id){ return document.getElementById(id); }
+function show(id){ ['s1','s2','s3','s4','s5'].forEach(function(x){ $(x).hidden = (x!==id); }); }
+
+fetch('/api/bai-tap').then(function(r){ return r.json(); }).then(function(d){
+  $('para').textContent = d.doan_van;
+  $('ntieng').textContent = d.n_tieng;
+});
+
+$('submit').onclick = function(){
+  var so = $('guess').value, vi = $('why').value;
+  if (!so && !vi.trim()){ alert('Điền số hoặc lý do đã.'); return; }
+  show('s2');
+  fetch('/api/chan-doan', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({so: so ? parseInt(so,10) : null, ly_do: vi})})
+  .then(function(r){ return r.json(); })
+  .then(ve)
+  .catch(function(e){
+    show('s3');
+    $('diagTag').textContent = 'LỖI KẾT NỐI';
+    $('diagBody').innerHTML = '<div class="box err">Không gọi được API: ' + e + '</div>';
+  });
+};
+
+function ve(d){
+  show('s3');
+  var tag = $('diagTag'), body = $('diagBody'), act = $('diagActions');
+  tag.textContent = NHAN[d.nhan] || d.nhan;
+  act.innerHTML = '';
+
+  if (d.nhan === 'LOW'){
+    tag.style.background='#fef3c7'; tag.style.color='#92400e';
+    body.innerHTML = '<div class="box warn"><b>Chưa đủ căn cứ để chẩn đoán</b><br>' + d.chan_doan +
+      '<br><br><b>' + d.goi_y + '</b></div>';
+  } else if (d.nhan === 'OUT'){
+    tag.style.background='#fef2f2'; tag.style.color='#991b1b';
+    body.innerHTML = '<div class="box err"><b>Chưa xếp được lý do của bạn vào nhóm lỗi nào</b><br>' +
+      d.chan_doan + ' Câu trả lời được ghi lại cho giảng viên xem.<br><br><b>' + d.goi_y + '</b></div>';
+  } else if (d.nhan === 'XIN'){
+    tag.style.background='#fef2f2'; tag.style.color='#991b1b';
+    body.innerHTML = '<div class="box err"><b>Mình không đưa đáp án ở bước này.</b><br>' + d.chan_doan +
+      '<br><br><b>' + d.goi_y + '</b></div>';
+  } else if (d.nhan === 'DUNG'){
+    tag.style.background='#ecfdf5'; tag.style.color='#065f46';
+    body.innerHTML = '<div class="box ok"><b>' + d.chan_doan + '</b><br><br>' + d.goi_y + '</div>';
+    act.innerHTML = '<button id="go">Sang bước chốt hiểu</button>';
+  } else {
+    tag.style.background='#eef2ff'; tag.style.color='#3730a3';
+    body.innerHTML = '<p style="margin:0 0 4px"><b>' + d.chan_doan + '</b></p>' +
+      '<div class="box hint"><b>Gợi ý (bậc ' + (lan+1) + '/3) — không có đáp án:</b><br>' + d.goi_y + '</div>';
+    act.innerHTML = '<button id="go">Tôi sửa lại</button><button class="quiet" id="back">Trả lời lại từ đầu</button>';
+  }
+  if (!act.innerHTML) act.innerHTML = '<button class="quiet" id="back">Trả lời lại</button>';
+
+  body.innerHTML += '<div class="cite">Đối chiếu: <code>' + (d.trich_dan||'') + '</code></div>';
+  var w = (d.canh_bao||[]).length ? ' · hậu kiểm chặn: ' + d.canh_bao.join(',') : '';
+  $('diagMeta').textContent = 'model ' + (d._meta ? d._meta.model : '?') +
+    ' · ' + (d._meta ? d._meta.ms : '?') + 'ms · tin cậy ' + (d.do_tin!=null?d.do_tin:'?') + w;
+
+  if ($('go')) $('go').onclick = function(){ lan++; show('s4'); };
+  if ($('back')) $('back').onclick = function(){ show('s1'); };
+}
+
+$('shortcut').onclick = function(){
+  var r = $('refuse'); r.hidden = false;
+  r.innerHTML = '<b>Mình không đưa đáp án ở bước này.</b><br>' +
+    'Bài này chấm chỗ bạn nghĩ sai — biết đáp án trước thì không còn gì để chấm. ' +
+    'Đổi lại: <b>một tiếng tiếng Việt có dấu bị cắt làm mấy mảnh, so với một từ tiếng Anh?</b>';
+};
+
+$('checkExplain').onclick = function(){
+  var t = $('explain').value.toLowerCase(), out = $('explainOut');
+  var dat = t.length > 25 && /cắt|mảnh|cụm|tiếng anh|có dấu|không theo t/.test(t);
+  if (dat){
+    out.innerHTML = '<div class="box ok"><b>Đạt.</b> Bạn nêu được cơ chế, không chỉ nêu kết quả.</div>';
+    setTimeout(moKhoa, 600);
+  } else {
+    out.innerHTML = '<div class="box warn"><b>Chưa đủ.</b> Bạn mới nói kết quả, chưa nói cơ chế. ' +
+      'Tokenizer cắt theo <i>cái gì</i>, nếu không phải theo tiếng?</div>';
+  }
+};
+
+function moKhoa(){
+  fetch('/api/mo-khoa', {method:'POST'}).then(function(r){ return r.json(); }).then(function(d){
+    $('suthat').innerHTML = '<p style="margin:14px 0 0"><b>Số thật, tiktoken vừa đếm:</b></p>' +
+      '<table><tr><th>Cách đếm</th><th>Kết quả</th><th>So với ' + d.n_tieng + ' tiếng</th></tr>' +
+      '<tr><td><code>o200k_base</code> (GPT-4o)</td><td><b>' + d.o200k_base + '</b></td><td>' + d.ti_le_o200k + '×</td></tr>' +
+      '<tr><td><code>cl100k_base</code> (GPT-4/3.5)</td><td><b>' + d.cl100k_base + '</b></td><td>' + d.ti_le_cl100k + '×</td></tr></table>' +
+      '<div class="box hint">Cùng một đoạn, hai tokenizer chênh nhau <b>' +
+      (d.cl100k_base/d.o200k_base).toFixed(2) + ' lần</b>. Đây là chỗ tính nhầm tiền API.</div>';
+    show('s5');
+  });
+}
+
+$('dem').onclick = function(){
+  fetch('/api/dem', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({text: $('thu').value})})
+  .then(function(r){ return r.json(); }).then(function(d){
+    $('demOut').innerHTML = '<div class="box hint">' + d.n_tieng + ' tiếng → <b>' + d.o200k_base +
+      '</b> token (o200k) · <b>' + d.cl100k_base + '</b> token (cl100k)</div>';
+  });
+};
+
+$('again').onclick = function(){
+  lan = 0; $('guess').value=''; $('why').value=''; $('explain').value='';
+  $('explainOut').innerHTML=''; $('refuse').hidden=true; show('s1');
+};
+</script>
+</body>
+</html>
