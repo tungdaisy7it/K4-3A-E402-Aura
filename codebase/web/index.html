@@ -3,496 +3,1099 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>VLearn FailFirst</title>
+<title>VLearn</title>
+
+<!-- Google Fonts & Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
-  :root{
-    --bg:#f7f8fa; --surface:#fff; --surface-2:#fbfcfd;
-    --ink:#101419; --ink-2:#4b5563; --ink-3:#8b95a3;
-    --line:#e3e7ec; --line-2:#cfd6de;
-    --brand:#2a4fd7; --brand-ink:#1b348f; --brand-soft:#eef2ff;
-    --ok:#0d7a4f; --ok-soft:#eafaf1; --ok-line:#a7e3c4;
-    --warn:#96620a; --warn-soft:#fff8e6; --warn-line:#f2d48a;
-    --dang:#b02a2a; --dang-soft:#fdf1f1; --dang-line:#f3bdbd;
-    --r:10px; --shadow:0 1px 2px rgba(16,20,25,.05), 0 8px 24px -16px rgba(16,20,25,.18);
+  :root {
+    --bg-main: #f8fafc;
+    --bg-white: #ffffff;
+    --border: #e2e8f0;
+    --border-dark: #cbd5e1;
+    
+    --text-navy: #0f172a;
+    --text-title: #1e3a8a;
+    --text-muted: #1e293b;
+    --text-dim: #334155; /* Much darker high-contrast slate grey */
+    
+    --blue-vlearn: #1e3a8a;
+    --blue-primary: #0284c7;
+    --blue-pastel: #f0f9ff;
+    
+    --pink-pastel: #fdf2f8;
+    --pink-accent: #be185d;
+    --pink-border: #fbcfe8;
+    
+    --font-sans: 'Plus Jakarta Sans', sans-serif;
+    --font-mono: 'Fira Code', monospace;
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#0e1116; --surface:#161b22; --surface-2:#1b212a;
-      --ink:#e9edf2; --ink-2:#a8b3c1; --ink-3:#6e7b8b;
-      --line:#262d38; --line-2:#333c49;
-      --brand:#7d9bff; --brand-ink:#b9c8ff; --brand-soft:#1a2340;
-      --ok:#5ed39b; --ok-soft:#10261c; --ok-line:#1f5e42;
-      --warn:#e8bb63; --warn-soft:#2a2110; --warn-line:#5e4a1c;
-      --dang:#f08a8a; --dang-soft:#2b1616; --dang-line:#5e2626;
-      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg-main);
+    color: var(--text-navy);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 15px;
+  }
+
+  /* VLEARN HEADER */
+  .vlearn-header {
+    height: 56px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    z-index: 100;
+  }
+
+  .vlearn-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+  }
+
+  .nav-tabs {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 100%;
+  }
+
+  .tab-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 0 0.25rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .tab-link.active {
+    color: var(--blue-vlearn);
+    font-weight: 800;
+    border-bottom-color: #dc2626; /* Active red indicator */
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .avatar-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #1e3a8a;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  /* LESSON TOP BAR */
+  .lesson-top-bar {
+    height: 50px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    font-size: 0.92rem;
+    color: var(--text-navy);
+  }
+
+  /* LAYOUT CONTAINER */
+  .lms-layout {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* SIDEBAR NAVIGATION */
+  .lms-sidebar {
+    width: 290px;
+    background: #ffffff;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 0.85rem 0.5rem;
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--text-navy);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-group-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-navy);
+    padding: 0.55rem 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .nav-group-title:hover { background: #f8fafc; }
+
+  .sub-item {
+    padding: 0.5rem 0.75rem 0.5rem 1.75rem;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.15s;
+    font-weight: 500;
+  }
+
+  .sub-item:hover { background: #f1f5f9; color: var(--text-navy); }
+  .sub-item.active {
+    background: #f0f9ff;
+    color: var(--blue-vlearn);
+    font-weight: 800;
+  }
+
+  /* MAIN CONTENT AREA */
+  .lms-main {
+    flex: 1;
+    background: #f8fafc;
+    overflow-y: auto;
+    padding: 2rem 3rem;
+    position: relative;
+  }
+
+  .reading-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    max-width: 920px;
+    margin: 0 auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+
+  /* BLUR EFFECT & SELECTIVE UNLOCK SYSTEM */
+  .content-blurred .transcript-p,
+  .content-blurred .transcript-meta-box,
+  .content-blurred h2,
+  .content-blurred h3,
+  .content-blurred h4 {
+    filter: blur(5.5px);
+    opacity: 0.45;
+    user-select: none;
+    pointer-events: none;
+    transition: filter 0.4s ease, opacity 0.4s ease, background 0.3s ease;
+  }
+
+  /* SELECTIVE UNLOCKED PARAGRAPH IN SELF-STUDY MODE */
+  .content-blurred .transcript-p.paragraph-unlocked {
+    filter: none !important;
+    opacity: 1 !important;
+    user-select: text !important;
+    pointer-events: auto !important;
+    background: #f0fdf4 !important;
+    border-left: 4px solid #16a34a !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 10px rgba(22, 163, 74, 0.12) !important;
+    margin: 1.2rem 0 !important;
+  }
+
+  .blur-overlay-notice {
+    background: #fffbebf5;
+    border: 1.5px solid #fde68a;
+    border-radius: 10px;
+    padding: 0.9rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #92400e;
+    font-weight: 600;
+  }
+
+  .lesson-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-navy);
+    margin-bottom: 1rem;
+    line-height: 1.35;
+  }
+
+  /* CLEAN MARKDOWN TRANSCRIPT PARAGRAPHS */
+  .transcript-meta-box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 0.9rem 1.2rem;
+    font-size: 0.88rem;
+    color: #0369a1;
+    margin-bottom: 1.5rem;
+    line-height: 1.65;
+  }
+
+  .transcript-p {
+    margin-bottom: 1.35rem;
+    line-height: 1.75;
+    font-size: 0.98rem; /* Slightly larger, highly readable font size */
+    color: #1e293b;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+  }
+
+  .transcript-p.highlighted {
+    background: #fef08a !important; /* Yellow highlight when citation clicked */
+    border-left: 4px solid #ca8a04;
+  }
+
+  .cite-badge {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: var(--blue-vlearn);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-right: 0.4rem;
+    display: inline-block;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+  }
+
+  .cite-badge:hover {
+    background: var(--pink-pastel);
+    color: var(--pink-accent);
+    border-color: var(--pink-border);
+  }
+
+  /* RIGHT AI TUTOR PANEL */
+  .ai-panel {
+    width: 380px;
+    background: #ffffff;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 1.35rem;
+    overflow-y: auto;
+  }
+  /* LIVE GREEN DOT INDICATOR */
+  .live-dot-green {
+    width: 9px;
+    height: 9px;
+    background-color: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    animation: pulse-green 2s infinite;
+  }
+  @keyframes pulse-green {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    }
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+    }
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
     }
   }
-  *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--bg);color:var(--ink);
-       font:15px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-       -webkit-font-smoothing:antialiased}
 
-  /* ---------- thanh trạng thái ---------- */
-  .topbar{position:sticky;top:0;z-index:20;background:var(--surface);
-          border-bottom:1px solid var(--line);
-          padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
-  .topbar-in{max-width:840px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .logo{font-weight:700;letter-spacing:-.01em;font-size:15px;display:flex;align-items:center;gap:8px}
-  .logo i{width:22px;height:22px;border-radius:6px;background:var(--brand);display:grid;
-          place-items:center;color:#fff;font-size:12px;font-style:normal;font-weight:700}
-  .pill{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;
-        border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
-  .pill.live{border-color:var(--ok-line);background:var(--ok-soft);color:var(--ok)}
-  .pill.dot::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
-        background:currentColor;margin-right:6px;vertical-align:1px}
-  .spacer{margin-left:auto}
+  .ai-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--text-navy);
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
 
-  /* ---------- stepper ---------- */
-  .steps{max-width:840px;margin:0 auto;padding:14px 16px 0;display:flex;gap:6px}
-  .steps div{flex:1;font-size:11.5px;color:var(--ink-3);font-weight:600;
-             border-top:3px solid var(--line);padding-top:7px;transition:.2s}
-  .steps div.on{color:var(--brand);border-top-color:var(--brand)}
-  .steps div.done{color:var(--ok);border-top-color:var(--ok-line)}
+  .quiz-card {
+    background: var(--blue-pastel);
+    border: 1px solid #bae6fd;
+    border-radius: 10px;
+    padding: 1.1rem;
+    margin-bottom: 1rem;
+  }
 
-  .wrap{max-width:840px;margin:0 auto;padding:16px 16px 72px}
-  .eyebrow{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
-  h1{font-size:23px;line-height:1.25;letter-spacing:-.02em;margin:6px 0 18px}
+  .quiz-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--blue-vlearn);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-        padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
-  .card-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-  .card-hd h2{font-size:15px;margin:0;letter-spacing:-.01em}
-  .card-hd .num{width:22px;height:22px;flex:none;border-radius:6px;background:var(--brand-soft);
-        color:var(--brand-ink);display:grid;place-items:center;font-size:12px;font-weight:700}
+  textarea {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    padding: 0.7rem 0.85rem;
+    color: var(--text-navy);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    min-height: 85px;
+    resize: vertical;
+    margin: 0.6rem 0;
+  }
 
-  .lock{border:1px dashed var(--line-2);background:var(--surface-2);border-radius:var(--r);
-        padding:22px;text-align:center;margin-bottom:14px}
-  .lock svg{opacity:.5}
-  .lock b{display:block;margin:8px 0 3px;color:var(--ink)}
-  .lock span{font-size:13.5px;color:var(--ink-2)}
+  button {
+    padding: 0.55rem 1rem;
+    border-radius: 8px;
+    border: none;
+    background: var(--blue-vlearn);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    font-size: 0.86rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
 
-  .passage{background:var(--surface-2);border:1px solid var(--line);
-           border-left:3px solid var(--brand);border-radius:8px;padding:14px;
-           font-size:14.5px;line-height:1.75;color:var(--ink-2)}
-  .passage-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3);
-                margin-top:8px}
+  button:hover { background: #1e40af; }
 
-  label{display:block;font-weight:650;margin:18px 0 6px;font-size:13.5px}
-  label .opt{font-weight:400;color:var(--ink-3)}
-  input[type=number],textarea{width:100%;padding:11px 12px;border:1px solid var(--line-2);
-        border-radius:8px;font:inherit;background:var(--surface);color:var(--ink);transition:.15s}
-  input[type=number]:focus,textarea:focus{outline:none;border-color:var(--brand);
-        box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
-  textarea{min-height:84px;resize:vertical;line-height:1.6}
-  .hintrow{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3);margin-top:5px}
+  button.secondary {
+    background: #f1f5f9;
+    border: 1px solid var(--border-dark);
+    color: var(--text-navy);
+  }
+  button.secondary:hover { background: #e2e8f0; }
 
-  .row{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px;align-items:center}
-  button{padding:10px 16px;border-radius:8px;border:1px solid var(--brand);background:var(--brand);
-         color:#fff;font:inherit;font-weight:650;cursor:pointer;transition:.15s}
-  button:hover{filter:brightness(1.07)}
-  button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
-  button.ghost{background:transparent;color:var(--brand);border-color:var(--line-2)}
-  button.quiet{background:transparent;color:var(--ink-2);border-color:var(--line);font-weight:500}
-  button[disabled]{opacity:.5;cursor:not-allowed;filter:none}
-  kbd{font:600 11px ui-monospace,Consolas,monospace;border:1px solid var(--line-2);
-      border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--ink-3)}
+  .diag-result {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
 
-  .tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;
-       padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);margin-bottom:12px}
-  .tag.t-err{background:var(--brand-soft);color:var(--brand-ink);border-color:transparent}
-  .tag.t-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-line)}
-  .tag.t-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line)}
-  .tag.t-dang{background:var(--dang-soft);color:var(--dang);border-color:var(--dang-line)}
+  /* OPTIONAL MODE SWITCH */
+  .mode-switch-bar {
+    display: flex;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+  .mode-btn {
+    padding: 4px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+  }
+  .mode-btn.active {
+    background: #ffffff;
+    color: var(--blue-vlearn);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
 
-  .note{border-radius:8px;padding:14px;margin-top:12px;font-size:14px;border:1px solid}
-  .note.info{background:var(--brand-soft);border-color:transparent;color:var(--ink)}
-  .note.ok{background:var(--ok-soft);border-color:var(--ok-line)}
-  .note.warn{background:var(--warn-soft);border-color:var(--warn-line)}
-  .note.dang{background:var(--dang-soft);border-color:var(--dang-line)}
-  .note b:first-child{display:block;margin-bottom:4px}
-
-  .cite{font-size:13px;color:var(--ink-2);border-left:2px solid var(--line-2);
-        padding:2px 0 2px 11px;margin-top:12px}
-  .cite code{font:600 12px ui-monospace,Consolas,monospace;background:var(--brand-soft);
-        color:var(--brand-ink);padding:1.5px 6px;border-radius:4px}
-
-  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:12px;
-        border-top:1px solid var(--line)}
-  .meta span{font:500 11.5px ui-monospace,Consolas,monospace;color:var(--ink-3);
-        border:1px solid var(--line);border-radius:5px;padding:2px 7px}
-  .meta span.flag{color:var(--dang);border-color:var(--dang-line);background:var(--dang-soft)}
-
-  .conf{display:inline-flex;align-items:center;gap:6px}
-  .conf-bar{width:46px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
-  .conf-bar i{display:block;height:100%;background:var(--ok)}
-
-  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:12px}
-  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left}
-  th{background:var(--surface-2);font-size:12.5px;color:var(--ink-2);font-weight:650}
-  td code{font:600 12px ui-monospace,Consolas,monospace}
-  .big{font-size:17px;font-weight:700}
-
-  details{border:1px solid var(--line);border-radius:8px;margin-top:14px;background:var(--surface-2)}
-  summary{padding:11px 14px;cursor:pointer;font-weight:650;font-size:13.5px;list-style:none}
-  summary::-webkit-details-marker{display:none}
-  summary::before{content:"▸";margin-right:8px;color:var(--ink-3);display:inline-block;transition:.15s}
-  details[open] summary::before{transform:rotate(90deg)}
-  details .in{padding:0 14px 14px}
-  .log{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
-  .log li{margin:5px 0}
-  .log li b{color:var(--ink)}
-
-  .ladder{display:flex;gap:6px;margin-top:12px}
-  .ladder i{flex:1;height:4px;border-radius:2px;background:var(--line);font-style:normal}
-  .ladder i.on{background:var(--brand)}
-
-  .spin{display:inline-block;width:15px;height:15px;border:2px solid var(--line-2);
-        border-top-color:var(--brand);border-radius:50%;animation:s .7s linear infinite;
-        vertical-align:-3px;margin-right:9px}
-  @keyframes s{to{transform:rotate(360deg)}}
-  .skel{height:13px;border-radius:4px;background:linear-gradient(90deg,var(--line),var(--surface-2),var(--line));
-        background-size:200% 100%;animation:sk 1.2s linear infinite;margin:8px 0}
-  @keyframes sk{to{background-position:-200% 0}}
-  [hidden]{display:none!important}
-  @media (max-width:560px){ .card{padding:16px} h1{font-size:20px} .steps div{font-size:10.5px} }
+  [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-in">
-    <span class="logo"><i>FF</i> VLearn FailFirst</span>
-    <span class="pill">Day 01 · Token</span>
-    <span class="spacer"></span>
-    <span class="pill live dot" id="pModel">đang kết nối…</span>
-    <span class="pill" id="pTik">tiktoken thật</span>
+<!-- VLEARN MAIN HEADER -->
+<header class="vlearn-header">
+  <div class="vlearn-brand">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+      <path d="M4 6L16 26L28 6" stroke="#1E3A8A" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4 6L10 2" stroke="#DC2626" stroke-width="5.5" stroke-linecap="round"/>
+    </svg>
+    <span style="color:#cbd5e1; font-weight:300; font-size:1.2rem;">|</span>
+    <span style="font-size:1.3rem; font-weight:800; letter-spacing:-0.02em;">
+      <span style="color:#dc2626;">V</span><span style="color:#1e3a8a;">Learn</span>
+    </span>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="tab-link active" id="tabHome"><i class="fa-solid fa-house"></i> Trang chủ</div>
+    <div class="tab-link" id="tabCourses"><i class="fa-solid fa-book"></i> Khóa học</div>
+    <div class="tab-link" id="tabPractice"><i class="fa-solid fa-dumbbell"></i> Luyện tập <span style="font-size:0.7rem; color:#475569; font-weight:500; margin-left:2px;">Sắp ra mắt</span></div>
+    <div class="tab-link" id="tabLab"><i class="fa-solid fa-flask"></i> Lab <span style="font-size:0.7rem; color:#dc2626; font-weight:700; margin-left:2px;">Mới</span></div>
+  </div>
+
+  <div class="header-right">
+    <span style="font-size:0.82rem; font-weight:700; background:#f1f5f9; padding:2px 8px; border-radius:4px; color:#334155;">VI</span>
+    <i class="fa-regular fa-bell" style="font-size:1.1rem; color:var(--text-dim); cursor:pointer;"></i>
+    <div class="avatar-circle">N</div>
   </div>
 </header>
 
-<nav class="steps" id="steps" aria-label="Tiến trình">
-  <div class="on">1 · Dự đoán</div>
-  <div>2 · Chẩn đoán</div>
-  <div>3 · Chốt hiểu</div>
-  <div>4 · Lời giảng</div>
-</nav>
-
-<main class="wrap">
-  <div class="eyebrow">Foundation — cách LLM hoạt động</div>
-  <h1>3.2 — Token là gì</h1>
-
-  <!-- ============ BƯỚC 1 ============ -->
-  <section id="s1">
-    <div class="lock">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>
-      </svg>
-      <b>Lời giảng phần này đang khoá</b>
-      <span>Trả lời bài dự đoán bên dưới trước đã. Sai cũng không sao — đó là chủ đích của bài.</span>
-    </div>
-
-    <div class="card">
-      <div class="card-hd"><span class="num">1</span><h2>Bài dự đoán</h2></div>
-
-      <div class="passage" id="para"><div class="skel" style="width:96%"></div>
-        <div class="skel" style="width:99%"></div><div class="skel" style="width:78%"></div></div>
-      <div class="passage-meta">
-        <span>Số tiếng: <b id="ntieng">…</b></span>
-        <span>Encoding: <b>o200k_base</b></span>
+<!-- DASHBOARD VIEW -->
+<div id="viewHome" style="padding:2.5rem 3.5rem; background:#f8fafc; height:calc(100vh - 54px); overflow-y:auto;">
+  <div style="max-width:1160px; margin:0 auto;">
+    
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem;">
+      <div>
+        <h1 style="font-size:1.85rem; font-weight:800; color:var(--text-navy); margin-bottom:0.4rem;">
+          Tối nay học gì đây? 👋
+        </h1>
+        <p style="color:var(--text-dim); font-size:0.95rem; font-weight:500;">
+          Bắt đầu thôi. Làm một bài quiz môn L3-L4 - Khóa 4 Phase 1 trước, rồi trang này sẽ biết chỗ nào đáng dành thời gian cho bạn.
+        </p>
       </div>
-
-      <label for="guess">Bạn đoán <code>tiktoken</code> đếm đoạn trên ra bao nhiêu token?</label>
-      <input type="number" id="guess" min="1" placeholder="nhập một số" inputmode="numeric">
-
-      <label for="why">Vì sao bạn nghĩ vậy? <span class="opt">— đây là phần được chấm, không phải con số</span></label>
-      <textarea id="why" placeholder="Viết đúng suy nghĩ thật của bạn, kể cả khi chưa chắc."></textarea>
-      <div class="hintrow"><span id="cc">0 ký tự</span><span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> để nộp</span></div>
-
-      <div class="row">
-        <button id="submit">Nộp dự đoán</button>
-        <button class="quiet" id="shortcut">Cho đáp án luôn đi</button>
-      </div>
-      <div class="note dang" id="refuse" hidden></div>
+      <button onclick="switchToLessonView(1)"><i class="fa-solid fa-play"></i> Vào khóa học</button>
     </div>
-  </section>
 
-  <!-- ============ BƯỚC 2 ============ -->
-  <section id="s2" hidden>
-    <div class="card">
-      <span class="spin"></span><b>Đang đối chiếu câu trả lời của bạn với tài liệu bài giảng</b>
-      <div class="skel" style="width:70%;margin-top:14px"></div>
-      <div class="skel" style="width:88%"></div>
-    </div>
-  </section>
-
-  <section id="s3" hidden>
-    <div class="card" aria-live="polite">
-      <div class="card-hd"><span class="num">2</span><h2>Kết quả chẩn đoán</h2></div>
-      <div id="dTag"></div>
-      <div id="dBody"></div>
-      <div class="ladder" id="dLadder" hidden><i class="on"></i><i></i><i></i></div>
-      <div class="row" id="dAct"></div>
-      <div class="meta" id="dMeta"></div>
-    </div>
-  </section>
-
-  <!-- ============ BƯỚC 3 ============ -->
-  <section id="s4" hidden>
-    <div class="card">
-      <div class="card-hd"><span class="num">3</span><h2>Chốt hiểu</h2></div>
-      <p style="margin:0 0 2px"><b>Giải thích lại bằng lời của bạn:</b> vì sao số token khác số tiếng?</p>
-      <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Hai, ba câu là đủ. Nói được cơ chế, không chỉ nói kết quả.</p>
-      <textarea id="explain" style="margin-top:12px" placeholder="Tokenizer cắt theo…"></textarea>
-      <div class="row"><button id="checkExplain">Gửi</button>
-        <button class="quiet" id="backDiag">Xem lại chẩn đoán</button></div>
-      <div id="explainOut" aria-live="polite"></div>
-    </div>
-  </section>
-
-  <!-- ============ BƯỚC 4 ============ -->
-  <section id="s5" hidden>
-    <div class="card">
-      <div class="card-hd"><span class="num">4</span><h2>Mở khoá lời giảng</h2></div>
-      <div class="note ok"><b>Xong phần dự đoán.</b>
-        Giờ bạn xem phần giảng với câu hỏi đã có trong đầu — đó là toàn bộ mục đích của bài tập này.</div>
-
-      <div id="truth"></div>
-
-      <div class="cite">
-        <code>[T06-134]</code> "Đơn vị cơ bản của LLM là cái nãy giờ chúng ta gọi là token…"<br>
-        <code>[T06-155]</code> "Cách tính giá: tính cả input token cộng output token thì ra total cost…"
-      </div>
-
-      <label for="thu">Tự thử — dán đoạn bất kỳ, <code>tiktoken</code> đếm thật:</label>
-      <textarea id="thu" placeholder="Dán tiếng Việt hoặc tiếng Anh để so."></textarea>
-      <div class="row"><button class="ghost" id="dem">Đếm token</button></div>
-      <div id="demOut"></div>
-
-      <details id="logBox">
-        <summary>Log phiên gửi giảng viên</summary>
-        <div class="in">
-          <p style="margin:0 0 8px;font-size:13px;color:var(--ink-3)">
-            Chỉ giảng viên thấy. Không công khai cho lớp, không tính vào điểm.</p>
-          <ol class="log" id="logList"></ol>
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:2rem;">
+      <!-- LEFT: COURSE LIST -->
+      <div style="background:#ffffff; border:1px solid var(--border); border-radius:12px; padding:1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;">
+          <b style="font-size:1.05rem; color:var(--text-navy);">KHÓA HỌC CỦA TÔI</b>
+          <span style="font-size:0.82rem; font-weight:700; color:#dc2626; cursor:pointer;">XEM TẤT CẢ ▶</span>
         </div>
-      </details>
 
-      <div class="row"><button class="quiet" id="again">Làm lại từ đầu</button></div>
+        <div style="display:flex; gap:1.5rem; border-bottom:1px solid var(--border); margin-bottom:1rem; padding-bottom:0.5rem; font-size:0.92rem; font-weight:700;">
+          <span style="color:var(--blue-vlearn); border-bottom:2px solid var(--blue-vlearn); padding-bottom:0.4rem; cursor:pointer;">L3-L4 - Khóa 4 Phase 1</span>
+          <span style="color:var(--text-dim); cursor:pointer;">Khoá 3 Phase 1</span>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:0.6rem;" id="dashboardLessonList">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- RIGHT: STREAK & FAILFIRST WIDGET -->
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+        <div style="background:#1e3a8a; border-radius:12px; padding:1.25rem; color:#ffffff;">
+          <div style="font-size:0.82rem; font-weight:700; text-transform:uppercase; opacity:0.8;">CHUỖI NGÀY HỌC</div>
+          <div style="font-size:2.5rem; font-weight:800; margin:0.2rem 0;">1 <span style="font-size:0.9rem; font-weight:500;">ngày liên tiếp</span></div>
+          <div style="font-size:0.8rem; opacity:0.7;">Hôm nay đã tính</div>
+        </div>
+
+        <div style="background:#ffffff; border:1px solid var(--border); border-radius:12px; padding:1.25rem;">
+          <b style="font-size:0.95rem; color:var(--text-navy); display:block; margin-bottom:0.5rem;">CHỖ BẠN ĐANG YẾU</b>
+          <p style="font-size:0.88rem; color:var(--text-dim); line-height:1.5; margin-bottom:0.85rem; font-weight:500;">
+            Chưa đo được phần nào. Làm một bài quiz để VLearn biết bạn đang ở đâu.
+          </p>
+          <button style="width:100%; justify-content:center; font-size:0.84rem;" onclick="switchToLessonView(1)">
+            Ôn chẩn đoán ngay (+80 XP)
+          </button>
+        </div>
+      </div>
     </div>
-  </section>
-</main>
+
+  </div>
+</div>
+
+<!-- LESSON VIEW -->
+<div id="viewLesson" hidden style="display:flex; flex-direction:column; height:calc(100vh - 54px);">
+  
+  <!-- LESSON TOP SUBBAR -->
+  <div class="lesson-top-bar">
+    <div style="display:flex; align-items:center; gap:0.75rem; font-weight:700;">
+      <span style="cursor:pointer;" onclick="switchToHomeView()"><i class="fa-solid fa-arrow-left"></i></span>
+      <span id="currentLessonHeaderTitle">Bài 1: Foundation</span>
+    </div>
+
+    <!-- OPTIONAL MODE TOGGLE SWITCH (TỰ HỌC FIRST, NO EMOJI) -->
+    <div class="mode-switch-bar">
+      <div class="mode-btn active" id="btnModeFailFirst" onclick="setLearningMode('failfirst')">
+        Tự học
+      </div>
+      <div class="mode-btn" id="btnModeDirect" onclick="setLearningMode('direct')">
+        Bài giảng
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:1.25rem; font-size:0.88rem; font-weight:600;">
+      <span style="cursor:pointer; color:var(--text-navy);"><i class="fa-solid fa-sparkles"></i> Đặt câu hỏi với AI</span>
+      <span style="cursor:pointer; color:var(--text-navy);"><i class="fa-regular fa-hand"></i> Gửi yêu cầu</span>
+      <div class="avatar-circle" style="width:28px; height:28px; font-size:0.75rem;">N</div>
+    </div>
+  </div>
+
+  <!-- MAIN WORKSPACE LAYOUT -->
+  <div class="lms-layout">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="lms-sidebar">
+      <div class="sidebar-header">
+        <span>NỘI DUNG BÀI HỌC</span>
+        <i class="fa-solid fa-xmark" style="cursor:pointer; color:var(--text-dim);"></i>
+      </div>
+
+      <!-- ACCORDION: SLIDES -->
+      <div class="nav-group-title">
+        <span>Slides</span>
+        <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
+      </div>
+
+      <!-- ACCORDION: LAB 01 -->
+      <div class="nav-group-title" style="color:var(--blue-vlearn); font-weight:800;">
+        <span>📘 Lab 01 – Nền tảng LLM API</span>
+        <i class="fa-solid fa-chevron-down" style="font-size:0.75rem;"></i>
+      </div>
+
+      <!-- LESSON SUBITEMS (LOADED DYNAMICALLY) -->
+      <div id="sidebarLessonList">
+        <!-- Populated from API -->
+      </div>
+
+      <!-- ACCORDION: VIDEOS -->
+      <div class="nav-group-title" style="margin-top:0.5rem;">
+        <span>Videos</span>
+        <i class="fa-solid fa-chevron-right" style="font-size:0.75rem;"></i>
+      </div>
+
+      <!-- ACCORDION: KC & LUYỆN TẬP -->
+      <div class="nav-group-title">
+        <span>KC &amp; Luyện tập</span>
+        <i class="fa-solid fa-chevron-down" style="font-size:0.75rem;"></i>
+      </div>
+
+      <div style="padding-left:0.5rem;">
+        <div style="font-size:0.78rem; font-weight:700; color:var(--text-dim); margin:0.3rem 0.5rem;">Kiến thức</div>
+        <div class="sub-item"><i class="fa-regular fa-lightbulb"></i> Kiến thức trọng tâm</div>
+
+        <div style="font-size:0.78rem; font-weight:700; color:var(--text-dim); margin:0.5rem 0.5rem 0.3rem 0.5rem;">Luyện tập</div>
+        <div class="sub-item"><i class="fa-solid fa-list-check"></i> Quiz cuối ngày</div>
+        <div class="sub-item"><i class="fa-solid fa-flask"></i> Luyện theo đề xuất</div>
+        <div class="sub-item"><i class="fa-solid fa-layer-group"></i> Ôn toàn bộ câu hỏi</div>
+      </div>
+    </aside>
+
+    <!-- CENTER READING AREA -->
+    <main class="lms-main">
+      <div class="reading-card">
+        
+        <!-- BLUR OVERLAY NOTICE (TẠM ĐÓNG TEXT FIX) -->
+        <div id="blurOverlayNotice" class="blur-overlay-notice" hidden>
+          <span><i class="fa-solid fa-eye-slash"></i> Nội dung bài giảng đang <b>tạm đóng</b> ở chế độ Tự học.</span>
+          <button class="secondary" onclick="setLearningMode('direct')" style="font-size:0.82rem; padding:0.4rem 0.75rem;">
+            <i class="fa-solid fa-forward"></i> Bỏ qua &amp; Xem bài giảng ngay
+          </button>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <h1 class="lesson-title" id="lessonTitle">...</h1>
+          <button class="secondary" id="btnSkipTop" onclick="setLearningMode('direct')" style="font-size:0.82rem; padding:0.4rem 0.75rem; flex-shrink:0;">
+            Chuyển sang Bài giảng
+          </button>
+        </div>
+
+        <div id="readingContent">
+          <!-- Real transcript paragraphs parsed nicely into clean HTML -->
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT AI TUTOR PANEL -->
+    <aside class="ai-panel" id="aiPanel">
+      <div class="ai-panel-header">
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span class="live-dot-green"></span>
+          <span><i class="fa-solid fa-robot" style="color:var(--blue-vlearn);"></i> AI Tutor</span>
+        </div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-title">
+          <span>🎯 Câu hỏi Chẩn đoán:</span>
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-dim);" id="qIndexText">1/3</span>
+        </div>
+
+        <!-- PASSAGE & ENCODER DETAILS BOX -->
+        <div id="diagQuestionText" style="font-size:0.88rem; color:var(--text-navy); line-height:1.55; font-weight:600; white-space:pre-wrap;">
+          ...
+        </div>
+
+        <label style="font-size:0.82rem; margin-top:0.75rem; color:var(--text-navy);">1. Suy đoán của bạn:</label>
+        <input type="text" id="diagInputNumber" style="width:100%; border:1px solid var(--border-dark); border-radius:6px; padding:0.45rem 0.65rem; font-size:0.88rem;" placeholder="Nhập suy đoán hoặc câu trả lời của bạn...">
+
+        <label style="font-size:0.82rem; margin-top:0.5rem; color:var(--text-navy);">2. Lý do giải thích:</label>
+        <textarea id="diagInputReason" placeholder="Viết lý do thật của bạn..."></textarea>
+
+        <div style="display:flex; gap:0.4rem; margin-top:0.5rem;">
+          <button id="btnSubmitDiag" style="flex:1; justify-content:center;">
+            <i class="fa-solid fa-paper-plane"></i> Gửi
+          </button>
+          <button class="secondary" id="btnNextQuestion" onclick="cycleNextQuestion()" title="Đổi câu hỏi khác">
+            <i class="fa-solid fa-rotate"></i> Đổi câu hỏi
+          </button>
+        </div>
+
+        <button class="secondary" onclick="setLearningMode('direct')" style="width:100%; justify-content:center; margin-top:0.5rem; font-size:0.8rem;">
+          <i class="fa-solid fa-forward"></i> Bỏ qua câu hỏi này
+        </button>
+      </div>
+
+      <!-- DIAGNOSTIC RESULT BOX -->
+      <div id="diagResultBox" class="diag-result" hidden>
+        <!-- Populated by AI diagnosis -->
+      </div>
+    </aside>
+
+  </div>
+</div>
 
 <script>
-var NHAN = {
-  M1:{t:'M1 · token = từ hoặc tiếng',       c:'t-err'},
-  M2:{t:'M2 · token = ký tự',               c:'t-err'},
-  M3:{t:'M3 · coi số token cố định mọi model', c:'t-err'},
-  M4:{t:'M4 · nhầm token vào với token ra', c:'t-err'},
-  M5:{t:'M5 · số đúng nhưng đang đoán',     c:'t-err'},
-  DUNG:{t:'Đúng cơ chế',                    c:'t-ok'},
-  LOW:{t:'Chưa đủ căn cứ để chẩn đoán',     c:'t-warn'},
-  OUT:{t:'Lỗi ngoài bộ nhãn',               c:'t-warn'},
-  XIN:{t:'Đang xin đáp án',                 c:'t-dang'}
-};
-var bac = 1, log = [];
+var currentLessonId = 1;
+var currentLessonData = null;
+var currentQuestionIdx = 0;
+var isBlurredMode = true;
+
 function $(i){ return document.getElementById(i); }
-function show(id){
-  ['s1','s2','s3','s4','s5'].forEach(function(x){ $(x).hidden = (x !== id); });
-  var i = {s1:0,s2:1,s3:1,s4:2,s5:3}[id], d = $('steps').children;
-  for (var k = 0; k < 4; k++){
-    d[k].className = k < i ? 'done' : (k === i ? 'on' : '');
-  }
-  window.scrollTo({top:0, behavior:'smooth'});
+
+function switchToHomeView() {
+  $('viewHome').hidden = false;
+  $('viewLesson').hidden = true;
+  $('tabHome').className = 'tab-link active';
+  $('tabCourses').className = 'tab-link';
 }
-function ghi(t){ log.push(t); }
 
-fetch('/api/health').then(function(r){ return r.json(); }).then(function(d){
-  $('pModel').textContent = d.provider + ' · ' + d.model;
-}).catch(function(){ $('pModel').textContent = 'không kết nối được'; $('pModel').className = 'pill'; });
+function switchToLessonView(lid) {
+  $('viewHome').hidden = true;
+  $('viewLesson').hidden = false;
+  $('tabHome').className = 'tab-link';
+  $('tabCourses').className = 'tab-link active';
+  loadLessonDetail(lid || 1);
+  setLearningMode('failfirst');
+}
 
-fetch('/api/bai-tap').then(function(r){ return r.json(); }).then(function(d){
-  $('para').textContent = d.doan_van;
-  $('ntieng').textContent = d.n_tieng;
-});
+function setLearningMode(mode) {
+  if (mode === 'direct') {
+    $('btnModeDirect').className = 'mode-btn active';
+    $('btnModeFailFirst').className = 'mode-btn';
+    $('aiPanel').hidden = true; // Hide AI Tutor panel when viewing lesson directly!
+    unblurContent();
+  } else {
+    $('btnModeDirect').className = 'mode-btn';
+    $('btnModeFailFirst').className = 'mode-btn active';
+    $('aiPanel').hidden = false; // Show AI Tutor panel in Tự học mode!
+    blurContent();
+  }
+}
 
-$('why').addEventListener('input', function(){
-  $('cc').textContent = this.value.length + ' ký tự';
-});
-document.addEventListener('keydown', function(e){
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !$('s1').hidden) $('submit').click();
-});
+function blurContent() {
+  isBlurredMode = true;
+  $('readingContent').classList.add('content-blurred');
+  $('blurOverlayNotice').hidden = false;
+}
 
-$('submit').onclick = function(){
-  var so = $('guess').value, vi = $('why').value;
-  if (!so && !vi.trim()){ $('why').focus(); return; }
-  this.disabled = true;
-  show('s2');
-  fetch('/api/chan-doan', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({so: so ? parseInt(so,10) : null, ly_do: vi})})
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-    .then(ve)
-    .catch(function(e){
-      show('s3');
-      $('dTag').innerHTML = '<span class="tag t-dang">Không gọi được hệ thống</span>';
-      $('dBody').innerHTML = '<div class="note dang"><b>Lỗi kết nối</b>' + e +
-        '<br>Kiểm tra server còn chạy và <code>.env</code> đã có key chưa.</div>';
-      $('dAct').innerHTML = '<button id="retry">Thử lại</button>';
-      $('retry').onclick = function(){ show('s1'); $('submit').disabled = false; };
+function unblurContent() {
+  isBlurredMode = false;
+  $('readingContent').classList.remove('content-blurred');
+  $('blurOverlayNotice').hidden = true;
+}
+
+$('tabHome').onclick = switchToHomeView;
+$('tabCourses').onclick = function(){ switchToLessonView(currentLessonId); };
+
+// Load Lesson List from API
+fetch('/api/bai-hoc')
+  .then(function(r){ return r.json(); })
+  .then(function(lessons){
+    var sidebarHtml = '';
+    var homeHtml = '';
+
+    lessons.forEach(function(l){
+      sidebarHtml += 
+        '<div class="sub-item ' + (l.id === currentLessonId ? 'active' : '') + '" onclick="loadLessonDetail(' + l.id + ')" id="navItem' + l.id + '">' +
+          '<i class="fa-solid fa-circle-play" style="font-size:0.75rem;"></i>' +
+          '<span>' + l.title + '</span>' +
+        '</div>';
+
+      homeHtml += 
+        '<div style="padding:0.85rem 1rem; background:#ffffff; border:1px solid var(--border); border-radius:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="switchToLessonView(' + l.id + ')">' +
+          '<div>' +
+            '<span style="font-size:0.75rem; color:var(--blue-vlearn); font-weight:800; display:block;">' + (l.module || 'MODULE') + '</span>' +
+            '<span style="font-weight:700; font-size:0.9rem; color:var(--text-navy);">' + l.title + '</span>' +
+          '</div>' +
+          '<span style="font-size:0.8rem; color:var(--blue-vlearn); font-weight:700;">Học ngay ▶</span>' +
+        '</div>';
     });
-};
 
-function ve(d){
-  show('s3');
-  $('submit').disabled = false;
-  var n = NHAN[d.nhan] || {t:d.nhan, c:'t-warn'};
-  $('dTag').innerHTML = '<span class="tag ' + n.c + '">' + n.t + '</span>';
-  var body = '', act = '', ladder = false;
-
-  if (d.nhan === 'LOW'){
-    body = '<div class="note warn"><b>Mình chưa xếp được câu trả lời của bạn vào lỗi nào</b>' +
-      d.chan_doan + ' Đoán bừa một nhãn rồi dạy theo nhãn đó thì bạn sẽ đi sửa nhầm chỗ, ' +
-      'nên mình hỏi lại một câu thôi:<br><br><b>' + d.goi_y + '</b></div>';
-    act = '<button id="back">Trả lời lại</button>';
-  } else if (d.nhan === 'OUT'){
-    body = '<div class="note warn"><b>Lý do của bạn không thuộc nhóm lỗi nào mình đang có</b>' +
-      d.chan_doan + ' Mình không bịa ra một chẩn đoán cho có — câu trả lời này được ghi lại để ' +
-      'giảng viên xem.<br><br><b>' + d.goi_y + '</b></div>';
-    act = '<button id="back">Thử lại</button>';
-  } else if (d.nhan === 'XIN'){
-    body = '<div class="note dang"><b>Mình không đưa đáp án ở bước này</b>' + d.chan_doan +
-      '<br><br><b>' + d.goi_y + '</b></div>';
-    act = '<button id="back">Quay lại làm bài</button>';
-  } else if (d.nhan === 'DUNG'){
-    body = '<div class="note ok"><b>' + d.chan_doan + '</b>' + d.goi_y + '</div>';
-    act = '<button id="go">Sang bước chốt hiểu</button>';
-  } else {
-    body = '<p style="margin:0 0 2px"><b>' + d.chan_doan + '</b></p>' +
-      '<div class="note info"><b>Gợi ý bậc ' + bac + '/3 — không có đáp án</b>' + d.goi_y + '</div>';
-    act = '<button id="go">Tôi sửa lại</button>' +
-          '<button class="ghost" id="wrong">Chẩn đoán sai rồi</button>' +
-          '<button class="quiet" id="stuck">Vẫn chưa hiểu</button>';
-    ladder = true;
-  }
-
-  $('dBody').innerHTML = body +
-    (d.trich_dan ? '<div class="cite">Đối chiếu transcript: <code>' + d.trich_dan + '</code></div>' : '');
-  $('dAct').innerHTML = act;
-  $('dLadder').hidden = !ladder;
-  if (ladder){
-    var L = $('dLadder').children;
-    for (var i = 0; i < 3; i++) L[i].className = i < bac ? 'on' : '';
-  }
-
-  var m = d._meta || {}, pct = Math.round((d.do_tin || 0) * 100);
-  var html = '<span>' + (m.model || '?') + '</span><span>' + (m.ms || '?') + ' ms</span>' +
-    '<span class="conf">tin cậy ' + pct + '%<span class="conf-bar"><i style="width:' + pct + '%"></i></span></span>';
-  (d.canh_bao || []).forEach(function(w){ html += '<span class="flag">hậu kiểm: ' + w + '</span>'; });
-  if (d.nhan_raw && d.nhan_raw !== d.nhan) html += '<span class="flag">nhãn thô: ' + d.nhan_raw + '</span>';
-  $('dMeta').innerHTML = html;
-
-  ghi('<b>' + n.t + '</b> — ' + d.chan_doan + ' (tin cậy ' + pct + '%, ' + (m.model || '') + ')');
-
-  if ($('go')) $('go').onclick = function(){ show('s4'); };
-  if ($('back')) $('back').onclick = function(){ show('s1'); };
-  if ($('wrong')) $('wrong').onclick = function(){
-    $('dTag').innerHTML = '<span class="tag t-ok">Đã huỷ nhãn</span>';
-    $('dBody').innerHTML = '<div class="note ok"><b>Mình xếp sai nhãn cho bạn.</b>' +
-      'Bỏ nhãn <code>' + d.nhan + '</code>, không bảo lưu. Nói giúp mình một câu: bạn đang so số ' +
-      'token với cái gì — số tiếng, số ký tự, hay giá tiền một lần gọi?</div>';
-    $('dAct').innerHTML = '<button id="back2">Trả lời lại</button>';
-    $('dLadder').hidden = true;
-    ghi('<b>Correction</b> — học viên báo chẩn đoán sai, hệ thống huỷ nhãn ' + d.nhan + ', không bảo lưu.');
-    $('back2').onclick = function(){ show('s1'); };
-  };
-  if ($('stuck')) $('stuck').onclick = function(){
-    bac++;
-    if (bac === 2){
-      $('dBody').innerHTML = '<p style="margin:0 0 2px"><b>' + d.chan_doan + '</b></p>' +
-        '<div class="note info"><b>Bậc 2/3 — giải thích</b>' +
-        'Tokenizer cắt theo cụm ký tự hay gặp trong dữ liệu huấn luyện, không cắt theo tiếng. ' +
-        'Dữ liệu đó phần lớn là tiếng Anh, nên một tiếng tiếng Việt có dấu thường bị cắt làm nhiều mảnh. ' +
-        'Vì vậy số token của đoạn tiếng Việt lớn hơn số tiếng.</div>' +
-        '<div class="cite">Đối chiếu transcript: <code>[T06-136]</code></div>';
-      $('dAct').innerHTML = '<button id="go2">Tôi hiểu rồi, sửa lại</button>' +
-        '<button class="quiet" id="stuck2">Vẫn chưa hiểu</button>';
-      var L2 = $('dLadder').children; L2[1].className = 'on';
-      ghi('<b>Bậc 2</b> — học viên vẫn kẹt, hệ thống nâng lên mức giải thích.');
-      $('go2').onclick = function(){ show('s4'); };
-      $('stuck2').onclick = function(){
-        ghi('<b>Bậc 3</b> — kẹt qua hai bậc, hệ thống mở lời giảng đầy đủ thay vì để học viên bỏ cuộc.');
-        moKhoa();
-      };
-    }
-  };
-}
-
-$('shortcut').onclick = function(){
-  var r = $('refuse'); r.hidden = false;
-  r.innerHTML = '<b>Mình không đưa đáp án ở bước này</b>' +
-    'Bài này chấm chỗ bạn nghĩ sai — biết đáp án trước thì không còn gì để chấm. ' +
-    'Đổi lại mình thu hẹp giúp bạn: <b>một tiếng tiếng Việt có dấu bị cắt làm mấy mảnh, ' +
-    'so với một từ tiếng Anh?</b> Trả lời được câu đó là bạn đoán được con số.';
-  ghi('<b>Xin đáp án</b> — học viên bấm "cho đáp án luôn", hệ thống từ chối và đổi bằng câu hỏi thu hẹp.');
-  $('why').focus();
-};
-
-$('backDiag').onclick = function(){ show('s3'); };
-
-$('checkExplain').onclick = function(){
-  var t = $('explain').value.toLowerCase(), out = $('explainOut');
-  var dat = t.length > 25 && /cắt|mảnh|cụm|tiếng anh|có dấu|không theo t/.test(t);
-  if (dat){
-    out.innerHTML = '<div class="note ok"><b>Đạt</b>Bạn nêu được cơ chế, không chỉ nêu kết quả.</div>';
-    ghi('<b>Chốt hiểu: ĐẠT</b> — học viên tự giải thích lại đúng cơ chế, không cần mở lời giảng đầy đủ.');
-    setTimeout(moKhoa, 700);
-  } else {
-    out.innerHTML = '<div class="note warn"><b>Chưa đủ</b>Bạn mới nói kết quả, chưa nói cơ chế. ' +
-      'Một câu thôi: tokenizer cắt theo <i>cái gì</i>, nếu không phải theo tiếng?</div>';
-    ghi('<b>Chốt hiểu: CHƯA ĐẠT</b> — hệ thống hỏi ngược đúng chỗ còn hổng thay vì cho qua.');
-  }
-};
-
-function moKhoa(){
-  fetch('/api/mo-khoa', {method:'POST'}).then(function(r){ return r.json(); }).then(function(d){
-    $('truth').innerHTML =
-      '<p style="margin:16px 0 0"><b>Số thật — <code>tiktoken</code> vừa đếm, không phải AI đoán:</b></p>' +
-      '<table><thead><tr><th>Tokenizer</th><th>Số token</th><th>So với ' + d.n_tieng +
-      ' tiếng</th></tr></thead><tbody>' +
-      '<tr><td><code>o200k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4o, 4.1</span></td>' +
-      '<td class="big">' + d.o200k_base + '</td><td>' + d.ti_le_o200k + '×</td></tr>' +
-      '<tr><td><code>cl100k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4, 3.5</span></td>' +
-      '<td class="big">' + d.cl100k_base + '</td><td>' + d.ti_le_cl100k + '×</td></tr>' +
-      '</tbody></table>' +
-      '<div class="note info"><b>Đây là chỗ tính nhầm tiền thật</b>Cùng một đoạn văn, hai tokenizer chênh nhau <b>' +
-      (d.cl100k_base / d.o200k_base).toFixed(2) + ' lần</b>. Ước lượng chi phí theo tokenizer sai là sai ' +
-      'ngay từ đầu.</div>';
-    var ol = $('logList'); ol.innerHTML = '';
-    log.forEach(function(x){ var li = document.createElement('li'); li.innerHTML = x; ol.appendChild(li); });
-    show('s5');
+    $('sidebarLessonList').innerHTML = sidebarHtml;
+    $('dashboardLessonList').innerHTML = homeHtml;
   });
+
+function loadLessonDetail(lid) {
+  currentLessonId = lid;
+  currentQuestionIdx = 0;
+  completedQuestions = new Set();
+  attemptCount = 0;
+  lastDiagnosis = null;
+  
+  // Highlight active sidebar item
+  for (var i = 1; i <= 6; i++) {
+    var el = $('navItem' + i);
+    if (el) el.className = 'sub-item ' + (i === lid ? 'active' : '');
+  }
+
+  fetch('/api/bai-hoc/' + lid)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      currentLessonData = d;
+      $('lessonTitle').textContent = d.title;
+      $('currentLessonHeaderTitle').textContent = d.title;
+      
+      updateQuestionDisplay();
+
+      // PARSE MARKDOWN INTO BEAUTIFUL CLEAN HTML
+      var lines = d.content.split('\n');
+      var html = '';
+      var inMeta = false;
+      var metaHtml = '';
+
+      lines.forEach(function(line){
+        var trimmed = line.trim();
+        if (!trimmed) return;
+
+        // Clean up markdown quotes > **Nguồn:** etc. into a clean info box
+        if (trimmed.startsWith('>')) {
+          inMeta = true;
+          var cleanText = trimmed.replace(/^>\s*/, '').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+          metaHtml += '<div style="margin-bottom:0.25rem;">• ' + cleanText + '</div>';
+          return;
+        }
+
+        if (inMeta && !trimmed.startsWith('>')) {
+          inMeta = false;
+          html += '<div class="transcript-meta-box"><b><i class="fa-solid fa-circle-info"></i> THÔNG TIN BÀI GIẢNG:</b><br>' + metaHtml + '</div>';
+          metaHtml = '';
+        }
+
+        if (trimmed.startsWith('#')) {
+          var level = (trimmed.match(/^#+/) || ['#'])[0].length;
+          var text = trimmed.replace(/^#+\s*/, '').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+          html += '<h' + Math.min(level+1, 4) + ' style="font-weight:800; color:var(--text-title); margin:1.5rem 0 0.75rem 0;">' + text + '</h' + Math.min(level+1, 4) + '>';
+        } else {
+          // Replace [Txx-NNN] with clickable citation badges
+          var processedLine = trimmed
+            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+            .replace(/\[(T\d+-\d+)\]/g, function(match, code){
+              return '<span class="cite-badge" onclick="highlightParagraph(\'' + code + '\')" id="cite_' + code + '">' + code + '</span>';
+            });
+
+          html += '<p class="transcript-p" id="p_' + trimmed.match(/\[(T\d+-\d+)\]/)?.[1] + '">' + processedLine + '</p>';
+        }
+      });
+
+      if (metaHtml) {
+        html = '<div class="transcript-meta-box"><b><i class="fa-solid fa-circle-info"></i> THÔNG TIN BÀI GIẢNG:</b><br>' + metaHtml + '</div>' + html;
+      }
+
+      $('readingContent').innerHTML = html;
+    });
 }
 
-$('dem').onclick = function(){
-  var t = $('thu').value;
-  if (!t.trim()) return;
-  fetch('/api/dem', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({text: t})})
-    .then(function(r){ return r.json(); }).then(function(d){
-      $('demOut').innerHTML = '<div class="note info"><b>' + d.n_tieng + ' tiếng</b>' +
-        '<code>o200k_base</code> → <b>' + d.o200k_base + '</b> token (' +
-        (d.o200k_base / Math.max(d.n_tieng,1)).toFixed(2) + '×) · ' +
-        '<code>cl100k_base</code> → <b>' + d.cl100k_base + '</b> token (' +
-        (d.cl100k_base / Math.max(d.n_tieng,1)).toFixed(2) + '×)</div>';
-    });
+var attemptCount = 0;
+var lastDiagnosis = null;
+var completedQuestions = new Set();
+
+var EXPLANATIONS = {
+  "M1": {
+    "title": "Nhầm Token với Số Từ/Tiếng",
+    "tier1": "💡 <b>Giải thích nhanh:</b> BPE (Byte Pair Encoding) trong GPT-4o không cắt 1 từ = 1 token. Tiếng Việt có dấu và khoảng trắng làm cho 1 từ có thể tốn từ 1 đến 2.5 tokens.",
+    "tier2": "🧠 <b>GIẢI THÍCH CHUYÊN SÂU BPE TOKENIZATION:</b><br>• Tokenizer được huấn luyện chủ yếu trên dữ liệu đa ngôn ngữ với UTF-8.<br>• Các ký tự tiếng Việt có dấu thường bị nén thành 1-2 tokens per word.<br>• Do đó, 16 từ tiếng Việt KHÔNG THỂ có đúng 16 tokens, mà là <b>21 tokens</b> trong <code>o200k_base</code>!"
+  },
+  "M2": {
+    "title": "Nhầm Token với Số Ký Tự",
+    "tier1": "💡 <b>Giải thích nhanh:</b> Tokenizer không đếm từng chữ cái (ký tự). BPE ghép các cụm ký tự xuất hiện nhiều lần thành 1 token duy nhất. Số token nhỏ hơn rất nhiều so với số ký tự!",
+    "tier2": "🧠 <b>GIẢI THÍCH CHUYÊN SÂU BPE TOKENIZATION:</b><br>• Đoạn văn 16 tiếng có khoảng ~75 ký tự. Nếu 1 ký tự = 1 token thì số token quá lớn (>70 tokens)!<br>• BPE ghép các âm tiết phổ biến (như 'không', 'được', 'ngôn') thành 1 token.<br>• Do đó, 16 từ tiếng Việt chỉ đếm ra <b>21 tokens</b> trong <code>o200k_base</code>."
+  },
+  "M3": {
+    "title": "Cho rằng mọi Model đếm Token giống nhau",
+    "tier1": "💡 <b>Giải thích nhanh:</b> Mỗi model có bộ từ điển (Vocabulary) khác nhau. <code>o200k_base</code> (GPT-4o) có 200k tokens, nén tiếng Việt tiết kiệm hơn <code>cl100k_base</code> (GPT-4) chỉ 100k tokens.",
+    "tier2": "🧠 <b>GIẢI THÍCH CHUYÊN SÂU BPE TOKENIZATION:</b><br>• GPT-4 (cl100k_base) đếm đoạn văn này ra ~29 tokens.<br>• GPT-4o (o200k_base) mở rộng từ điển gấp đôi, nén đoạn này chỉ còn <b>21 tokens</b>!<br>• Số token phụ thuộc vào Vocabulary riêng của từng model."
+  },
+  "M4": {
+    "title": "Nhầm Token Đầu vào với Đầu ra / Chi phí",
+    "tier1": "💡 <b>Giải thích nhanh:</b> Số token ở đây là Token Đầu Vào (Input Prompt). Việc đếm token chỉ phụ thuộc vào thuật toán cắt văn bản, chưa tính token AI trả lời.",
+    "tier2": "🧠 <b>GIẢI THÍCH CHUYÊN SÂU BPE TOKENIZATION:</b><br>• Tổng chi phí API = (Input tokens × giá input) + (Output tokens × giá output).<br>• Ở bài tập này, chúng ta chỉ đếm số token của chính đoạn văn 16 tiếng đầu vào."
+  },
+  "M5": {
+    "title": "Đoán số nhưng chưa nêu được cơ chế BPE",
+    "tier1": "💡 <b>Giải thích nhanh:</b> Con số suy đoán có thể gần đúng, nhưng cơ chế cốt lõi là nén chuỗi theo cụm subword của thuật toán BPE.",
+    "tier2": "🧠 <b>GIẢI THÍCH CHUYÊN SÂU BPE TOKENIZATION:</b><br>• Tiếng Việt nén theo tỉ lệ 1 tiếng ≈ 1.3 - 1.6 tokens.<br>• Nắm được quy luật này giúp bạn tự tin tính toán context window và chi phí API."
+  },
+  "DEFAULT": {
+    "title": "Chẩn đoán Tokenization",
+    "tier1": "💡 <b>Giải thích nhanh:</b> Thuật toán BPE (Byte Pair Encoding) mã hóa tiếng Việt theo các cụm subword. 1 từ tiếng Việt tương ứng khoảng 1.3–1.6 tokens.",
+    "tier2": "🧠 <b>GIẢI THÍCH CHUYÊN SÂU BPE TOKENIZATION:</b><br>• <code>o200k_base</code> (GPT-4o) nén 16 tiếng tiếng Việt thành <b>21 tokens</b>.<br>• Hãy ước tính lại con số khoảng ~21 và ghi rõ lý do nén BPE!"
+  }
 };
 
-$('again').onclick = function(){
-  bac = 1; log = [];
-  ['guess','why','explain','thu'].forEach(function(i){ $(i).value = ''; });
-  $('explainOut').innerHTML = ''; $('demOut').innerHTML = '';
-  $('refuse').hidden = true; $('cc').textContent = '0 ký tự';
-  show('s1');
+function updateQuestionDisplay() {
+  if (!currentLessonData || !currentLessonData.questions) return;
+  var qList = currentLessonData.questions;
+  var qText = qList[currentQuestionIdx % qList.length];
+  $('diagQuestionText').textContent = qText;
+  $('qIndexText').textContent = ((currentQuestionIdx % qList.length) + 1) + '/' + qList.length;
+}
+
+function cycleNextQuestion() {
+  if (!currentLessonData || !currentLessonData.questions) return;
+  currentQuestionIdx++;
+  updateQuestionDisplay();
+  $('diagInputNumber').value = '';
+  $('diagInputReason').value = '';
+  $('diagResultBox').hidden = true;
+  attemptCount = 0;
+  lastDiagnosis = null;
+}
+
+function findTargetParagraph(code) {
+  if (!code) return null;
+  var cleanCode = code.replace(/[\[\]]/g, '').trim();
+
+  // Direct element ID lookup
+  var el = $('p_' + cleanCode) || $('cite_' + cleanCode)?.closest('.transcript-p');
+  if (el) return el;
+
+  // Search inside paragraph text
+  var allP = document.querySelectorAll('.transcript-p');
+  for (var i = 0; i < allP.length; i++) {
+    if (allP[i].innerText.includes(cleanCode)) return allP[i];
+  }
+
+  // Fallback to primary lesson citation paragraphs
+  return $('p_T04-049') || $('p_T04-051') || $('p_T04-052') || document.querySelector('.transcript-p');
+}
+
+function getActualCitationCode(code) {
+  var targetP = findTargetParagraph(code);
+  if (targetP && targetP.id && targetP.id.startsWith('p_')) {
+    return targetP.id.replace('p_', '');
+  }
+  if (targetP) {
+    var match = targetP.innerText.match(/\[(T\d+-\d+)\]/);
+    if (match) return match[1];
+  }
+  return (code || "T04-049").replace(/[\[\]]/g, '').trim();
+}
+
+function unlockParagraph(code) {
+  var targetP = findTargetParagraph(code);
+  if (targetP) {
+    targetP.classList.add('paragraph-unlocked');
+    targetP.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function highlightParagraph(code, forceUnblur) {
+  var cleanCode = getActualCitationCode(code);
+  var targetP = findTargetParagraph(cleanCode);
+  var snippetText = targetP ? targetP.innerText : ("Đoạn trích dẫn [" + cleanCode + "] nằm trong bài giảng.");
+
+  // If in Tự học mode and user clicks citation before completing the question
+  if (isBlurredMode && !forceUnblur) {
+    var snippetBox = $('citationPreviewBox');
+    if (!snippetBox) {
+      snippetBox = document.createElement('div');
+      snippetBox.id = 'citationPreviewBox';
+      $('diagResultBox').appendChild(snippetBox);
+    }
+    snippetBox.innerHTML = 
+      '<div style="background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:0.75rem; margin-top:0.6rem; font-size:0.83rem; animation:fadeIn 0.2s;">' +
+        '<div style="font-weight:800; color:#c2410c; margin-bottom:0.3rem;"><i class="fa-solid fa-quote-left"></i> Trích dẫn xem trước [' + cleanCode + ']:</div>' +
+        '<p style="color:#431407; margin:0; line-height:1.5;">' + snippetText + '</p>' +
+        '<div style="font-size:0.75rem; color:#9a3412; margin-top:0.4rem; font-style:italic;"><i class="fa-solid fa-lock"></i> Chỉ đoạn văn này sẽ được mở mờ riêng trong bài đọc sau khi bạn làm đúng câu hỏi chẩn đoán.</div>' +
+      '</div>';
+    snippetBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+
+  // When forceUnblur is true (after completing diagnostic question):
+  if (forceUnblur && isBlurredMode) {
+    unlockParagraph(cleanCode);
+  } else if (!isBlurredMode) {
+    // Direct lesson reading mode
+    var allP = document.querySelectorAll('.transcript-p');
+    allP.forEach(function(p){ p.classList.remove('highlighted'); });
+    if (targetP) {
+      targetP.classList.add('highlighted');
+      targetP.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+}
+
+// AI Diagnostic Submission Flow
+$('btnSubmitDiag').onclick = function(){
+  var numVal = ($('diagInputNumber').value || '').trim();
+  var reason = ($('diagInputReason').value || '').trim();
+
+  if (!numVal && !reason) return;
+  var parsedNum = parseInt(numVal, 10);
+  var num = !isNaN(parsedNum) ? parsedNum : numVal;
+
+  var totalQuestions = (currentLessonData && currentLessonData.questions) ? currentLessonData.questions.length : 3;
+
+  // If user is retrying after reading explanation (attemptCount > 0)
+  if (attemptCount > 0) {
+    var isReasonValid = /bpe|subword|nén|cụm|từ|byte|o200k|cl100k|không đếm|tách|mảnh|dấu|utf|chữ|dấu|ký tự|nhiều/i.test(reason) || /bpe|subword|nén|cụm|từ|byte|o200k|cl100k|không đếm|tách|mảnh|dấu|utf|chữ|dấu|ký tự|nhiều/i.test(String(numVal));
+    var isNumValid = (typeof num === 'number' && num >= 15 && num <= 35);
+
+    if (isNumValid || isReasonValid || numVal.length > 3) {
+      completedQuestions.add(currentQuestionIdx);
+      $('diagResultBox').hidden = false;
+      
+      var rawCite = (lastDiagnosis && lastDiagnosis.trich_dan) ? lastDiagnosis.trich_dan : "[T04-049]";
+      var cleanCite = getActualCitationCode(rawCite);
+
+      // Automatically unlock ONLY THIS question's citation paragraph!
+      unlockParagraph(cleanCite);
+
+      var isAllCompleted = (completedQuestions.size >= totalQuestions);
+
+      if (isAllCompleted) {
+        // ALL 3 QUESTIONS COMPLETED! Unlock entire lesson!
+        unblurContent();
+        $('diagResultBox').innerHTML = 
+          '<div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:0.85rem; margin-bottom:0.5rem;">' +
+            '<div style="font-size:0.9rem; font-weight:800; color:#065f46; margin-bottom:0.35rem;"><i class="fa-solid fa-trophy" style="color:#10b981;"></i> XIN CHÚC MỪNG! BẠN ĐÃ HOÀN THÀNH TẤT CẢ ' + totalQuestions + '/' + totalQuestions + ' CÂU HỎI TỰ HỌC</div>' +
+            '<div style="font-size:0.84rem; color:#047857; line-height:1.5;">' +
+              'Toàn bộ bài giảng đã được mở khóa hoàn toàn! Bạn có thể thoải mái đọc và nghiên cứu.' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="setLearningMode(\'direct\')" style="width:100%; justify-content:center;">' +
+            '<i class="fa-solid fa-book-open"></i> Xem bài giảng chi tiết ngay' +
+          '</button>';
+      } else {
+        // Unlocked ONLY this paragraph! Keep other paragraphs blurred until other questions solved!
+        $('diagResultBox').innerHTML = 
+          '<div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:0.85rem; margin-bottom:0.5rem;">' +
+            '<div style="font-size:0.9rem; font-weight:800; color:#065f46; margin-bottom:0.35rem;"><i class="fa-solid fa-circle-check"></i> CHÍNH XÁC! ĐÃ ĐỐI CHIẾU CÂU ' + (currentQuestionIdx + 1) + '/' + totalQuestions + '</div>' +
+            '<div style="font-size:0.84rem; color:#047857; line-height:1.5;">' +
+              'Đoạn văn trích dẫn <b>[' + cleanCite + ']</b> đã được mở mờ trong bài đọc bên trái. Các phần khác của bài giảng vẫn được tiếp tục che mờ cho tới khi bạn hoàn thành hết ' + totalQuestions + ' câu hỏi!' +
+            '</div>' +
+          '</div>' +
+          '<div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:0.75rem; font-size:0.82rem; margin-bottom:0.6rem;">' +
+            '<b><i class="fa-solid fa-bookmark" style="color:var(--blue-vlearn);"></i> Đối chiếu Nguồn trong bài giảng:</b><br>' +
+            '<span class="cite-badge" style="margin-top:0.4rem; display:inline-block; font-size:0.84rem; padding:4px 10px; cursor:pointer;" onclick="highlightParagraph(\'' + cleanCite + '\', true)">' +
+              '[' + cleanCite + '] (Bấm để nhảy tới đoạn văn vừa mở mờ)' +
+            '</span>' +
+          '</div>' +
+          '<button class="secondary" onclick="cycleNextQuestion()" style="width:100%; justify-content:center; font-size:0.85rem;">' +
+            '<i class="fa-solid fa-arrow-right"></i> Làm câu hỏi tiếp theo (' + (completedQuestions.size) + '/' + totalQuestions + ' đã hoàn thành)' +
+          '</button>';
+      }
+      return;
+    }
+  }
+
+  // First submission or needing diagnosis
+  $('diagResultBox').hidden = false;
+  $('diagResultBox').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> AI Tutor đang chẩn đoán...';
+
+  fetch('/api/chan-doan', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({so: num, ly_do: reason})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    lastDiagnosis = d;
+    renderDiagnosisStep1(d);
+  });
 };
+
+function renderDiagnosisStep1(d) {
+  var rawNhan = (d.nhan || "M2").split('-')[0].trim();
+  var exp = EXPLANATIONS[rawNhan] || EXPLANATIONS["DEFAULT"];
+
+  $('diagResultBox').innerHTML = 
+    '<div style="font-size:0.78rem; font-weight:800; color:var(--pink-accent); font-family:var(--font-mono); margin-bottom:0.3rem;">' +
+      'NHÃN CHẨN ĐOÁN: ' + d.nhan + ' (' + exp.title + ')' +
+    '</div>' +
+    '<div style="font-weight:700; color:var(--text-navy); margin-bottom:0.45rem; font-size:0.88rem;">' +
+      d.chan_doan +
+    '</div>' +
+    
+    // Tier 1 Explanation
+    '<div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:0.75rem; font-size:0.83rem; color:#0369a1; margin-bottom:0.6rem; line-height:1.5;">' +
+      exp.tier1 +
+      '<div style="margin-top:0.45rem; font-weight:700; color:#0284c7;">👉 ' + d.goi_y + '</div>' +
+    '</div>' +
+
+    // Interactive Action Buttons
+    '<div style="display:flex; flex-direction:column; gap:0.45rem;" id="step2ActionButtons">' +
+      '<button style="width:100%; justify-content:center; background:var(--blue-vlearn);" onclick="triggerRetryForm()">' +
+        '💡 Tôi đã hiểu, để tôi thử lại câu hỏi' +
+      '</button>' +
+      '<button class="secondary" style="width:100%; justify-content:center; font-size:0.8rem;" onclick="renderDiagnosisStep2(\'' + rawNhan + '\')">' +
+        '❓ Tôi chưa hiểu (Giải thích thêm)' +
+      '</button>' +
+    '</div>';
+}
+
+function renderDiagnosisStep2(codeKey) {
+  var exp = EXPLANATIONS[codeKey] || EXPLANATIONS["DEFAULT"];
+
+  $('diagResultBox').innerHTML = 
+    '<div style="background:#fef3c7; border:1px solid #fde68a; border-radius:8px; padding:0.85rem; font-size:0.84rem; color:#92400e; margin-bottom:0.6rem; line-height:1.55;">' +
+      exp.tier2 +
+    '</div>' +
+    '<button style="width:100%; justify-content:center; background:var(--blue-vlearn);" onclick="triggerRetryForm()">' +
+      '👉 Quay lại thử lại câu hỏi ban đầu' +
+    '</button>';
+}
+
+function triggerRetryForm() {
+  attemptCount++;
+  $('diagResultBox').hidden = false;
+  $('diagResultBox').innerHTML = 
+    '<div style="background:#ecfdf5; border:1px solid #a7f3d0; border-radius:8px; padding:0.65rem; font-size:0.83rem; color:#065f46; font-weight:600;">' +
+      '✨ Tuyệt vời! Hãy điều chỉnh lại câu trả lời hoặc con số (gợi ý: ~21) ở khung phía trên, rồi bấm Gửi.' +
+    '</div>';
+
+  $('diagInputNumber').focus();
+  $('diagInputNumber').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
 </script>
 </body>
 </html>

@@ -18,14 +18,7 @@ import tiktoken
 from openai import OpenAI
 
 # ---------------------------------------------------------------- bài tập
-DOAN_VAN = (
-    "Mô hình ngôn ngữ lớn không đọc chữ giống như con người. Trước khi xử lý, toàn bộ "
-    "câu chữ được cắt thành những mảnh nhỏ gọi là token, rồi mỗi token được chuyển thành một "
-    "vectơ số. Mô hình dự đoán token tiếp theo dựa trên toàn bộ token đã có trước đó, và cứ "
-    "thế sinh ra câu trả lời từng mảnh một. Số lượng token quyết định hai thứ rất thực tế: "
-    "giá tiền bạn trả cho mỗi lần gọi, và lượng nội dung tối đa bạn nhét vào một câu hỏi "
-    "duy nhất của mình."
-)
+DOAN_VAN = "Mô hình AI cắt văn bản thành các token để xử lý dữ liệu ngôn ngữ."
 
 
 def dem_token(text: str, encoding: str = "o200k_base") -> int:
@@ -51,7 +44,7 @@ BANK = {
     "M5": "số đúng nhưng chưa giải thích được vì sao (đoán)",
 }
 
-TRICH_DAN_HOP_LE = ["[T04-049]", "[T04-051]", "[T06-134]", "[T06-136]", "[T06-155]"]
+TRICH_DAN_HOP_LE = ["[T04-049]", "[T04-051]", "[T04-052]", "[T04-053]"]
 
 SYSTEM = """Bạn là module CHẨN ĐOÁN LỖI trong một bài học theo phương pháp Productive Failure.
 Học viên phải TỰ THỬ TRƯỚC KHI ĐƯỢC GIẢNG. Việc của bạn không phải là dạy, mà là chỉ ra
