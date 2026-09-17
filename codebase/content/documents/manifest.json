@@ -1,0 +1,50 @@
+{
+  "documents": [
+    {
+      "document_id": "vl-token-transcript-04",
+      "document_name": "Transcript bài 04 — Tokenizer và ngôn ngữ",
+      "lesson_id": "token-foundations",
+      "path": "tokenizer-va-ngon-ngu.md",
+      "sources": [
+        {
+          "source_id": "[T04-049]",
+          "section": "Tokenizer học các cụm ký tự",
+          "page": null,
+          "quote": "Tokenizer biểu diễn văn bản bằng các đơn vị là cụm ký tự xuất hiện thường xuyên, thay vì mặc định coi mỗi từ hay mỗi ký tự là một token."
+        },
+        {
+          "source_id": "[T04-051]",
+          "section": "Khác biệt giữa các ngôn ngữ",
+          "page": null,
+          "quote": "Một cụm quen thuộc trong dữ liệu có thể nằm trong một token, còn từ ít gặp hoặc từ có dấu có thể bị tách thành nhiều token."
+        }
+      ]
+    },
+    {
+      "document_id": "vl-token-transcript-06",
+      "document_name": "Transcript bài 06 — Token, ngữ cảnh và chi phí",
+      "lesson_id": "token-foundations",
+      "path": "token-ngu-canh-chi-phi.md",
+      "sources": [
+        {
+          "source_id": "[T06-134]",
+          "section": "Đơn vị xử lý của mô hình",
+          "page": null,
+          "quote": "Đơn vị cơ bản mà mô hình nhận và sinh ra là token; token có thể là một từ, một phần của từ, dấu câu hoặc một cụm ký tự."
+        },
+        {
+          "source_id": "[T06-136]",
+          "section": "Vì sao số token khác số tiếng",
+          "page": null,
+          "quote": "Tokenizer cắt văn bản theo các cụm ký tự đã học, nên số token không bằng số tiếng và có thể thay đổi khi dùng tokenizer khác."
+        },
+        {
+          "source_id": "[T06-155]",
+          "section": "Token đầu vào và đầu ra",
+          "page": null,
+          "quote": "Chi phí của một lần gọi được tính từ token đầu vào và token đầu ra; hai phần cần được đếm riêng theo bảng giá của mô hình."
+        }
+      ]
+    }
+  ]
+}

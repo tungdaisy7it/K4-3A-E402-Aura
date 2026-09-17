@@ -1,0 +1,43 @@
+{
+  "lesson_id": "token-foundations",
+  "lesson_name": "Foundation — cách LLM hoạt động",
+  "title": "3.2 — Token là gì",
+  "exercises": [
+    {
+      "exercise_id": "token-default",
+      "question": "Bạn đoán tiktoken đếm đoạn trên ra bao nhiêu token?",
+      "content": "Mô hình ngôn ngữ lớn không đọc chữ giống như con người. Trước khi xử lý, toàn bộ câu chữ được cắt thành những mảnh nhỏ gọi là token, rồi mỗi token được chuyển thành một vectơ số. Mô hình dự đoán token tiếp theo dựa trên toàn bộ token đã có trước đó, và cứ thế sinh ra câu trả lời từng mảnh một. Số lượng token quyết định hai thứ rất thực tế: giá tiền bạn trả cho mỗi lần gọi, và lượng nội dung tối đa bạn nhét vào một câu hỏi duy nhất của mình.",
+      "answer": {
+        "type": "token_count",
+        "encoding": "o200k_base",
+        "comparison_encodings": ["cl100k_base"]
+      },
+      "source_refs": ["[T06-134]", "[T06-136]", "[T06-155]"],
+      "expected_errors": ["M1", "M2", "M3", "M4", "M5"]
+    },
+    {
+      "exercise_id": "token-mixed-language",
+      "question": "Với encoding o200k_base, đoạn pha tiếng Việt và tiếng Anh này có bao nhiêu token?",
+      "content": "Một chatbot nhận câu hỏi: Hãy summarize báo cáo bán hàng quý này, rồi explain ba nguyên nhân doanh thu thay đổi bằng tiếng Việt.",
+      "answer": {
+        "type": "token_count",
+        "encoding": "o200k_base",
+        "comparison_encodings": ["cl100k_base"]
+      },
+      "source_refs": ["[T04-049]", "[T04-051]", "[T06-136]"],
+      "expected_errors": ["M1", "M2", "M3", "M5"]
+    },
+    {
+      "exercise_id": "token-cost-input",
+      "question": "Với encoding cl100k_base, riêng phần nội dung đầu vào này có bao nhiêu token?",
+      "content": "Chi phí một lời gọi mô hình phụ thuộc vào lượng token đầu vào và lượng token đầu ra. Trong bài này bạn chỉ cần đếm phần đầu vào đang nhìn thấy; câu trả lời mà mô hình có thể sinh ra chưa tồn tại.",
+      "answer": {
+        "type": "token_count",
+        "encoding": "cl100k_base",
+        "comparison_encodings": ["o200k_base"]
+      },
+      "source_refs": ["[T06-134]", "[T06-155]"],
+      "expected_errors": ["M1", "M2", "M3", "M4", "M5"]
+    }
+  ]
+}
