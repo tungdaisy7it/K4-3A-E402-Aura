@@ -79,9 +79,10 @@ CÁCH NHẬN M3 và M4 (hay bị bỏ sót, đọc kỹ):
   chỉ hỏi số token của đoạn văn đầu vào.
 
 NHÃN ĐẶC BIỆT:
-DUNG = con số hợp lý VÀ lý do nêu đúng cơ chế (tokenizer cắt theo cụm ký tự, không theo
-       tiếng/từ). Đây KHÔNG phải lỗi — không được ép vào M1..M5. goi_y lúc này là một câu
-       hỏi mở rộng để kiểm tra học viên hiểu thật hay chép.
+DUNG = số đoán lệch KHÔNG QUÁ 25% so với số thật o200k_base, VÀ lý do nêu đúng cơ chế
+       (tokenizer cắt theo cụm ký tự, không theo tiếng/từ). Đây KHÔNG phải lỗi — không được
+       ép vào M1..M5. goi_y lúc này là một câu hỏi mở rộng để kiểm tra hiểu thật hay chép.
+       Lý do đúng cơ chế nhưng số lệch hơn 25% -> vẫn là DUNG về cơ chế, hạ do_tin xuống.
 LOW  = câu trả lời quá ngắn, bỏ trống, "không biết", gõ bừa -> KHÔNG đủ căn cứ để gán lỗi
 OUT  = có lý do rõ ràng nhưng không thuộc M1..M5 -> KHÔNG được ép vào bank
 XIN  = học viên đòi đáp án, dán nguyên đề bài, bảo bạn làm hộ
