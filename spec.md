@@ -257,6 +257,11 @@ thấp hơn, nhóm giữ nguyên bar và phân tích nguyên nhân chứ không 
    prompt ghi rõ (đo riêng 6 case khó: **2/6**); `gpt-4.1-mini` được **5/6**. Giới hạn năng lực model,
    không phải lỗi prompt. Nhờ OpenRouter nên đổi model chỉ là sửa một dòng `.env`.
 
+| v7 | 28 case · sau khi tách nội dung ra JSON, mở rộng lên **8 bài học** | **26/28 · 93%** | 26/28 | 28/28 · 100% | 28/28 · 100% | `eval/results-20260917-1951.md` |
+
+Lượt v7 nhỉnh hơn v6 nhờ thêm **THỨ TỰ XÉT** vào prompt (XIN → LOW → DUNG → bank → OUT), sửa sau khi
+một lượt trung gian tụt xuống 82% vì nhãn `M5` bị dùng làm nhãn vơ-đũa.
+
 **Ba case còn trượt ở v6:** `G24` (ra `M2` thay `M1`) · `G26`, `G27` (ra `M4` thay `OUT` — hệ thống
 vẫn thích gán một nhãn quen hơn là thừa nhận chưa xếp được).
 
@@ -338,7 +343,7 @@ lên thì định nghĩa chưa đủ rõ và phải viết lại.
 | 3b | **Nhận nhãn `DUNG`** | ✅ **ĐÃ SỬA** ở v6 — `G17` `G18` `G23` đều ra `DUNG`. Cách sửa: viết chẩn đoán trước rồi chọn nhãn, cộng đổi sang `gpt-4.1-mini` | R3 lớp ① |
 | 3c | **Thừa nhận "ngoài bộ nhãn"** | **CHƯA ỔN.** `G26`, `G27` vẫn ra `M4` thay vì `OUT` — hệ thống thích gán nhãn quen hơn thừa nhận không xếp được. Đây là chỗ yếu nhất còn lại | R3 lớp ① |
 | 4 | **Nội dung trích dẫn transcript** | ✅ **ĐÃ SỬA.** Mã đoạn và nguyên văn câu trích nay nạp từ `content/noi-dung.json`, hiện ở cả khối chẩn đoán lẫn màn mở khoá. **Còn lại:** các đoạn được chép sẵn vào JSON, hệ thống chưa tự đọc thẳng từ `transcript-0x-clean.md` vì pack không được commit | R3 lớp ① |
-| 4b | **Golden set cho bài tập thứ hai** | **CHƯA CÓ.** Đã thêm bài Temperature (phần 4.1), thử tay đúng 6/6 ca, nhưng **không có bộ eval riêng** — con số 89% chỉ nói về bài Token, không nói gì về bài Temperature | R4 — phát sinh sau khi chốt bar, khai thêm để không giấu |
+| 4b | **Golden set cho 7 bài còn lại** | **CHƯA CÓ.** Hệ thống nay có **8 bài học** (5 bài Day 01 + 3 bài Day 02), nhưng golden set 28 case **chỉ phủ bài Token**. Bảy bài kia mới thử tay: 12/12 ca đúng trên 6 bài, 6/6 trên bài Temperature. **Con số 93% chỉ nói về bài Token** | R4 — phát sinh sau khi chốt bar, khai thêm để không giấu |
 | 5 | **Log phiên cho giảng viên** | **CHỈ HIỆN RA MÀN HÌNH**, chưa ghi ra file, chưa có màn hình riêng cho giảng viên | Đích xa của D2, đã khai trong non-goals |
 | 6 | **Vòng validation 5 người học thật** | **CHƯA CHẠY.** Có 2 willing user đã đồng ý, còn thiếu 3 người | R6 (bonus +8) và **chỉ số học ở quality bar §7 điều kiện 4** — nếu không chạy được thì nhóm khai là không đo được, không tự cho điểm |
 | 7 | **Ngưỡng "số hợp lý"** | ✅ **ĐÃ CHỐT** — sai lệch ≤25% so với số thật, ghi vào prompt và `golden_set.json`. Nhưng **ngưỡng đúng mà model vẫn không gán `DUNG`**: `G18` và `G23` vẫn trượt ở v3. Vấn đề nằm ở luồng phân loại, không ở ngưỡng | R4 — ngưỡng chốt cùng bar, không sửa |

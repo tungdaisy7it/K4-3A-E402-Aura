@@ -39,7 +39,9 @@ BAI_TAP_MAC_DINH = _ND["bai_tap"][0]["id"]
 def danh_sach_bai_tap():
     """Cho giao diện dựng thanh chọn bài."""
     return [
-        {"id": b["id"], "khai_niem": b["khai_niem"], "phan": b["phan"], "tieu_de": b["tieu_de"]}
+        {"id": b["id"], "khai_niem": b["khai_niem"], "phan": b["phan"],
+         "tieu_de": b["tieu_de"], "buoi": b.get("buoi", ""),
+         "bang_chung": b.get("bang_chung", ""), "kieu": b["kieu"]}
         for b in _ND["bai_tap"]
     ]
 
@@ -81,7 +83,20 @@ def _so_can_giau(st):
     """Những con số tuyệt đối không được xuất hiện trong gợi ý."""
     if st["kieu"] == "dem_token":
         return [st["o200k_base"], st["cl100k_base"]]
+    if st["kieu"] == "dap_an_khoang":
+        k = st.get("khoang_dung", [])
+        # Chỉ giấu khi đáp án là một con số cụ thể, không giấu khoảng rộng như 0-0.3.
+        if len(k) == 2 and k[0] == k[1] and k[0] >= 10:
+            return [int(k[0])]
     return []
+
+
+def _lo_dap_an_chon(text, st):
+    """Với bài trắc nghiệm: chặn việc nêu thẳng ký hiệu phương án đúng."""
+    if st["kieu"] != "chon":
+        return False
+    d = st.get("dap_an_dung", "")
+    return bool(re.search(r"(phương án|đáp án|chọn)\s*(là\s*)?[\"'`]?%s\b" % re.escape(d), text, re.I))
 
 
 # ------------------------------------------------------------ prompt
@@ -137,6 +152,14 @@ Hai chỗ hay xếp nhầm, đọc kỹ:
   con số của họ lệch một chút. Nhãn lỗi dành cho người hiểu sai cơ chế."""
 
 
+def _de_bai(b):
+    """Đề bài đưa vào prompt; bài trắc nghiệm phải kèm đủ các phương án."""
+    if not b.get("lua_chon"):
+        return b["doan_van"]
+    ds = " | ".join("%s. %s" % (o["id"], o["text"]) for o in b["lua_chon"])
+    return b["doan_van"] + "\nCác phương án: " + ds
+
+
 def _client():
     """Dùng chung cho OpenRouter và OpenAI — chỉ khác base_url trong .env."""
     return OpenAI(
@@ -150,6 +173,8 @@ def _lo_dap_an(text, st):
     for so in _so_can_giau(st):
         if re.search(r"\b%d\b" % so, text):
             return True
+    if _lo_dap_an_chon(text, st):
+        return True
     return bool(re.search(r"đáp án là|kết quả là|chính xác là|đúng ra là", text, re.I))
 
 
@@ -162,7 +187,7 @@ def chan_doan(so_doan, ly_do, model=None, bai_tap_id=None):
 
     sys_prompt = SYSTEM.format(
         khai_niem=b["khai_niem"],
-        de_bai=b["doan_van"],
+        de_bai=_de_bai(b),
         cau_hoi=re.sub(r"<[^>]+>", "", b["cau_hoi_so"]),
         su_that=_mo_ta_su_that(st),
         bank="\n".join("%s = %s" % (k, v) for k, v in b["bank"].items()),

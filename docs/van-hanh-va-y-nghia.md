@@ -89,16 +89,24 @@ trong một file duy nhất: `codebase/content/noi-dung.json`.
 **Thêm một bài tập = thêm một khối JSON**, không sửa dòng code nào. Hệ thống tự dựng thanh chọn bài,
 tự ghép prompt theo bộ nhãn của bài đó, tự giới hạn trích dẫn trong danh sách của bài đó.
 
-Hiện có hai bài: **Token** (phần 3.2) và **Temperature** (phần 4.1). Hai bài khác kiểu nhau để chứng
-minh khung này không chỉ chạy được với bài đếm token:
+Hiện có **8 bài học**, mỗi bài gắn với một cụm kẹt có số đếm thật trong chatlog K4
+(2.555 lượt tự gõ / 384 học viên):
 
-| | `token-01` | `temperature-01` |
-|---|---|---|
-| Kiểu | `dem_token` — sự thật do `tiktoken` tính tại chỗ | `dap_an_khoang` — sự thật là một khoảng giá trị |
-| Đề bài | Đoạn văn 99 tiếng | Tình huống chatbot ngân hàng |
-| Đáp án | 121 token (`o200k_base`) | temperature trong khoảng 0 – 0,3 |
-| Nhãn lỗi | M1–M5 về token | M1–M5 về temperature, hoàn toàn khác |
-| Trích dẫn cho phép | 5 mã | 3 mã |
+| Phần | Khái niệm | Kiểu bài | Học viên K4 hỏi |
+|---|---|---|---|
+| 1.1 | Token | đếm bằng `tiktoken` | 67 lượt · 33 người |
+| 1.2 | Context window | trắc nghiệm | 187 lượt · 57 người |
+| 1.3 | Chi phí API | đáp án số | 137 lượt · 77 người |
+| 1.4 | Temperature | đáp án khoảng | 35 lượt · 22 người |
+| 1.5 | AI Agent | trắc nghiệm | **849 lượt · 161 người** — cụm lớn nhất khoá |
+| 2.1 | Xác định bài toán | trắc nghiệm | 67 lượt · 47 người |
+| 2.2 | Mức tự động hoá | trắc nghiệm | 12 lượt · 9 người |
+| 2.3 | Chỉ số thành công | trắc nghiệm | 85 lượt · 52 người |
+
+Ba kiểu bài cùng chạy trên một lõi chẩn đoán: `dem_token` (sự thật do `tiktoken` tính tại chỗ),
+`dap_an_khoang` (sự thật là một khoảng số), `chon` (sự thật là một phương án). Mỗi bài có **bộ nhãn
+lỗi riêng** và **danh sách trích dẫn riêng** — nhãn `M1` của bài Token không liên quan gì tới `M1`
+của bài Agent.
 
 **Giới hạn phải nói rõ:** `nguon` hiện là các đoạn transcript đã **chép sẵn vào file JSON**, chứ hệ
 thống chưa tự đọc thẳng từ `transcript-0x-clean.md` trong data pack. Lý do: data pack không được

@@ -40,16 +40,18 @@ def health():
 
 @app.get("/api/bai-tap")
 def bai_tap():
-    """Danh sách bài + nội dung một bài. Không kèm đáp án."""
+    """Danh sách bài + nội dung một bài. Không bao giờ kèm đáp án."""
     b = lay_bai(request.args.get("id"))
     return jsonify({
         "danh_sach": danh_sach_bai_tap(),
         "bai": {
-            "id": b["id"], "khai_niem": b["khai_niem"], "phan": b["phan"],
-            "tieu_de": b["tieu_de"], "doan_van": b["doan_van"],
+            "id": b["id"], "buoi": b.get("buoi", ""), "phan": b["phan"],
+            "khai_niem": b["khai_niem"], "tieu_de": b["tieu_de"],
+            "bang_chung": b.get("bang_chung", ""), "kieu": b["kieu"],
+            "doan_van": b["doan_van"], "lua_chon": b.get("lua_chon", []),
             "cau_hoi_so": b["cau_hoi_so"], "cau_hoi_ly_do": b["cau_hoi_ly_do"],
             "cau_chot_hieu": b["cau_chot_hieu"], "tu_khoa_chot_hieu": b["tu_khoa_chot_hieu"],
-            "n_tieng": len(b["doan_van"].split()), "kieu": b["kieu"],
+            "co_che_dung": b["co_che_dung"], "n_tieng": len(b["doan_van"].split()),
         },
     })
 

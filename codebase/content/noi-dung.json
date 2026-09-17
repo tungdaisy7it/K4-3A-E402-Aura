@@ -1,32 +1,43 @@
 {
-  "_doc": "Toàn bộ nội dung bài học nạp từ file này. Thêm một bài tập = thêm một khối trong 'bai_tap', không phải sửa code. Trích dẫn trong 'nguon' là trích ngắn từ transcript bài giảng, mỗi đoạn có mã [Txx-NNN] để phúc khảo ngược về bản gốc trong data pack.",
+  "_doc": "Toàn bộ nội dung bài học nạp từ file này. Thêm một bài tập = thêm một khối trong 'bai_tap', không sửa code. Mỗi bài ghi 'bang_chung' là số lượt hỏi thật của khoá 4 về khái niệm đó (mining tutor_turns.csv, cohort_hint=K4, is_preset=False, 2.555 lượt / 384 học viên).",
 
   "nguon": {
+    "[T01-003]": "Việc đưa AI vào ứng dụng, đặc biệt trong doanh nghiệp, thì 70% của nó đến từ con người và vận hành chứ không phải đến từ công nghệ. Không phải lúc nào cũng AI first — nhưng cuối cùng AI để giải cái gì?",
+    "[T01-004]": "Công nghệ sinh ra để giải quyết một vấn đề gì đấy. Đầu tiên mình phải biết vấn đề là gì, sau đấy công nghệ mới là công cụ để giải nó. Nhiều khi con người có một cái quán tính là nhảy thẳng vào giải pháp.",
+    "[T02-035]": "Khi AI tham gia vào rồi, đánh giá mức độ của AI — của công nghệ nói chung — thì còn có các mức độ liên quan đến kỹ thuật. Ở đây mình chia ra ba cấp độ chính.",
+    "[T02-036]": "Cấp độ thứ nhất là dùng các quy tắc. Những gì có thể viết thành quy tắc rất rõ ràng được, thì có thể đưa vào code và máy chạy, chúng ta không cần đến AI luôn.",
+    "[T02-037]": "Cấp độ hai là build theo dạng workflow. Rule-based không xử lý được nữa, nhưng nhìn chung nó vẫn có thể chia thành các bước lớn, và trong từng nút đấy chúng ta sẽ có AI agent, AI LLM để hỗ trợ.",
+    "[T03-092]": "Các bạn đưa ra solution thì mục tiêu cải thiện là gì — tiết kiệm thời gian làm việc của user, số click bấm, số thời gian — phải có đo lường nhá. Mục tiêu thì phải đóng thành con số.",
     "[T04-049]": "Trong các mô hình ngôn ngữ lớn thì có một thuật ngữ quan trọng chúng ta cần nắm được, đấy là token.",
-    "[T04-051]": "Rồi sau token thì cũng có một khái niệm rất là quan trọng, đấy là context. Context nghĩa là bối cảnh, ngữ cảnh.",
+    "[T04-051]": "Sau token thì cũng có một khái niệm rất là quan trọng, đấy là context. Context là toàn bộ những thông tin mà một mô hình nó có thể tiêu thụ trong một lần. Những mô hình thời đầu, khi context này ngắn, nó có giới hạn ngữ cảnh.",
     "[T04-071]": "Temperature cao thì tăng độ sáng tạo đúng không? Bạn prompt cho một bài viết content marketing chẳng hạn, thì bạn tăng cái temperature.",
-    "[T04-072]": "Temperature hoạt động theo kiểu: nếu temperature bằng 0, mô hình sẽ luôn luôn lấy xác suất cao nhất. Các bạn có thể chạy thử một mô hình với temperature bằng 0 thì kết quả trả ra gần như sẽ giống nhau.",
+    "[T04-072]": "Temperature hoạt động theo kiểu: nếu temperature bằng 0, mô hình sẽ luôn luôn lấy xác suất cao nhất. Chạy thử một mô hình với temperature bằng 0 thì kết quả trả ra gần như sẽ giống nhau.",
+    "[T04-073]": "Bây giờ chúng ta làm cho mô hình có tay, có chân, có bộ não, có thêm nhiều ngữ cảnh khác để làm được việc — đấy là con đường đi đến AI agent. Nó không phải chỉ sinh văn bản nữa: nó có thể làm được việc, có thể tương tác với thế giới.",
+    "[T04-087]": "Khi bạn gọi API của một mô hình LLM, luôn có đầu vào và đầu ra — có in và có out. Input là câu hỏi của bạn, output là câu AI trả lời.",
+    "[T05-105]": "Một hệ thống AI thì đầu tiên nó sẽ có một mô hình, sau đấy phải có những ngữ cảnh — context management, phần quản lý ngữ cảnh. Rồi sau đó chúng ta có planning — phần liên quan đến lập kế hoạch — và những cái tool.",
+    "[T05-115]": "Nếu các bạn không trả lời được vì sao lại cần planning và vì sao cần tool để đạt đến trạng thái tự động 100%, thì khả năng cao các bạn thấy cái này tôi không cần xài đâu. Ngay lập tức các bạn nhận ra được bài toán cần giải là cái gì.",
     "[T06-134]": "Đơn vị cơ bản của LLM là cái nãy giờ chúng ta gọi là token.",
     "[T06-136]": "Quá trình dự báo next token: cái LLM nó không hiểu ngôn ngữ giống con người nhá, mà nó chỉ dự đoán token nào có khả năng đứng sau.",
     "[T06-137]": "Một cái rất quan trọng nữa là cơ chế autoregressive: output token sẽ trở thành input token.",
-    "[T06-155]": "Cách tính giá của nó các bạn nhá: chúng ta tính cả input token cộng với output token thì ra total cost."
+    "[T06-155]": "Cách tính giá của nó các bạn nhá: chúng ta tính cả input token cộng với output token thì ra total cost. Không phải một từ là một token — có khi một từ là nhiều token.",
+    "[T06-157]": "Cái context window rất quan trọng nhá. Khi các bạn thiết kế một hệ thống thật, đôi khi không hiểu tại sao nó trả về không đúng như mọi khi — đơn giản là người ta giới hạn token mà query của user thì dài."
   },
 
   "bai_tap": [
     {
       "id": "token-01",
+      "buoi": "Day 01 — Foundation",
+      "phan": "1.1",
       "khai_niem": "Token",
-      "phan": "3.2",
       "tieu_de": "Token là gì",
+      "bang_chung": "67 lượt hỏi · 33 học viên",
       "kieu": "dem_token",
       "doan_van": "Mô hình ngôn ngữ lớn không đọc chữ giống như con người. Trước khi xử lý, toàn bộ câu chữ được cắt thành những mảnh nhỏ gọi là token, rồi mỗi token được chuyển thành một vectơ số. Mô hình dự đoán token tiếp theo dựa trên toàn bộ token đã có trước đó, và cứ thế sinh ra câu trả lời từng mảnh một. Số lượng token quyết định hai thứ rất thực tế: giá tiền bạn trả cho mỗi lần gọi, và lượng nội dung tối đa bạn nhét vào một câu hỏi duy nhất của mình.",
       "cau_hoi_so": "Bạn đoán <code>tiktoken</code> đếm đoạn trên ra bao nhiêu token?",
       "cau_hoi_ly_do": "Vì sao bạn nghĩ vậy?",
-      "don_vi": "token",
       "co_che_dung": "tokenizer cắt theo cụm ký tự hay gặp trong dữ liệu huấn luyện, không cắt theo tiếng hay theo từ",
       "cau_chot_hieu": "Vì sao số token khác số tiếng?",
       "tu_khoa_chot_hieu": ["cắt", "mảnh", "cụm", "tiếng anh", "có dấu", "không theo t"],
-      "nguong_lech_phan_tram": 25,
       "bank": {
         "M1": "token = từ hoặc tiếng — tin rằng mỗi tiếng đúng bằng một token",
         "M2": "token = ký tự — tin rằng token là từng chữ cái",
@@ -40,33 +51,222 @@
     },
 
     {
+      "id": "context-01",
+      "buoi": "Day 01 — Foundation",
+      "phan": "1.2",
+      "khai_niem": "Context window",
+      "tieu_de": "Nhét bao nhiêu vào một lần hỏi",
+      "bang_chung": "187 lượt hỏi · 57 học viên",
+      "kieu": "chon",
+      "doan_van": "Bạn có một tập tài liệu nội bộ dài khoảng 300 trang. Bạn dán toàn bộ 300 trang đó vào một lần gọi API duy nhất, kèm câu hỏi ở cuối, rồi bấm gửi.",
+      "cau_hoi_so": "Điều gì sẽ xảy ra?",
+      "cau_hoi_ly_do": "Vì sao bạn chọn phương án đó?",
+      "lua_chon": [
+        {"id": "A", "text": "Mô hình vẫn đọc hết, chỉ chạy chậm hơn bình thường"},
+        {"id": "B", "text": "Mô hình tự tóm tắt bớt phần thừa rồi mới đọc"},
+        {"id": "C", "text": "API báo lỗi vượt giới hạn, hoặc phần vượt quá bị cắt mất"},
+        {"id": "D", "text": "Mô hình ghi nhớ tài liệu này cho tất cả các lần hỏi sau"}
+      ],
+      "su_that": {"dap_an_dung": "C", "giai_thich": "Mỗi mô hình có một context window — tổng số token tối đa nó tiêu thụ được trong MỘT lần gọi, tính cả câu hỏi lẫn câu trả lời. Vượt quá thì API báo lỗi, hoặc phần đầu bị cắt âm thầm khiến câu trả lời sai mà không rõ vì sao. Context cũng không phải bộ nhớ: hết lần gọi là hết, mô hình không tự nhớ sang lần sau."},
+      "co_che_dung": "context window là giới hạn token cho MỘT lần gọi, tính cả đầu vào lẫn đầu ra, và nó không phải bộ nhớ lưu qua các lần gọi",
+      "cau_chot_hieu": "Context window giới hạn cái gì, và vì sao nó không phải là bộ nhớ của mô hình?",
+      "tu_khoa_chot_hieu": ["giới hạn", "gioi han", "một lần", "mot lan", "không nhớ", "khong nho", "cắt", "vượt"],
+      "bank": {
+        "M1": "tin rằng context không có giới hạn thật, chỉ làm mô hình chạy chậm hơn",
+        "M2": "tin rằng mô hình tự tóm tắt hoặc tự lọc bớt phần thừa giúp mình",
+        "M3": "nhầm context với bộ nhớ — tin rằng mô hình nhớ tài liệu sang các lần hỏi sau",
+        "M4": "nhầm context window với dung lượng file, tốc độ mạng hoặc cấu hình máy",
+        "M5": "chọn đúng phương án nhưng lý do không nêu được đó là giới hạn token của một lần gọi"
+      },
+      "trich_dan_cho_phep": ["[T04-051]", "[T06-157]", "[T06-155]", "[T06-134]"],
+      "trich_dan_mac_dinh": "[T04-051]",
+      "nguon_mo_khoa": ["[T04-051]", "[T06-157]"]
+    },
+
+    {
+      "id": "chi-phi-01",
+      "buoi": "Day 01 — Foundation",
+      "phan": "1.3",
+      "khai_niem": "Chi phí API",
+      "tieu_de": "Bạn bị tính tiền cho cái gì",
+      "bang_chung": "137 lượt hỏi · 77 học viên",
+      "kieu": "dap_an_khoang",
+      "doan_van": "Bạn gọi API một mô hình LLM đúng một lần. Phần bạn gửi đi — gồm system prompt, lịch sử hội thoại và câu hỏi — dài 2.000 token. Mô hình trả lời bạn một đoạn dài 500 token.",
+      "cau_hoi_so": "Tổng cộng bạn bị tính tiền cho bao nhiêu token trong lần gọi này?",
+      "cau_hoi_ly_do": "Vì sao lại là con số đó?",
+      "su_that": {"khoang_dung": [2500, 2500], "giai_thich": "Bị tính cả hai chiều: 2.000 token đầu vào cộng 500 token đầu ra bằng 2.500 token. Và quan trọng hơn con số: token đầu ra thường có đơn giá CAO HƠN token đầu vào vài lần, nên một câu trả lời dài đắt hơn nhiều so với một câu hỏi dài cùng độ dài."},
+      "co_che_dung": "cả token đầu vào lẫn token đầu ra đều bị tính tiền, và đơn giá đầu ra thường cao hơn đầu vào",
+      "cau_chot_hieu": "Bạn bị tính tiền cho những phần nào, và phần nào đắt hơn?",
+      "tu_khoa_chot_hieu": ["đầu vào", "dau vao", "đầu ra", "dau ra", "input", "output", "cả hai", "ca hai"],
+      "bank": {
+        "M1": "chỉ tính token đầu vào — tin rằng chỉ trả tiền cho câu mình gửi đi",
+        "M2": "chỉ tính token đầu ra — tin rằng chỉ trả tiền cho câu mô hình viết ra",
+        "M3": "tin rằng đầu vào và đầu ra cùng một đơn giá nên không cần phân biệt hai chiều",
+        "M4": "nhầm token với số từ hoặc số ký tự khi tính",
+        "M5": "ra đúng con số nhưng lý do không nói được là gồm cả hai chiều"
+      },
+      "trich_dan_cho_phep": ["[T04-087]", "[T06-155]", "[T06-137]", "[T06-134]"],
+      "trich_dan_mac_dinh": "[T06-155]",
+      "nguon_mo_khoa": ["[T04-087]", "[T06-155]"]
+    },
+
+    {
       "id": "temperature-01",
+      "buoi": "Day 01 — Foundation",
+      "phan": "1.4",
       "khai_niem": "Temperature",
-      "phan": "4.1",
       "tieu_de": "Chọn temperature cho sản phẩm",
+      "bang_chung": "35 lượt hỏi · 22 học viên",
       "kieu": "dap_an_khoang",
       "doan_van": "Bạn đang xây một chatbot hỗ trợ khách hàng cho một ngân hàng. Bot trả lời các câu hỏi về phí dịch vụ, hạn mức thẻ và thủ tục mở tài khoản — toàn bộ dựa trên tài liệu chính thức của ngân hàng. Cùng một câu hỏi, hai khách hàng khác nhau hỏi vào hai thời điểm khác nhau, phải nhận được câu trả lời thống nhất.",
-      "cau_hoi_so": "Bạn sẽ đặt <code>temperature</code> bằng bao nhiêu cho chatbot này? (nhập số, ví dụ 0 hoặc 1)",
+      "cau_hoi_so": "Bạn sẽ đặt <code>temperature</code> bằng bao nhiêu cho chatbot này?",
       "cau_hoi_ly_do": "Vì sao bạn chọn giá trị đó?",
-      "don_vi": "",
-      "su_that": {
-        "khoang_dung": [0, 0.3],
-        "giai_thich": "Chatbot ngân hàng cần tính nhất quán và bám tài liệu, không cần sáng tạo. Temperature thấp (0 đến 0,3) khiến mô hình gần như luôn chọn token có xác suất cao nhất, nên cùng một câu hỏi cho ra câu trả lời ổn định. Temperature cao làm câu chữ đa dạng hơn nhưng đồng thời tăng khả năng bịa chi tiết — đúng thứ không được phép xảy ra với thông tin phí và hạn mức."
-      },
-      "co_che_dung": "temperature thấp làm mô hình luôn lấy token xác suất cao nhất nên câu trả lời nhất quán; temperature cao tăng ngẫu nhiên nên dễ bịa, không hợp với thông tin phải chính xác",
-      "cau_chot_hieu": "Temperature thay đổi cái gì bên trong mô hình, và vì sao điều đó lại quan trọng với chatbot ngân hàng?",
+      "su_that": {"khoang_dung": [0, 0.3], "giai_thich": "Chatbot ngân hàng cần tính nhất quán và bám tài liệu, không cần sáng tạo. Temperature thấp khiến mô hình gần như luôn chọn token có xác suất cao nhất, nên cùng một câu hỏi cho ra câu trả lời ổn định. Temperature cao làm câu chữ đa dạng hơn nhưng đồng thời tăng khả năng bịa chi tiết — đúng thứ không được phép xảy ra với thông tin phí và hạn mức."},
+      "co_che_dung": "temperature thấp làm mô hình luôn lấy token xác suất cao nhất nên câu trả lời nhất quán; temperature cao tăng ngẫu nhiên nên dễ bịa",
+      "cau_chot_hieu": "Temperature thay đổi cái gì bên trong mô hình, và vì sao điều đó quan trọng với chatbot ngân hàng?",
       "tu_khoa_chot_hieu": ["xác suất", "xac suat", "nhất quán", "nhat quan", "ngẫu nhiên", "ngau nhien", "ổn định", "bịa"],
-      "nguong_lech_phan_tram": 0,
       "bank": {
         "M1": "tin rằng temperature cao thì mô hình thông minh hơn hoặc trả lời tốt hơn",
         "M2": "nhầm temperature với độ chính xác — tin rằng temperature cao thì chính xác hơn",
         "M3": "tin rằng temperature bằng 0 làm mô hình ngừng suy nghĩ, trả lời cứng nhắc như câu mẫu có sẵn",
-        "M4": "nhầm temperature với các tham số khác như max_tokens hoặc top_p, hoặc tin rằng nó ảnh hưởng tới chi phí",
+        "M4": "nhầm temperature với tham số khác như max_tokens hoặc top_p, hoặc tin rằng nó ảnh hưởng tới chi phí",
         "M5": "chọn đúng khoảng giá trị thấp nhưng lý do không nêu được vì sao"
       },
       "trich_dan_cho_phep": ["[T04-071]", "[T04-072]", "[T06-136]"],
       "trich_dan_mac_dinh": "[T04-072]",
       "nguon_mo_khoa": ["[T04-072]", "[T04-071]"]
+    },
+
+    {
+      "id": "agent-01",
+      "buoi": "Day 01 — Foundation",
+      "phan": "1.5",
+      "khai_niem": "AI Agent",
+      "tieu_de": "Thế nào thì gọi là agent",
+      "bang_chung": "849 lượt hỏi · 161 học viên — cụm lớn nhất của khoá",
+      "kieu": "chon",
+      "doan_van": "Một bạn trong nhóm khoe: \"Mình vừa viết cho ChatGPT một system prompt rất dài, dạy nó quy trình làm việc của công ty, cách xưng hô, cả các bước xử lý đơn hàng. Vậy là mình đã có một AI agent rồi.\"",
+      "cau_hoi_so": "Nhận định đó thiếu cái gì?",
+      "cau_hoi_ly_do": "Vì sao bạn chọn phương án đó?",
+      "lua_chon": [
+        {"id": "A", "text": "Không thiếu gì — một system prompt đủ tốt thì đã là agent"},
+        {"id": "B", "text": "Thiếu khả năng gọi công cụ và tự lập kế hoạch nhiều bước — agent phải làm được việc, không chỉ sinh văn bản"},
+        {"id": "C", "text": "Thiếu bước fine-tune lại mô hình trên dữ liệu của công ty"},
+        {"id": "D", "text": "Thiếu một mô hình lớn hơn — agent cần model mạnh hơn ChatGPT thường"}
+      ],
+      "su_that": {"dap_an_dung": "B", "giai_thich": "Một hệ thống agent gồm bốn phần: mô hình, quản lý ngữ cảnh, lập kế hoạch (planning), và công cụ (tool). System prompt chỉ tác động vào phần ngữ cảnh. Thiếu tool thì mô hình không chạm được vào thế giới bên ngoài — không đọc được đơn hàng thật, không gửi được email thật. Thiếu planning thì nó không tự chia việc thành nhiều bước và tự đi tiếp khi một bước thất bại."},
+      "co_che_dung": "agent cần gọi được tool để tác động ra thế giới bên ngoài và cần planning để tự đi nhiều bước, chứ không chỉ là một prompt khéo",
+      "cau_chot_hieu": "Một hệ thống agent gồm những phần nào, và phần nào khiến nó khác một con chatbot?",
+      "tu_khoa_chot_hieu": ["tool", "công cụ", "cong cu", "planning", "kế hoạch", "ke hoach", "nhiều bước", "nhieu buoc", "hành động"],
+      "bank": {
+        "M1": "tin rằng một prompt dài hoặc khéo là đủ để thành agent",
+        "M2": "tin rằng agent chỉ là mô hình lớn hơn hoặc thông minh hơn",
+        "M3": "tin rằng phải fine-tune mô hình mới thành agent",
+        "M4": "tin rằng agent tự học và tự nhớ vĩnh viễn sau mỗi lần sử dụng",
+        "M5": "chọn đúng phương án nhưng lý do không nêu được vai trò của tool và planning"
+      },
+      "trich_dan_cho_phep": ["[T04-073]", "[T05-105]", "[T05-115]", "[T04-051]"],
+      "trich_dan_mac_dinh": "[T04-073]",
+      "nguon_mo_khoa": ["[T04-073]", "[T05-105]"]
+    },
+
+    {
+      "id": "bai-toan-01",
+      "buoi": "Day 02 — Xác định bài toán",
+      "phan": "2.1",
+      "khai_niem": "Xác định bài toán",
+      "tieu_de": "Khi sếp đưa một yêu cầu mơ hồ",
+      "bang_chung": "67 lượt hỏi · 47 học viên",
+      "kieu": "chon",
+      "doan_van": "Sếp gọi bạn vào phòng và nói: \"Phòng chăm sóc khách hàng đang quá tải. Em làm cho anh một con AI chatbot đi, hai tuần nữa demo.\" Sếp nói xong thì đi họp, không có thêm thông tin gì.",
+      "cau_hoi_so": "Việc ĐẦU TIÊN bạn nên làm là gì?",
+      "cau_hoi_ly_do": "Vì sao bạn chọn phương án đó?",
+      "lua_chon": [
+        {"id": "A", "text": "Bắt tay chọn mô hình và dựng ngay một chatbot demo trong tuần này"},
+        {"id": "B", "text": "Đi tìm hiểu khách hàng đang hỏi những gì nhiều nhất và phòng CSKH đang tắc ở khâu nào"},
+        {"id": "C", "text": "Khảo sát xem các đối thủ cùng ngành đang dùng chatbot nào rồi làm theo"},
+        {"id": "D", "text": "Trả lời sếp rằng nên tuyển thêm người thay vì làm AI"}
+      ],
+      "su_that": {"dap_an_dung": "B", "giai_thich": "\"Làm một con chatbot\" là một GIẢI PHÁP, không phải bài toán. Bài toán thật nằm ở chỗ \"quá tải\" — mà quá tải có thể do quá nhiều câu hỏi trùng nhau, do quy trình tra cứu chậm, hoặc do thiếu người vào giờ cao điểm. Ba nguyên nhân đó dẫn tới ba giải pháp hoàn toàn khác nhau, và chỉ một trong ba cần đến chatbot. Việc của bạn là bóc yêu cầu mơ hồ thành vài phương án cụ thể rồi mang lại hỏi sếp: em hiểu ý anh là A, B hay C?"},
+      "co_che_dung": "phải xác định đúng vấn đề trước rồi mới chọn công nghệ; yêu cầu mơ hồ phải bóc thành phương án cụ thể rồi kiểm lại với người đặt đề bài",
+      "cau_chot_hieu": "Vì sao \"làm một chatbot\" chưa phải là một bài toán?",
+      "tu_khoa_chot_hieu": ["giải pháp", "giai phap", "vấn đề", "van de", "nguyên nhân", "nguyen nhan", "hỏi lại", "chưa rõ"],
+      "bank": {
+        "M1": "nhảy thẳng vào giải pháp — coi yêu cầu của sếp đã là đề bài rõ ràng",
+        "M2": "coi việc chọn công nghệ hoặc mô hình là bước đầu tiên",
+        "M3": "đi so sánh đối thủ thay vì hiểu vấn đề của chính tổ chức mình",
+        "M4": "từ chối hoặc né bài toán thay vì bóc tách nó ra",
+        "M5": "chọn đúng phương án nhưng lý do không nêu được vì sao phải hiểu vấn đề trước"
+      },
+      "trich_dan_cho_phep": ["[T01-003]", "[T01-004]", "[T05-115]"],
+      "trich_dan_mac_dinh": "[T01-004]",
+      "nguon_mo_khoa": ["[T01-004]", "[T01-003]"]
+    },
+
+    {
+      "id": "tu-dong-hoa-01",
+      "buoi": "Day 02 — Xác định bài toán",
+      "phan": "2.2",
+      "khai_niem": "Mức tự động hoá",
+      "tieu_de": "Để AI tự làm tới đâu",
+      "bang_chung": "12 lượt hỏi · 9 học viên — ít hỏi nhưng sai thì đắt",
+      "kieu": "chon",
+      "doan_van": "Bạn làm tính năng trả lời email khiếu nại của khách hàng ngân hàng về phí dịch vụ. Mỗi ngày có khoảng 200 email. Nếu trả lời sai số tiền phí, khách hàng có thể khiếu nại lên cơ quan quản lý và ngân hàng bị phạt.",
+      "cau_hoi_so": "Bạn chọn mức tự động hoá nào?",
+      "cau_hoi_ly_do": "Vì sao bạn chọn mức đó?",
+      "lua_chon": [
+        {"id": "A", "text": "AI tự soạn và tự gửi luôn, không cần ai duyệt — như vậy mới tiết kiệm được người"},
+        {"id": "B", "text": "AI soạn sẵn bản nháp kèm trích dẫn biểu phí, nhân viên đọc rồi bấm gửi"},
+        {"id": "C", "text": "Không dùng AI, viết quy tắc if-else cho từng loại phí"},
+        {"id": "D", "text": "AI chỉ gợi ý vài câu mẫu, nhân viên tự viết lại toàn bộ"}
+      ],
+      "su_that": {"dap_an_dung": "B", "giai_thich": "Mức tự động hoá chọn theo CHI PHÍ CỦA MỘT LẦN SAI, không theo mức độ hiện đại. Ở đây một câu trả lời sai có thể dẫn tới phạt cơ quan quản lý — quá đắt để AI tự gửi (A). Nhưng nếu bắt nhân viên viết lại từ đầu (D) thì gần như không tiết kiệm được gì. Quy tắc if-else (C) xử lý được các ca đơn giản nhưng gãy ngay khi khách hỏi vòng vo. B giữ được tốc độ mà vẫn có người chịu trách nhiệm cuối cùng."},
+      "co_che_dung": "mức tự động hoá chọn theo chi phí của một lần sai: sai càng đắt thì càng phải có người duyệt trước khi kết quả đi ra ngoài",
+      "cau_chot_hieu": "Điều gì quyết định nên để AI tự làm hay phải có người duyệt?",
+      "tu_khoa_chot_hieu": ["sai", "chi phí", "chi phi", "hậu quả", "hau qua", "người duyệt", "nguoi duyet", "rủi ro", "trách nhiệm"],
+      "bank": {
+        "M1": "chọn tự động hoàn toàn vì tin rằng càng tự động thì càng tốt, càng hiện đại",
+        "M2": "chọn mà không hề tính tới chuyện sai thì mất gì — bỏ qua chi phí của một lần sai",
+        "M3": "tin rằng đã làm sản phẩm AI thì phải dùng AI cho mọi khâu, bỏ qua việc quy tắc đơn giản đôi khi là đủ",
+        "M4": "chọn mức thấp nhất vì sợ AI, khiến tính năng gần như không tiết kiệm được gì",
+        "M5": "chọn đúng mức nhưng lý do không nêu được chi phí của một lần sai"
+      },
+      "trich_dan_cho_phep": ["[T02-035]", "[T02-036]", "[T02-037]"],
+      "trich_dan_mac_dinh": "[T02-035]",
+      "nguon_mo_khoa": ["[T02-036]", "[T02-037]"]
+    },
+
+    {
+      "id": "chi-so-01",
+      "buoi": "Day 02 — Xác định bài toán",
+      "phan": "2.3",
+      "khai_niem": "Chỉ số thành công",
+      "tieu_de": "Làm sao biết tính năng đã thành công",
+      "bang_chung": "85 lượt hỏi · 52 học viên",
+      "kieu": "chon",
+      "doan_van": "Nhóm bạn làm một tính năng tóm tắt bài giảng cho học viên: bấm một nút là có bản tóm tắt buổi học. Trưởng nhóm hỏi: \"Làm sao chúng ta biết tính năng này thành công?\"",
+      "cau_hoi_so": "Chỉ số nào dùng được?",
+      "cau_hoi_ly_do": "Vì sao bạn chọn chỉ số đó?",
+      "lua_chon": [
+        {"id": "A", "text": "Học viên khen tính năng hay, phản hồi tích cực trên Discord"},
+        {"id": "B", "text": "Bản tóm tắt chính xác, không bỏ sót ý chính nào"},
+        {"id": "C", "text": "Thời gian trung bình để ôn lại một buổi giảm từ 40 phút xuống dưới 15 phút"},
+        {"id": "D", "text": "Số lượt bấm nút tóm tắt tăng đều mỗi tuần"}
+      ],
+      "su_that": {"dap_an_dung": "C", "giai_thich": "Chỉ số dùng được phải đóng thành CON SỐ và gắn với công việc thật của người dùng. Lời khen (A) không đo được và ai cũng khen cho vui lòng. Độ chính xác của bản tóm tắt (B) là chỉ số của AI, không phải của người học — tóm tắt đúng mà không ai đọc thì vẫn thất bại. Số lượt bấm (D) tăng có thể vì tính năng khó dùng nên phải bấm lại nhiều lần. Chỉ C nói được điều người dùng thực sự nhận được, và có mốc trước–sau để so."},
+      "co_che_dung": "chỉ số phải đóng thành con số và đo kết quả của người dùng, không đo cảm nhận cũng không đo chất lượng kỹ thuật của AI",
+      "cau_chot_hieu": "Một chỉ số thành công cần có những gì thì mới dùng được?",
+      "tu_khoa_chot_hieu": ["con số", "con so", "đo", "trước", "sau", "người dùng", "nguoi dung", "thời gian", "mốc"],
+      "bank": {
+        "M1": "lấy lời khen hoặc cảm nhận làm chỉ số thành công",
+        "M2": "lấy chỉ số kỹ thuật của AI thay cho kết quả của người dùng",
+        "M3": "lấy chỉ số hoạt động như số lượt bấm — tăng chưa chắc đã là tốt",
+        "M4": "nêu được hướng đo nhưng không có con số và không có mốc trước sau",
+        "M5": "chọn đúng chỉ số nhưng lý do không nêu được vì sao nó đo đúng thứ cần đo"
+      },
+      "trich_dan_cho_phep": ["[T03-092]", "[T02-035]", "[T01-003]"],
+      "trich_dan_mac_dinh": "[T03-092]",
+      "nguon_mo_khoa": ["[T03-092]", "[T01-003]"]
     }
   ]
 }
