@@ -26,6 +26,17 @@ def index():
     return send_from_directory("web", "index.html")
 
 
+@app.get("/api/health")
+def health():
+    """Cho header hiển thị đang chạy model nào, qua nhà cung cấp nào."""
+    base = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+    return jsonify({
+        "model": os.environ.get("OPENAI_MODEL", "?"),
+        "provider": "OpenRouter" if "openrouter" in base else "OpenAI",
+        "co_key": bool(os.environ.get("OPENAI_API_KEY")),
+    })
+
+
 @app.get("/api/bai-tap")
 def bai_tap():
     st = su_that()

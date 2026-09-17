@@ -2,241 +2,496 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>VLearn FailFirst</title>
 <style>
-  :root{--bg:#f6f7f9;--card:#fff;--ink:#16181d;--mut:#6b7280;--line:#e5e7eb;--brand:#2f5bea;
-        --warnbg:#fef3c7;--okbg:#ecfdf5;--errbg:#fef2f2;--lock:#9ca3af}
+  :root{
+    --bg:#f7f8fa; --surface:#fff; --surface-2:#fbfcfd;
+    --ink:#101419; --ink-2:#4b5563; --ink-3:#8b95a3;
+    --line:#e3e7ec; --line-2:#cfd6de;
+    --brand:#2a4fd7; --brand-ink:#1b348f; --brand-soft:#eef2ff;
+    --ok:#0d7a4f; --ok-soft:#eafaf1; --ok-line:#a7e3c4;
+    --warn:#96620a; --warn-soft:#fff8e6; --warn-line:#f2d48a;
+    --dang:#b02a2a; --dang-soft:#fdf1f1; --dang-line:#f3bdbd;
+    --r:10px; --shadow:0 1px 2px rgba(16,20,25,.05), 0 8px 24px -16px rgba(16,20,25,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0e1116; --surface:#161b22; --surface-2:#1b212a;
+      --ink:#e9edf2; --ink-2:#a8b3c1; --ink-3:#6e7b8b;
+      --line:#262d38; --line-2:#333c49;
+      --brand:#7d9bff; --brand-ink:#b9c8ff; --brand-soft:#1a2340;
+      --ok:#5ed39b; --ok-soft:#10261c; --ok-line:#1f5e42;
+      --warn:#e8bb63; --warn-soft:#2a2110; --warn-line:#5e4a1c;
+      --dang:#f08a8a; --dang-soft:#2b1616; --dang-line:#5e2626;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.6);
+    }
+  }
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--bg);color:var(--ink);
-       font:15px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-  .bar{position:sticky;top:0;z-index:10;background:#0f172a;color:#fff;padding:8px 16px;
-       font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .bar b{background:#10b981;color:#06251a;padding:1px 7px;border-radius:4px;font-size:12px}
-  .wrap{max-width:780px;margin:0 auto;padding:20px 16px 60px}
-  .crumb{color:var(--mut);font-size:13px;margin-bottom:6px}
-  h1{font-size:21px;margin:0 0 16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
-  .locked{background:#f3f4f6;border-style:dashed;color:var(--lock);text-align:center;padding:26px}
-  .para{background:#fbfbfd;border:1px solid var(--line);border-left:3px solid var(--brand);
-        border-radius:6px;padding:12px;font-size:14px;color:#374151}
-  label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px}
-  input[type=number],textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font:inherit}
-  textarea{min-height:76px;resize:vertical}
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+       font:15px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased}
+
+  /* ---------- thanh trạng thái ---------- */
+  .topbar{position:sticky;top:0;z-index:20;background:var(--surface);
+          border-bottom:1px solid var(--line);
+          padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px}
+  .topbar-in{max-width:840px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .logo{font-weight:700;letter-spacing:-.01em;font-size:15px;display:flex;align-items:center;gap:8px}
+  .logo i{width:22px;height:22px;border-radius:6px;background:var(--brand);display:grid;
+          place-items:center;color:#fff;font-size:12px;font-style:normal;font-weight:700}
+  .pill{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:999px;
+        border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+  .pill.live{border-color:var(--ok-line);background:var(--ok-soft);color:var(--ok)}
+  .pill.dot::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+        background:currentColor;margin-right:6px;vertical-align:1px}
+  .spacer{margin-left:auto}
+
+  /* ---------- stepper ---------- */
+  .steps{max-width:840px;margin:0 auto;padding:14px 16px 0;display:flex;gap:6px}
+  .steps div{flex:1;font-size:11.5px;color:var(--ink-3);font-weight:600;
+             border-top:3px solid var(--line);padding-top:7px;transition:.2s}
+  .steps div.on{color:var(--brand);border-top-color:var(--brand)}
+  .steps div.done{color:var(--ok);border-top-color:var(--ok-line)}
+
+  .wrap{max-width:840px;margin:0 auto;padding:16px 16px 72px}
+  .eyebrow{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  h1{font-size:23px;line-height:1.25;letter-spacing:-.02em;margin:6px 0 18px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+        padding:20px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .card-hd{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .card-hd h2{font-size:15px;margin:0;letter-spacing:-.01em}
+  .card-hd .num{width:22px;height:22px;flex:none;border-radius:6px;background:var(--brand-soft);
+        color:var(--brand-ink);display:grid;place-items:center;font-size:12px;font-weight:700}
+
+  .lock{border:1px dashed var(--line-2);background:var(--surface-2);border-radius:var(--r);
+        padding:22px;text-align:center;margin-bottom:14px}
+  .lock svg{opacity:.5}
+  .lock b{display:block;margin:8px 0 3px;color:var(--ink)}
+  .lock span{font-size:13.5px;color:var(--ink-2)}
+
+  .passage{background:var(--surface-2);border:1px solid var(--line);
+           border-left:3px solid var(--brand);border-radius:8px;padding:14px;
+           font-size:14.5px;line-height:1.75;color:var(--ink-2)}
+  .passage-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-3);
+                margin-top:8px}
+
+  label{display:block;font-weight:650;margin:18px 0 6px;font-size:13.5px}
+  label .opt{font-weight:400;color:var(--ink-3)}
+  input[type=number],textarea{width:100%;padding:11px 12px;border:1px solid var(--line-2);
+        border-radius:8px;font:inherit;background:var(--surface);color:var(--ink);transition:.15s}
+  input[type=number]:focus,textarea:focus{outline:none;border-color:var(--brand);
+        box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+  textarea{min-height:84px;resize:vertical;line-height:1.6}
+  .hintrow{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-3);margin-top:5px}
+
+  .row{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px;align-items:center}
   button{padding:10px 16px;border-radius:8px;border:1px solid var(--brand);background:var(--brand);
-         color:#fff;font:inherit;font-weight:600;cursor:pointer}
-  button.ghost{background:#fff;color:var(--brand)}
-  button.quiet{background:#fff;color:var(--mut);border-color:var(--line);font-weight:500}
-  button:disabled{opacity:.55;cursor:wait}
-  .tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:5px;margin-bottom:8px}
-  .box{border-radius:8px;padding:13px;margin-top:12px;font-size:14px}
-  .box.warn{background:var(--warnbg);border:1px solid #fcd34d}
-  .box.ok{background:var(--okbg);border:1px solid #6ee7b7}
-  .box.err{background:var(--errbg);border:1px solid #fecaca}
-  .box.hint{background:#eff6ff;border:1px solid #bfdbfe}
-  .cite{font-size:13px;color:var(--mut);border-left:3px solid #cbd5e1;padding-left:10px;margin-top:10px}
-  .cite code{background:#eef2ff;color:#3730a3;padding:1px 5px;border-radius:4px;font-size:12px}
-  .step{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
-  .meta{font-size:12px;color:var(--mut);margin-top:10px;font-family:ui-monospace,Menlo,Consolas,monospace}
-  .spin{display:inline-block;width:14px;height:14px;border:2px solid #cbd5e1;border-top-color:var(--brand);
-        border-radius:50%;animation:s .7s linear infinite;vertical-align:-2px;margin-right:7px}
+         color:#fff;font:inherit;font-weight:650;cursor:pointer;transition:.15s}
+  button:hover{filter:brightness(1.07)}
+  button:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  button.ghost{background:transparent;color:var(--brand);border-color:var(--line-2)}
+  button.quiet{background:transparent;color:var(--ink-2);border-color:var(--line);font-weight:500}
+  button[disabled]{opacity:.5;cursor:not-allowed;filter:none}
+  kbd{font:600 11px ui-monospace,Consolas,monospace;border:1px solid var(--line-2);
+      border-bottom-width:2px;border-radius:4px;padding:1px 5px;color:var(--ink-3)}
+
+  .tag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;
+       padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);margin-bottom:12px}
+  .tag.t-err{background:var(--brand-soft);color:var(--brand-ink);border-color:transparent}
+  .tag.t-ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok-line)}
+  .tag.t-warn{background:var(--warn-soft);color:var(--warn);border-color:var(--warn-line)}
+  .tag.t-dang{background:var(--dang-soft);color:var(--dang);border-color:var(--dang-line)}
+
+  .note{border-radius:8px;padding:14px;margin-top:12px;font-size:14px;border:1px solid}
+  .note.info{background:var(--brand-soft);border-color:transparent;color:var(--ink)}
+  .note.ok{background:var(--ok-soft);border-color:var(--ok-line)}
+  .note.warn{background:var(--warn-soft);border-color:var(--warn-line)}
+  .note.dang{background:var(--dang-soft);border-color:var(--dang-line)}
+  .note b:first-child{display:block;margin-bottom:4px}
+
+  .cite{font-size:13px;color:var(--ink-2);border-left:2px solid var(--line-2);
+        padding:2px 0 2px 11px;margin-top:12px}
+  .cite code{font:600 12px ui-monospace,Consolas,monospace;background:var(--brand-soft);
+        color:var(--brand-ink);padding:1.5px 6px;border-radius:4px}
+
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding-top:12px;
+        border-top:1px solid var(--line)}
+  .meta span{font:500 11.5px ui-monospace,Consolas,monospace;color:var(--ink-3);
+        border:1px solid var(--line);border-radius:5px;padding:2px 7px}
+  .meta span.flag{color:var(--dang);border-color:var(--dang-line);background:var(--dang-soft)}
+
+  .conf{display:inline-flex;align-items:center;gap:6px}
+  .conf-bar{width:46px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+  .conf-bar i{display:block;height:100%;background:var(--ok)}
+
+  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:12px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left}
+  th{background:var(--surface-2);font-size:12.5px;color:var(--ink-2);font-weight:650}
+  td code{font:600 12px ui-monospace,Consolas,monospace}
+  .big{font-size:17px;font-weight:700}
+
+  details{border:1px solid var(--line);border-radius:8px;margin-top:14px;background:var(--surface-2)}
+  summary{padding:11px 14px;cursor:pointer;font-weight:650;font-size:13.5px;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";margin-right:8px;color:var(--ink-3);display:inline-block;transition:.15s}
+  details[open] summary::before{transform:rotate(90deg)}
+  details .in{padding:0 14px 14px}
+  .log{margin:0;padding-left:18px;font-size:13px;color:var(--ink-2)}
+  .log li{margin:5px 0}
+  .log li b{color:var(--ink)}
+
+  .ladder{display:flex;gap:6px;margin-top:12px}
+  .ladder i{flex:1;height:4px;border-radius:2px;background:var(--line);font-style:normal}
+  .ladder i.on{background:var(--brand)}
+
+  .spin{display:inline-block;width:15px;height:15px;border:2px solid var(--line-2);
+        border-top-color:var(--brand);border-radius:50%;animation:s .7s linear infinite;
+        vertical-align:-3px;margin-right:9px}
   @keyframes s{to{transform:rotate(360deg)}}
-  table{border-collapse:collapse;width:100%;font-size:14px;margin-top:10px}
-  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left}
-  th{background:#f9fafb}
+  .skel{height:13px;border-radius:4px;background:linear-gradient(90deg,var(--line),var(--surface-2),var(--line));
+        background-size:200% 100%;animation:sk 1.2s linear infinite;margin:8px 0}
+  @keyframes sk{to{background-position:-200% 0}}
   [hidden]{display:none!important}
+  @media (max-width:560px){ .card{padding:16px} h1{font-size:20px} .steps div{font-size:10.5px} }
 </style>
 </head>
 <body>
 
-<div class="bar">
-  <b>AI THẬT</b>
-  <span id="barinfo">Chẩn đoán gọi OpenAI · số token do tiktoken đếm thật</span>
-</div>
+<header class="topbar">
+  <div class="topbar-in">
+    <span class="logo"><i>FF</i> VLearn FailFirst</span>
+    <span class="pill">Day 01 · Token</span>
+    <span class="spacer"></span>
+    <span class="pill live dot" id="pModel">đang kết nối…</span>
+    <span class="pill" id="pTik">tiktoken thật</span>
+  </div>
+</header>
 
-<div class="wrap">
-  <div class="crumb">VLearn · Day 01 — Foundation: cách LLM hoạt động</div>
+<nav class="steps" id="steps" aria-label="Tiến trình">
+  <div class="on">1 · Dự đoán</div>
+  <div>2 · Chẩn đoán</div>
+  <div>3 · Chốt hiểu</div>
+  <div>4 · Lời giảng</div>
+</nav>
+
+<main class="wrap">
+  <div class="eyebrow">Foundation — cách LLM hoạt động</div>
   <h1>3.2 — Token là gì</h1>
 
+  <!-- ============ BƯỚC 1 ============ -->
   <section id="s1">
-    <div class="card locked">
-      <div style="font-size:28px">&#128274;</div>
-      <div><b>Lời giảng phần này đang khoá</b></div>
-      <div style="font-size:13px">Trả lời bài dự đoán bên dưới trước đã — sai cũng không sao, đó là chủ đích.</div>
+    <div class="lock">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+      </svg>
+      <b>Lời giảng phần này đang khoá</b>
+      <span>Trả lời bài dự đoán bên dưới trước đã. Sai cũng không sao — đó là chủ đích của bài.</span>
     </div>
 
     <div class="card">
-      <div class="step">Bài dự đoán · trước khi học</div>
-      <p style="margin:0 0 10px"><b>Đoạn tiếng Việt dưới đây có <span id="ntieng">…</span> tiếng.</b></p>
-      <div class="para" id="para">đang tải…</div>
+      <div class="card-hd"><span class="num">1</span><h2>Bài dự đoán</h2></div>
 
-      <label for="guess">Theo bạn <code>tiktoken</code> (<code>o200k_base</code>) đếm ra bao nhiêu token?</label>
-      <input type="number" id="guess" placeholder="ví dụ: 99" min="1">
+      <div class="passage" id="para"><div class="skel" style="width:96%"></div>
+        <div class="skel" style="width:99%"></div><div class="skel" style="width:78%"></div></div>
+      <div class="passage-meta">
+        <span>Số tiếng: <b id="ntieng">…</b></span>
+        <span>Encoding: <b>o200k_base</b></span>
+      </div>
 
-      <label for="why">Vì sao bạn nghĩ vậy? <span style="font-weight:400;color:var(--mut)">(bắt buộc — đây là chỗ được chấm)</span></label>
-      <textarea id="why" placeholder="Viết suy nghĩ thật của bạn."></textarea>
+      <label for="guess">Bạn đoán <code>tiktoken</code> đếm đoạn trên ra bao nhiêu token?</label>
+      <input type="number" id="guess" min="1" placeholder="nhập một số" inputmode="numeric">
+
+      <label for="why">Vì sao bạn nghĩ vậy? <span class="opt">— đây là phần được chấm, không phải con số</span></label>
+      <textarea id="why" placeholder="Viết đúng suy nghĩ thật của bạn, kể cả khi chưa chắc."></textarea>
+      <div class="hintrow"><span id="cc">0 ký tự</span><span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> để nộp</span></div>
 
       <div class="row">
         <button id="submit">Nộp dự đoán</button>
         <button class="quiet" id="shortcut">Cho đáp án luôn đi</button>
       </div>
-      <div class="box err" id="refuse" hidden></div>
+      <div class="note dang" id="refuse" hidden></div>
     </div>
   </section>
 
+  <!-- ============ BƯỚC 2 ============ -->
   <section id="s2" hidden>
-    <div class="card"><span class="spin"></span> Đang đối chiếu câu trả lời của bạn với tài liệu bài giảng…</div>
+    <div class="card">
+      <span class="spin"></span><b>Đang đối chiếu câu trả lời của bạn với tài liệu bài giảng</b>
+      <div class="skel" style="width:70%;margin-top:14px"></div>
+      <div class="skel" style="width:88%"></div>
+    </div>
   </section>
 
   <section id="s3" hidden>
-    <div class="card">
-      <div id="diagTag" class="tag"></div>
-      <div id="diagBody"></div>
-      <div class="row" id="diagActions"></div>
-      <div class="meta" id="diagMeta"></div>
+    <div class="card" aria-live="polite">
+      <div class="card-hd"><span class="num">2</span><h2>Kết quả chẩn đoán</h2></div>
+      <div id="dTag"></div>
+      <div id="dBody"></div>
+      <div class="ladder" id="dLadder" hidden><i class="on"></i><i></i><i></i></div>
+      <div class="row" id="dAct"></div>
+      <div class="meta" id="dMeta"></div>
     </div>
   </section>
 
+  <!-- ============ BƯỚC 3 ============ -->
   <section id="s4" hidden>
     <div class="card">
-      <div class="step">Chốt hiểu</div>
-      <p style="margin:0 0 4px"><b>Giải thích lại bằng lời của bạn:</b> vì sao số token khác số tiếng?</p>
-      <textarea id="explain" placeholder="2–3 câu là đủ."></textarea>
-      <div class="row"><button id="checkExplain">Gửi</button></div>
-      <div id="explainOut"></div>
+      <div class="card-hd"><span class="num">3</span><h2>Chốt hiểu</h2></div>
+      <p style="margin:0 0 2px"><b>Giải thích lại bằng lời của bạn:</b> vì sao số token khác số tiếng?</p>
+      <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Hai, ba câu là đủ. Nói được cơ chế, không chỉ nói kết quả.</p>
+      <textarea id="explain" style="margin-top:12px" placeholder="Tokenizer cắt theo…"></textarea>
+      <div class="row"><button id="checkExplain">Gửi</button>
+        <button class="quiet" id="backDiag">Xem lại chẩn đoán</button></div>
+      <div id="explainOut" aria-live="polite"></div>
     </div>
   </section>
 
+  <!-- ============ BƯỚC 4 ============ -->
   <section id="s5" hidden>
     <div class="card">
-      <div class="box ok"><b>&#9989; Mở khoá lời giảng phần 3.2</b></div>
-      <div id="suthat"></div>
+      <div class="card-hd"><span class="num">4</span><h2>Mở khoá lời giảng</h2></div>
+      <div class="note ok"><b>Xong phần dự đoán.</b>
+        Giờ bạn xem phần giảng với câu hỏi đã có trong đầu — đó là toàn bộ mục đích của bài tập này.</div>
+
+      <div id="truth"></div>
+
       <div class="cite">
         <code>[T06-134]</code> "Đơn vị cơ bản của LLM là cái nãy giờ chúng ta gọi là token…"<br>
         <code>[T06-155]</code> "Cách tính giá: tính cả input token cộng output token thì ra total cost…"
       </div>
-      <label for="thu">Tự thử đi — dán đoạn bất kỳ, tiktoken đếm thật:</label>
-      <textarea id="thu" placeholder="Dán tiếng Việt hoặc tiếng Anh vào đây."></textarea>
-      <div class="row"><button class="ghost" id="dem">Đếm</button><button class="quiet" id="again">Chạy lại từ đầu</button></div>
+
+      <label for="thu">Tự thử — dán đoạn bất kỳ, <code>tiktoken</code> đếm thật:</label>
+      <textarea id="thu" placeholder="Dán tiếng Việt hoặc tiếng Anh để so."></textarea>
+      <div class="row"><button class="ghost" id="dem">Đếm token</button></div>
       <div id="demOut"></div>
+
+      <details id="logBox">
+        <summary>Log phiên gửi giảng viên</summary>
+        <div class="in">
+          <p style="margin:0 0 8px;font-size:13px;color:var(--ink-3)">
+            Chỉ giảng viên thấy. Không công khai cho lớp, không tính vào điểm.</p>
+          <ol class="log" id="logList"></ol>
+        </div>
+      </details>
+
+      <div class="row"><button class="quiet" id="again">Làm lại từ đầu</button></div>
     </div>
   </section>
-</div>
+</main>
 
 <script>
 var NHAN = {
-  M1:'M1 — token = từ/tiếng', M2:'M2 — token = ký tự',
-  M3:'M3 — nghĩ mọi model đếm token như nhau', M4:'M4 — nhầm token vào với token ra',
-  M5:'M5 — số đúng nhưng đang đoán', DUNG:'Đúng — có nêu được cơ chế',
-  LOW:'Chưa đủ để chẩn đoán', OUT:'Lỗi ngoài bank', XIN:'Xin đáp án'
+  M1:{t:'M1 · token = từ hoặc tiếng',       c:'t-err'},
+  M2:{t:'M2 · token = ký tự',               c:'t-err'},
+  M3:{t:'M3 · coi số token cố định mọi model', c:'t-err'},
+  M4:{t:'M4 · nhầm token vào với token ra', c:'t-err'},
+  M5:{t:'M5 · số đúng nhưng đang đoán',     c:'t-err'},
+  DUNG:{t:'Đúng cơ chế',                    c:'t-ok'},
+  LOW:{t:'Chưa đủ căn cứ để chẩn đoán',     c:'t-warn'},
+  OUT:{t:'Lỗi ngoài bộ nhãn',               c:'t-warn'},
+  XIN:{t:'Đang xin đáp án',                 c:'t-dang'}
 };
-var lan = 0;
-function $(id){ return document.getElementById(id); }
-function show(id){ ['s1','s2','s3','s4','s5'].forEach(function(x){ $(x).hidden = (x!==id); }); }
+var bac = 1, log = [];
+function $(i){ return document.getElementById(i); }
+function show(id){
+  ['s1','s2','s3','s4','s5'].forEach(function(x){ $(x).hidden = (x !== id); });
+  var i = {s1:0,s2:1,s3:1,s4:2,s5:3}[id], d = $('steps').children;
+  for (var k = 0; k < 4; k++){
+    d[k].className = k < i ? 'done' : (k === i ? 'on' : '');
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function ghi(t){ log.push(t); }
+
+fetch('/api/health').then(function(r){ return r.json(); }).then(function(d){
+  $('pModel').textContent = d.provider + ' · ' + d.model;
+}).catch(function(){ $('pModel').textContent = 'không kết nối được'; $('pModel').className = 'pill'; });
 
 fetch('/api/bai-tap').then(function(r){ return r.json(); }).then(function(d){
   $('para').textContent = d.doan_van;
   $('ntieng').textContent = d.n_tieng;
 });
 
+$('why').addEventListener('input', function(){
+  $('cc').textContent = this.value.length + ' ký tự';
+});
+document.addEventListener('keydown', function(e){
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !$('s1').hidden) $('submit').click();
+});
+
 $('submit').onclick = function(){
   var so = $('guess').value, vi = $('why').value;
-  if (!so && !vi.trim()){ alert('Điền số hoặc lý do đã.'); return; }
+  if (!so && !vi.trim()){ $('why').focus(); return; }
+  this.disabled = true;
   show('s2');
   fetch('/api/chan-doan', {method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({so: so ? parseInt(so,10) : null, ly_do: vi})})
-  .then(function(r){ return r.json(); })
-  .then(ve)
-  .catch(function(e){
-    show('s3');
-    $('diagTag').textContent = 'LỖI KẾT NỐI';
-    $('diagBody').innerHTML = '<div class="box err">Không gọi được API: ' + e + '</div>';
-  });
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(ve)
+    .catch(function(e){
+      show('s3');
+      $('dTag').innerHTML = '<span class="tag t-dang">Không gọi được hệ thống</span>';
+      $('dBody').innerHTML = '<div class="note dang"><b>Lỗi kết nối</b>' + e +
+        '<br>Kiểm tra server còn chạy và <code>.env</code> đã có key chưa.</div>';
+      $('dAct').innerHTML = '<button id="retry">Thử lại</button>';
+      $('retry').onclick = function(){ show('s1'); $('submit').disabled = false; };
+    });
 };
 
 function ve(d){
   show('s3');
-  var tag = $('diagTag'), body = $('diagBody'), act = $('diagActions');
-  tag.textContent = NHAN[d.nhan] || d.nhan;
-  act.innerHTML = '';
+  $('submit').disabled = false;
+  var n = NHAN[d.nhan] || {t:d.nhan, c:'t-warn'};
+  $('dTag').innerHTML = '<span class="tag ' + n.c + '">' + n.t + '</span>';
+  var body = '', act = '', ladder = false;
 
   if (d.nhan === 'LOW'){
-    tag.style.background='#fef3c7'; tag.style.color='#92400e';
-    body.innerHTML = '<div class="box warn"><b>Chưa đủ căn cứ để chẩn đoán</b><br>' + d.chan_doan +
-      '<br><br><b>' + d.goi_y + '</b></div>';
+    body = '<div class="note warn"><b>Mình chưa xếp được câu trả lời của bạn vào lỗi nào</b>' +
+      d.chan_doan + ' Đoán bừa một nhãn rồi dạy theo nhãn đó thì bạn sẽ đi sửa nhầm chỗ, ' +
+      'nên mình hỏi lại một câu thôi:<br><br><b>' + d.goi_y + '</b></div>';
+    act = '<button id="back">Trả lời lại</button>';
   } else if (d.nhan === 'OUT'){
-    tag.style.background='#fef2f2'; tag.style.color='#991b1b';
-    body.innerHTML = '<div class="box err"><b>Chưa xếp được lý do của bạn vào nhóm lỗi nào</b><br>' +
-      d.chan_doan + ' Câu trả lời được ghi lại cho giảng viên xem.<br><br><b>' + d.goi_y + '</b></div>';
+    body = '<div class="note warn"><b>Lý do của bạn không thuộc nhóm lỗi nào mình đang có</b>' +
+      d.chan_doan + ' Mình không bịa ra một chẩn đoán cho có — câu trả lời này được ghi lại để ' +
+      'giảng viên xem.<br><br><b>' + d.goi_y + '</b></div>';
+    act = '<button id="back">Thử lại</button>';
   } else if (d.nhan === 'XIN'){
-    tag.style.background='#fef2f2'; tag.style.color='#991b1b';
-    body.innerHTML = '<div class="box err"><b>Mình không đưa đáp án ở bước này.</b><br>' + d.chan_doan +
+    body = '<div class="note dang"><b>Mình không đưa đáp án ở bước này</b>' + d.chan_doan +
       '<br><br><b>' + d.goi_y + '</b></div>';
+    act = '<button id="back">Quay lại làm bài</button>';
   } else if (d.nhan === 'DUNG'){
-    tag.style.background='#ecfdf5'; tag.style.color='#065f46';
-    body.innerHTML = '<div class="box ok"><b>' + d.chan_doan + '</b><br><br>' + d.goi_y + '</div>';
-    act.innerHTML = '<button id="go">Sang bước chốt hiểu</button>';
+    body = '<div class="note ok"><b>' + d.chan_doan + '</b>' + d.goi_y + '</div>';
+    act = '<button id="go">Sang bước chốt hiểu</button>';
   } else {
-    tag.style.background='#eef2ff'; tag.style.color='#3730a3';
-    body.innerHTML = '<p style="margin:0 0 4px"><b>' + d.chan_doan + '</b></p>' +
-      '<div class="box hint"><b>Gợi ý (bậc ' + (lan+1) + '/3) — không có đáp án:</b><br>' + d.goi_y + '</div>';
-    act.innerHTML = '<button id="go">Tôi sửa lại</button><button class="quiet" id="back">Trả lời lại từ đầu</button>';
+    body = '<p style="margin:0 0 2px"><b>' + d.chan_doan + '</b></p>' +
+      '<div class="note info"><b>Gợi ý bậc ' + bac + '/3 — không có đáp án</b>' + d.goi_y + '</div>';
+    act = '<button id="go">Tôi sửa lại</button>' +
+          '<button class="ghost" id="wrong">Chẩn đoán sai rồi</button>' +
+          '<button class="quiet" id="stuck">Vẫn chưa hiểu</button>';
+    ladder = true;
   }
-  if (!act.innerHTML) act.innerHTML = '<button class="quiet" id="back">Trả lời lại</button>';
 
-  body.innerHTML += '<div class="cite">Đối chiếu: <code>' + (d.trich_dan||'') + '</code></div>';
-  var w = (d.canh_bao||[]).length ? ' · hậu kiểm chặn: ' + d.canh_bao.join(',') : '';
-  $('diagMeta').textContent = 'model ' + (d._meta ? d._meta.model : '?') +
-    ' · ' + (d._meta ? d._meta.ms : '?') + 'ms · tin cậy ' + (d.do_tin!=null?d.do_tin:'?') + w;
+  $('dBody').innerHTML = body +
+    (d.trich_dan ? '<div class="cite">Đối chiếu transcript: <code>' + d.trich_dan + '</code></div>' : '');
+  $('dAct').innerHTML = act;
+  $('dLadder').hidden = !ladder;
+  if (ladder){
+    var L = $('dLadder').children;
+    for (var i = 0; i < 3; i++) L[i].className = i < bac ? 'on' : '';
+  }
 
-  if ($('go')) $('go').onclick = function(){ lan++; show('s4'); };
+  var m = d._meta || {}, pct = Math.round((d.do_tin || 0) * 100);
+  var html = '<span>' + (m.model || '?') + '</span><span>' + (m.ms || '?') + ' ms</span>' +
+    '<span class="conf">tin cậy ' + pct + '%<span class="conf-bar"><i style="width:' + pct + '%"></i></span></span>';
+  (d.canh_bao || []).forEach(function(w){ html += '<span class="flag">hậu kiểm: ' + w + '</span>'; });
+  if (d.nhan_raw && d.nhan_raw !== d.nhan) html += '<span class="flag">nhãn thô: ' + d.nhan_raw + '</span>';
+  $('dMeta').innerHTML = html;
+
+  ghi('<b>' + n.t + '</b> — ' + d.chan_doan + ' (tin cậy ' + pct + '%, ' + (m.model || '') + ')');
+
+  if ($('go')) $('go').onclick = function(){ show('s4'); };
   if ($('back')) $('back').onclick = function(){ show('s1'); };
+  if ($('wrong')) $('wrong').onclick = function(){
+    $('dTag').innerHTML = '<span class="tag t-ok">Đã huỷ nhãn</span>';
+    $('dBody').innerHTML = '<div class="note ok"><b>Mình xếp sai nhãn cho bạn.</b>' +
+      'Bỏ nhãn <code>' + d.nhan + '</code>, không bảo lưu. Nói giúp mình một câu: bạn đang so số ' +
+      'token với cái gì — số tiếng, số ký tự, hay giá tiền một lần gọi?</div>';
+    $('dAct').innerHTML = '<button id="back2">Trả lời lại</button>';
+    $('dLadder').hidden = true;
+    ghi('<b>Correction</b> — học viên báo chẩn đoán sai, hệ thống huỷ nhãn ' + d.nhan + ', không bảo lưu.');
+    $('back2').onclick = function(){ show('s1'); };
+  };
+  if ($('stuck')) $('stuck').onclick = function(){
+    bac++;
+    if (bac === 2){
+      $('dBody').innerHTML = '<p style="margin:0 0 2px"><b>' + d.chan_doan + '</b></p>' +
+        '<div class="note info"><b>Bậc 2/3 — giải thích</b>' +
+        'Tokenizer cắt theo cụm ký tự hay gặp trong dữ liệu huấn luyện, không cắt theo tiếng. ' +
+        'Dữ liệu đó phần lớn là tiếng Anh, nên một tiếng tiếng Việt có dấu thường bị cắt làm nhiều mảnh. ' +
+        'Vì vậy số token của đoạn tiếng Việt lớn hơn số tiếng.</div>' +
+        '<div class="cite">Đối chiếu transcript: <code>[T06-136]</code></div>';
+      $('dAct').innerHTML = '<button id="go2">Tôi hiểu rồi, sửa lại</button>' +
+        '<button class="quiet" id="stuck2">Vẫn chưa hiểu</button>';
+      var L2 = $('dLadder').children; L2[1].className = 'on';
+      ghi('<b>Bậc 2</b> — học viên vẫn kẹt, hệ thống nâng lên mức giải thích.');
+      $('go2').onclick = function(){ show('s4'); };
+      $('stuck2').onclick = function(){
+        ghi('<b>Bậc 3</b> — kẹt qua hai bậc, hệ thống mở lời giảng đầy đủ thay vì để học viên bỏ cuộc.');
+        moKhoa();
+      };
+    }
+  };
 }
 
 $('shortcut').onclick = function(){
   var r = $('refuse'); r.hidden = false;
-  r.innerHTML = '<b>Mình không đưa đáp án ở bước này.</b><br>' +
+  r.innerHTML = '<b>Mình không đưa đáp án ở bước này</b>' +
     'Bài này chấm chỗ bạn nghĩ sai — biết đáp án trước thì không còn gì để chấm. ' +
-    'Đổi lại: <b>một tiếng tiếng Việt có dấu bị cắt làm mấy mảnh, so với một từ tiếng Anh?</b>';
+    'Đổi lại mình thu hẹp giúp bạn: <b>một tiếng tiếng Việt có dấu bị cắt làm mấy mảnh, ' +
+    'so với một từ tiếng Anh?</b> Trả lời được câu đó là bạn đoán được con số.';
+  ghi('<b>Xin đáp án</b> — học viên bấm "cho đáp án luôn", hệ thống từ chối và đổi bằng câu hỏi thu hẹp.');
+  $('why').focus();
 };
+
+$('backDiag').onclick = function(){ show('s3'); };
 
 $('checkExplain').onclick = function(){
   var t = $('explain').value.toLowerCase(), out = $('explainOut');
   var dat = t.length > 25 && /cắt|mảnh|cụm|tiếng anh|có dấu|không theo t/.test(t);
   if (dat){
-    out.innerHTML = '<div class="box ok"><b>Đạt.</b> Bạn nêu được cơ chế, không chỉ nêu kết quả.</div>';
-    setTimeout(moKhoa, 600);
+    out.innerHTML = '<div class="note ok"><b>Đạt</b>Bạn nêu được cơ chế, không chỉ nêu kết quả.</div>';
+    ghi('<b>Chốt hiểu: ĐẠT</b> — học viên tự giải thích lại đúng cơ chế, không cần mở lời giảng đầy đủ.');
+    setTimeout(moKhoa, 700);
   } else {
-    out.innerHTML = '<div class="box warn"><b>Chưa đủ.</b> Bạn mới nói kết quả, chưa nói cơ chế. ' +
-      'Tokenizer cắt theo <i>cái gì</i>, nếu không phải theo tiếng?</div>';
+    out.innerHTML = '<div class="note warn"><b>Chưa đủ</b>Bạn mới nói kết quả, chưa nói cơ chế. ' +
+      'Một câu thôi: tokenizer cắt theo <i>cái gì</i>, nếu không phải theo tiếng?</div>';
+    ghi('<b>Chốt hiểu: CHƯA ĐẠT</b> — hệ thống hỏi ngược đúng chỗ còn hổng thay vì cho qua.');
   }
 };
 
 function moKhoa(){
   fetch('/api/mo-khoa', {method:'POST'}).then(function(r){ return r.json(); }).then(function(d){
-    $('suthat').innerHTML = '<p style="margin:14px 0 0"><b>Số thật, tiktoken vừa đếm:</b></p>' +
-      '<table><tr><th>Cách đếm</th><th>Kết quả</th><th>So với ' + d.n_tieng + ' tiếng</th></tr>' +
-      '<tr><td><code>o200k_base</code> (GPT-4o)</td><td><b>' + d.o200k_base + '</b></td><td>' + d.ti_le_o200k + '×</td></tr>' +
-      '<tr><td><code>cl100k_base</code> (GPT-4/3.5)</td><td><b>' + d.cl100k_base + '</b></td><td>' + d.ti_le_cl100k + '×</td></tr></table>' +
-      '<div class="box hint">Cùng một đoạn, hai tokenizer chênh nhau <b>' +
-      (d.cl100k_base/d.o200k_base).toFixed(2) + ' lần</b>. Đây là chỗ tính nhầm tiền API.</div>';
+    $('truth').innerHTML =
+      '<p style="margin:16px 0 0"><b>Số thật — <code>tiktoken</code> vừa đếm, không phải AI đoán:</b></p>' +
+      '<table><thead><tr><th>Tokenizer</th><th>Số token</th><th>So với ' + d.n_tieng +
+      ' tiếng</th></tr></thead><tbody>' +
+      '<tr><td><code>o200k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4o, 4.1</span></td>' +
+      '<td class="big">' + d.o200k_base + '</td><td>' + d.ti_le_o200k + '×</td></tr>' +
+      '<tr><td><code>cl100k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4, 3.5</span></td>' +
+      '<td class="big">' + d.cl100k_base + '</td><td>' + d.ti_le_cl100k + '×</td></tr>' +
+      '</tbody></table>' +
+      '<div class="note info"><b>Đây là chỗ tính nhầm tiền thật</b>Cùng một đoạn văn, hai tokenizer chênh nhau <b>' +
+      (d.cl100k_base / d.o200k_base).toFixed(2) + ' lần</b>. Ước lượng chi phí theo tokenizer sai là sai ' +
+      'ngay từ đầu.</div>';
+    var ol = $('logList'); ol.innerHTML = '';
+    log.forEach(function(x){ var li = document.createElement('li'); li.innerHTML = x; ol.appendChild(li); });
     show('s5');
   });
 }
 
 $('dem').onclick = function(){
+  var t = $('thu').value;
+  if (!t.trim()) return;
   fetch('/api/dem', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({text: $('thu').value})})
-  .then(function(r){ return r.json(); }).then(function(d){
-    $('demOut').innerHTML = '<div class="box hint">' + d.n_tieng + ' tiếng → <b>' + d.o200k_base +
-      '</b> token (o200k) · <b>' + d.cl100k_base + '</b> token (cl100k)</div>';
-  });
+    body: JSON.stringify({text: t})})
+    .then(function(r){ return r.json(); }).then(function(d){
+      $('demOut').innerHTML = '<div class="note info"><b>' + d.n_tieng + ' tiếng</b>' +
+        '<code>o200k_base</code> → <b>' + d.o200k_base + '</b> token (' +
+        (d.o200k_base / Math.max(d.n_tieng,1)).toFixed(2) + '×) · ' +
+        '<code>cl100k_base</code> → <b>' + d.cl100k_base + '</b> token (' +
+        (d.cl100k_base / Math.max(d.n_tieng,1)).toFixed(2) + '×)</div>';
+    });
 };
 
 $('again').onclick = function(){
-  lan = 0; $('guess').value=''; $('why').value=''; $('explain').value='';
-  $('explainOut').innerHTML=''; $('refuse').hidden=true; show('s1');
+  bac = 1; log = [];
+  ['guess','why','explain','thu'].forEach(function(i){ $(i).value = ''; });
+  $('explainOut').innerHTML = ''; $('demOut').innerHTML = '';
+  $('refuse').hidden = true; $('cc').textContent = '0 ký tự';
+  show('s1');
 };
 </script>
 </body>

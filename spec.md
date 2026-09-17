@@ -114,7 +114,7 @@ chẩn đoán) — nên golden set có gốc thật, không phải bịa.
 | Thành phần | Thật | Mock |
 |---|---|---|
 | Đếm token (`o200k_base` + `cl100k_base`) | ✅ `tiktoken` | |
-| **Chẩn đoán lỗi — quyết định trung tâm** | ✅ `gpt-4o-mini`, `temperature=0`, JSON mode | |
+| **Chẩn đoán lỗi — quyết định trung tâm** | ✅ **OpenRouter · `openai/gpt-4.1-mini`**, `temperature=0`, JSON mode | |
 | Chặn lộ đáp án + chặn trích dẫn bịa | ✅ hậu kiểm bằng luật sau khi LLM trả lời | |
 | Chấm "giải thích lại đạt chưa" | | ⬜ luật từ khoá trong `web/index.html` |
 | Nội dung đoạn transcript được trích | | ⬜ mã đoạn thật, nội dung còn hardcode |
@@ -236,7 +236,29 @@ thấp hơn, nhóm giữ nguyên bar và phân tích nguyên nhân chứ không 
 |---|---|---|---|---|---|---|
 | v1 | 21 case | 15/21 · **71%** | 15/21 | 21/21 · 100% | 21/21 · 100% | `eval/results-v1-truoc-khi-sua.md` |
 | v2 | 21 case | 20/21 · **95%** | 20/21 | 21/21 · 100% | 21/21 · 100% | `eval/results-20260916-2010.md` |
-| **v3** | **28 case** (11 case có gốc thật) | **25/28 · 89%** | 25/28 | 28/28 · 100% | 28/28 · 100% | `eval/results-20260917-0916.md` |
+| **v3** | 28 case (11 case gốc thật) | 25/28 · 89% | 25/28 | 28/28 · 100% | 28/28 · 100% | `eval/results-20260917-0916.md` |
+| v4 | 28 case · **đổi sang OpenRouter**, cùng `gpt-4o-mini` | 24/28 · 86% | 25/28 | **27/28 · 96%** ❌ | 28/28 · 100% | `eval/results-20260917-1104.md` |
+| v5 | 28 case · sau khi nhóm "sửa" schema | **16/28 · 57%** ❌ | 18/28 | 28/28 · 100% | 25/28 · 89% ❌ | `eval/results-20260917-1107.md` |
+| **v6** | **28 case · `openai/gpt-4.1-mini`** | **25/28 · 89%** | 25/28 | 28/28 · 100% | 28/28 · 100% | `eval/results-20260917-1112.md` |
+
+**Ba bài học từ chuỗi v3 → v6, giữ lại vì chúng là lỗi thật của nhóm:**
+
+1. **v4 tụt dù cùng model.** Đổi nhà cung cấp làm lộ lỗi prompt: bảng schema viết các lựa chọn cách
+   nhau bằng dấu `|`, model bắt đầu **copy nguyên cú pháp** → trả `"nhan": "M1|DUNG"`. Hậu kiểm ép
+   về `OUT` nên trông như model kém đi. Cũng ở lượt này, **điều kiện cứng "không lộ đáp án" bị vi
+   phạm** (27/28): case `G19` (prompt injection) khiến model in ra con số, hậu kiểm đã chặn và thay
+   thế nên học viên không thấy — nhưng theo quy tắc đã khoá, case đó vẫn tính là **trượt**.
+2. **v5 tụt xuống 57% vì chính bản sửa của nhóm.** Sửa schema nhưng đặt trường `nhan` **trước** phần
+   lý giải và mô tả nó bằng cách trỏ sang luật ở trên → model chộp giá trị cuối danh sách, trả `XIN`
+   cho gần như mọi câu, dù `chan_doan` nó viết vẫn đúng. Sửa lại: **viết chẩn đoán trước, chọn nhãn
+   sau**, bảng tra đặt ngay tại trường đó. Thêm chuẩn hoá `trich_dan` vì model trả `T06-134` thiếu
+   ngoặc vuông — guard cũ quá khắt khe, đó là lỗi của nhóm.
+3. **v6 đạt bar sau khi đổi model.** `gpt-4o-mini` không theo được luật phân biệt `DUNG` với `M1` dù
+   prompt ghi rõ (đo riêng 6 case khó: **2/6**); `gpt-4.1-mini` được **5/6**. Giới hạn năng lực model,
+   không phải lỗi prompt. Nhờ OpenRouter nên đổi model chỉ là sửa một dòng `.env`.
+
+**Ba case còn trượt ở v6:** `G24` (ra `M2` thay `M1`) · `G26`, `G27` (ra `M4` thay `OUT` — hệ thống
+vẫn thích gán một nhãn quen hơn là thừa nhận chưa xếp được).
 
 **Đối chiếu quality bar: ĐẠT 3/4 điều kiện đã kiểm được bằng máy.**
 
@@ -313,7 +335,8 @@ lên thì định nghĩa chưa đủ rõ và phải viết lại.
 | 1 | **Evidence chuẩn A (khảo sát ≥20 người)** | **CHƯA LÀM.** Chỉ có chuẩn B (mining). Rubric cho phép "A và/hoặc B" nên vẫn đạt, nhưng nhóm không có số "bao nhiêu % học viên tự nhận mình bỏ bước tự thử" | R1 — chấp nhận chỉ có một đường bằng chứng |
 | 2 | **Golden set ≥10 case từ chatlog thật** | ✅ **XONG.** 28 case, **11 case** dẫn `turn_id` thật (`T10355` `T10971` `T10972` `T11037` `T11169` `T11253` `T10807` `T11413` `T12619` `T13070` `T13135`) | R4 — đã đủ |
 | 3 | **Chấm "giải thích lại đạt chưa"** | **CÒN MOCK** — luật từ khoá trong `web/index.html`, chưa gọi AI | R5 — đã khai rõ trong §4, không tính là giấu |
-| 3b | **Nhận nhãn `DUNG`** | **CHƯA ỔN.** 2/3 case trượt ở v3 là do model đẩy câu trả lời đúng ra `OUT`. Đã biết nguyên nhân, đã có hướng sửa (§7), **chưa sửa** | R3 lớp ① — đây là chỗ yếu nhất của hệ thống hiện tại |
+| 3b | **Nhận nhãn `DUNG`** | ✅ **ĐÃ SỬA** ở v6 — `G17` `G18` `G23` đều ra `DUNG`. Cách sửa: viết chẩn đoán trước rồi chọn nhãn, cộng đổi sang `gpt-4.1-mini` | R3 lớp ① |
+| 3c | **Thừa nhận "ngoài bộ nhãn"** | **CHƯA ỔN.** `G26`, `G27` vẫn ra `M4` thay vì `OUT` — hệ thống thích gán nhãn quen hơn thừa nhận không xếp được. Đây là chỗ yếu nhất còn lại | R3 lớp ① |
 | 4 | **Nội dung trích dẫn transcript** | **BÁN THẬT** — mã đoạn thật và được hậu kiểm, nhưng nội dung câu trích còn hardcode trong HTML | R3 lớp ① — mã đúng nhưng chưa lấy động từ file transcript |
 | 5 | **Log phiên cho giảng viên** | **CHỈ HIỆN RA MÀN HÌNH**, chưa ghi ra file, chưa có màn hình riêng cho giảng viên | Đích xa của D2, đã khai trong non-goals |
 | 6 | **Vòng validation 5 người học thật** | **CHƯA CHẠY.** Có 2 willing user đã đồng ý, còn thiếu 3 người | R6 (bonus +8) và **chỉ số học ở quality bar §7 điều kiện 4** — nếu không chạy được thì nhóm khai là không đo được, không tự cho điểm |

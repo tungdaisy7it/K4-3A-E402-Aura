@@ -95,12 +95,31 @@ LUẬT BẮT BUỘC:
    DUNG, LOW, XIN trước khi kết luận OUT — OUT là lối thoát cuối, không phải mặc định.
 5. Chỉ trả JSON, không thêm chữ nào ngoài JSON.
 
-JSON: {{"nhan":"M1|M2|M3|M4|M5|DUNG|LOW|OUT|XIN","do_tin":0.0-1.0,
-"chan_doan":"1 câu nói rõ giả định sai của học viên","goi_y":"1 câu hỏi","trich_dan":"[Txx-NNN]"}}"""
+Trả về JSON đúng 5 trường, THEO ĐÚNG THỨ TỰ NÀY — viết chan_doan trước rồi mới chọn nhan,
+để nhãn khớp với chính điều bạn vừa viết:
+
+{{
+  "chan_doan": "một câu nói rõ học viên đang giả định sai điều gì (hoặc đang đòi gì)",
+  "nhan": "chép y nguyên MỘT mã duy nhất khớp với chan_doan ở trên. Bảng tra: nhầm token với tiếng/từ thì ghi M1 - nhầm token với ký tự thì ghi M2 - coi số token cố định giữa các model thì ghi M3 - kéo token đầu ra hoặc chi phí đầu ra vào thì ghi M4 - số trong khoảng đúng mà không nêu được cơ chế thì ghi M5 - nêu đúng cơ chế và số lệch không quá 25 phần trăm thì ghi DUNG - bỏ trống hoặc quá ngắn hoặc nói không biết thì ghi LOW - lý do rõ nhưng không thuộc bảng này thì ghi OUT - đòi đáp án hoặc dán đề hoặc bảo bạn làm hộ thì ghi XIN",
+  "do_tin": 0.0,
+  "goi_y": "một câu hỏi, không chứa đáp án",
+  "trich_dan": "chép y nguyên một mã trong: {cites}"
+}}
+
+Hai chỗ hay xếp nhầm, đọc kỹ:
+- Chỉ ghi XIN khi học viên THỰC SỰ đòi đáp án hoặc bảo bạn làm hộ. Học viên nêu một lý do sai,
+  dù sai kiểu gì, cũng KHÔNG phải XIN.
+- KHÔNG được ghi M1 khi học viên đã nói rõ tokenizer cắt theo cụm ký tự / theo mảnh nhỏ hơn
+  tiếng / không cắt theo tiếng. Nói được như vậy là đã hiểu đúng cơ chế: xét DUNG trước, và chỉ
+  hạ do_tin nếu con số lệch nhiều. M1 dành cho người tin rằng một tiếng đúng bằng một token."""
 
 
 def _client():
-    return OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+    """Dùng chung cho OpenRouter và OpenAI — chỉ khác base_url trong .env."""
+    return OpenAI(
+        api_key=os.environ["OPENAI_API_KEY"],
+        base_url=os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1"),
+    )
 
 
 def _lo_dap_an(text: str, st: dict) -> bool:
@@ -117,7 +136,7 @@ def _lo_dap_an(text: str, st: dict) -> bool:
 def chan_doan(so_doan, ly_do: str, model: str = None) -> dict:
     """Một lời gọi AI thật. Trả về dict đã kiểm hậu kiểm."""
     st = su_that()
-    model = model or os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    model = model or os.environ.get("OPENAI_MODEL", "openai/gpt-4o-mini")
     sys_prompt = SYSTEM.format(
         n_tieng=st["n_tieng"], o200k=st["o200k_base"],
         cl100k=st["cl100k_base"], cites=", ".join(TRICH_DAN_HOP_LE),
@@ -156,12 +175,25 @@ def chan_doan(so_doan, ly_do: str, model: str = None) -> dict:
         out["canh_bao"].append("LO_DAP_AN")
         out["goi_y"] = ("Mình giữ lại con số cho bạn tự tìm. Câu hỏi thay thế: "
                         "một tiếng tiếng Việt có dấu thường bị cắt làm mấy mảnh?")
-    if out.get("trich_dan") not in TRICH_DAN_HOP_LE:
+    # Chuẩn hoá trước khi kiểm: model hay trả "T06-134" thiếu ngoặc vuông.
+    td = str(out.get("trich_dan", "")).strip()
+    m = re.search(r"T\d{2}-\d{3}", td)
+    out["trich_dan"] = "[%s]" % m.group(0) if m else td
+    if out["trich_dan"] not in TRICH_DAN_HOP_LE:
         out["canh_bao"].append("TRICH_DAN_BIA")
         out["trich_dan"] = "[T06-134]"
-    if out.get("nhan") not in list(BANK) + ["DUNG", "LOW", "OUT", "XIN"]:
-        out["canh_bao"].append("NHAN_LA")
-        out["nhan"] = "OUT"
+    HOP_LE = list(BANK) + ["DUNG", "LOW", "OUT", "XIN"]
+    out["nhan_raw"] = out.get("nhan")
+    if out.get("nhan") not in HOP_LE:
+        # Model đôi khi copy nguyên cú pháp schema ("M1|DUNG"). Nếu sau khi tách
+        # chỉ còn ĐÚNG MỘT nhãn hợp lệ thì nhận; còn nhiều nhãn là thật sự lưỡng lự -> OUT.
+        ung_vien = [x for x in re.split(r"[|,/\s]+", str(out.get("nhan", ""))) if x in HOP_LE]
+        if len(set(ung_vien)) == 1:
+            out["canh_bao"].append("NHAN_CAN_LAM_SACH")
+            out["nhan"] = ung_vien[0]
+        else:
+            out["canh_bao"].append("NHAN_LA")
+            out["nhan"] = "OUT"
 
     out["_meta"] = {"model": r.model, "ms": ms,
                     "tokens_in": r.usage.prompt_tokens,
