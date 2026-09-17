@@ -154,6 +154,17 @@
   .skel{height:13px;border-radius:4px;background:linear-gradient(90deg,var(--line),var(--surface-2),var(--line));
         background-size:200% 100%;animation:sk 1.2s linear infinite;margin:8px 0}
   @keyframes sk{to{background-position:-200% 0}}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .tabs button{background:var(--surface);color:var(--ink-2);border-color:var(--line);
+        font-weight:600;font-size:13px;padding:8px 13px}
+  .tabs button.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .src{border:1px solid var(--line);border-left:3px solid var(--brand);border-radius:8px;
+       background:var(--surface-2);padding:12px 14px;margin-top:12px}
+  .src .ma{font:700 11.5px ui-monospace,Consolas,monospace;color:var(--brand-ink);
+       background:var(--brand-soft);padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:6px}
+  .src p{margin:0;font-size:13.5px;color:var(--ink-2);font-style:italic;line-height:1.6}
+  .src .lbl{font-size:11.5px;color:var(--ink-3);font-weight:600;text-transform:uppercase;
+       letter-spacing:.05em;display:block;margin-bottom:7px}
   [hidden]{display:none!important}
   @media (max-width:560px){ .card{padding:16px} h1{font-size:20px} .steps div{font-size:10.5px} }
 </style>
@@ -179,7 +190,8 @@
 
 <main class="wrap">
   <div class="eyebrow">Foundation — cách LLM hoạt động</div>
-  <h1>3.2 — Token là gì</h1>
+  <h1 id="tieude">…</h1>
+  <div class="tabs" id="tabs" role="tablist" aria-label="Chọn bài tập"></div>
 
   <!-- ============ BƯỚC 1 ============ -->
   <section id="s1">
@@ -198,13 +210,13 @@
         <div class="skel" style="width:99%"></div><div class="skel" style="width:78%"></div></div>
       <div class="passage-meta">
         <span>Số tiếng: <b id="ntieng">…</b></span>
-        <span>Encoding: <b>o200k_base</b></span>
+        <span id="mKieu"></span>
       </div>
 
-      <label for="guess">Bạn đoán <code>tiktoken</code> đếm đoạn trên ra bao nhiêu token?</label>
+      <label for="guess" id="lbSo">…</label>
       <input type="number" id="guess" min="1" placeholder="nhập một số" inputmode="numeric">
 
-      <label for="why">Vì sao bạn nghĩ vậy? <span class="opt">— đây là phần được chấm, không phải con số</span></label>
+      <label for="why" id="lbLyDo">Vì sao bạn nghĩ vậy? <span class="opt">— đây là phần được chấm, không phải con số</span></label>
       <textarea id="why" placeholder="Viết đúng suy nghĩ thật của bạn, kể cả khi chưa chắc."></textarea>
       <div class="hintrow"><span id="cc">0 ký tự</span><span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> để nộp</span></div>
 
@@ -240,7 +252,7 @@
   <section id="s4" hidden>
     <div class="card">
       <div class="card-hd"><span class="num">3</span><h2>Chốt hiểu</h2></div>
-      <p style="margin:0 0 2px"><b>Giải thích lại bằng lời của bạn:</b> vì sao số token khác số tiếng?</p>
+      <p style="margin:0 0 2px"><b>Giải thích lại bằng lời của bạn:</b> <span id="qChot"></span></p>
       <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Hai, ba câu là đủ. Nói được cơ chế, không chỉ nói kết quả.</p>
       <textarea id="explain" style="margin-top:12px" placeholder="Tokenizer cắt theo…"></textarea>
       <div class="row"><button id="checkExplain">Gửi</button>
@@ -258,15 +270,14 @@
 
       <div id="truth"></div>
 
-      <div class="cite">
-        <code>[T06-134]</code> "Đơn vị cơ bản của LLM là cái nãy giờ chúng ta gọi là token…"<br>
-        <code>[T06-155]</code> "Cách tính giá: tính cả input token cộng output token thì ra total cost…"
-      </div>
+      <div id="nguonMo"></div>
 
+      <div id="toolDem" hidden>
       <label for="thu">Tự thử — dán đoạn bất kỳ, <code>tiktoken</code> đếm thật:</label>
       <textarea id="thu" placeholder="Dán tiếng Việt hoặc tiếng Anh để so."></textarea>
       <div class="row"><button class="ghost" id="dem">Đếm token</button></div>
       <div id="demOut"></div>
+      </div>
 
       <details id="logBox">
         <summary>Log phiên gửi giảng viên</summary>
@@ -277,7 +288,7 @@
         </div>
       </details>
 
-      <div class="row"><button class="quiet" id="again">Làm lại từ đầu</button></div>
+      <div class="row" id="nextRow"><button class="quiet" id="again">Làm lại bài này</button></div>
     </div>
   </section>
 </main>
@@ -294,7 +305,7 @@ var NHAN = {
   OUT:{t:'Lỗi ngoài bộ nhãn',               c:'t-warn'},
   XIN:{t:'Đang xin đáp án',                 c:'t-dang'}
 };
-var bac = 1, log = [];
+var bac = 1, log = [], BAI = null, DS = [];
 function $(i){ return document.getElementById(i); }
 function show(id){
   ['s1','s2','s3','s4','s5'].forEach(function(x){ $(x).hidden = (x !== id); });
@@ -310,10 +321,32 @@ fetch('/api/health').then(function(r){ return r.json(); }).then(function(d){
   $('pModel').textContent = d.provider + ' · ' + d.model;
 }).catch(function(){ $('pModel').textContent = 'không kết nối được'; $('pModel').className = 'pill'; });
 
-fetch('/api/bai-tap').then(function(r){ return r.json(); }).then(function(d){
-  $('para').textContent = d.doan_van;
-  $('ntieng').textContent = d.n_tieng;
-});
+function napBai(id){
+  fetch('/api/bai-tap' + (id ? '?id=' + id : '')).then(function(r){ return r.json(); })
+  .then(function(d){
+    BAI = d.bai; DS = d.danh_sach;
+    $('tieude').textContent = BAI.phan + ' — ' + BAI.tieu_de;
+    $('para').textContent = BAI.doan_van;
+    $('ntieng').textContent = BAI.n_tieng;
+    $('mKieu').innerHTML = BAI.kieu === 'dem_token'
+      ? 'Encoding: <b>o200k_base</b>' : 'Khái niệm: <b>' + BAI.khai_niem + '</b>';
+    $('lbSo').innerHTML = BAI.cau_hoi_so;
+    $('lbLyDo').innerHTML = BAI.cau_hoi_ly_do +
+      ' <span class="opt">— đây là phần được chấm, không phải con số</span>';
+    $('qChot').textContent = BAI.cau_chot_hieu;
+    var t = $('tabs'); t.innerHTML = '';
+    DS.forEach(function(b){
+      var el = document.createElement('button');
+      el.textContent = b.phan + ' · ' + b.khai_niem;
+      el.className = b.id === BAI.id ? 'on' : '';
+      el.setAttribute('role','tab');
+      el.onclick = function(){ if (b.id !== BAI.id){ reset(); napBai(b.id); } };
+      t.appendChild(el);
+    });
+    $('toolDem').hidden = BAI.kieu !== 'dem_token';
+  });
+}
+napBai();
 
 $('why').addEventListener('input', function(){
   $('cc').textContent = this.value.length + ' ký tự';
@@ -328,7 +361,7 @@ $('submit').onclick = function(){
   this.disabled = true;
   show('s2');
   fetch('/api/chan-doan', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({so: so ? parseInt(so,10) : null, ly_do: vi})})
+    body: JSON.stringify({so: so !== '' ? parseFloat(so) : null, ly_do: vi, bai_tap: BAI.id})})
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(ve)
     .catch(function(e){
@@ -374,8 +407,10 @@ function ve(d){
     ladder = true;
   }
 
-  $('dBody').innerHTML = body +
-    (d.trich_dan ? '<div class="cite">Đối chiếu transcript: <code>' + d.trich_dan + '</code></div>' : '');
+  $('dBody').innerHTML = body + (d.trich_dan
+    ? '<div class="src"><span class="lbl">Nguồn đối chiếu — transcript bài giảng</span>' +
+      '<span class="ma">' + d.trich_dan + '</span><p>"' + (d.trich_dan_noi_dung || '') + '"</p></div>'
+    : '');
   $('dAct').innerHTML = act;
   $('dLadder').hidden = !ladder;
   if (ladder){
@@ -440,7 +475,8 @@ $('backDiag').onclick = function(){ show('s3'); };
 
 $('checkExplain').onclick = function(){
   var t = $('explain').value.toLowerCase(), out = $('explainOut');
-  var dat = t.length > 25 && /cắt|mảnh|cụm|tiếng anh|có dấu|không theo t/.test(t);
+  var dat = t.length > 25 && (BAI.tu_khoa_chot_hieu || []).some(function(k){
+    return t.indexOf(k.toLowerCase()) !== -1; });
   if (dat){
     out.innerHTML = '<div class="note ok"><b>Đạt</b>Bạn nêu được cơ chế, không chỉ nêu kết quả.</div>';
     ghi('<b>Chốt hiểu: ĐẠT</b> — học viên tự giải thích lại đúng cơ chế, không cần mở lời giảng đầy đủ.');
@@ -453,21 +489,41 @@ $('checkExplain').onclick = function(){
 };
 
 function moKhoa(){
-  fetch('/api/mo-khoa', {method:'POST'}).then(function(r){ return r.json(); }).then(function(d){
-    $('truth').innerHTML =
-      '<p style="margin:16px 0 0"><b>Số thật — <code>tiktoken</code> vừa đếm, không phải AI đoán:</b></p>' +
-      '<table><thead><tr><th>Tokenizer</th><th>Số token</th><th>So với ' + d.n_tieng +
-      ' tiếng</th></tr></thead><tbody>' +
-      '<tr><td><code>o200k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4o, 4.1</span></td>' +
-      '<td class="big">' + d.o200k_base + '</td><td>' + d.ti_le_o200k + '×</td></tr>' +
-      '<tr><td><code>cl100k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4, 3.5</span></td>' +
-      '<td class="big">' + d.cl100k_base + '</td><td>' + d.ti_le_cl100k + '×</td></tr>' +
-      '</tbody></table>' +
-      '<div class="note info"><b>Đây là chỗ tính nhầm tiền thật</b>Cùng một đoạn văn, hai tokenizer chênh nhau <b>' +
-      (d.cl100k_base / d.o200k_base).toFixed(2) + ' lần</b>. Ước lượng chi phí theo tokenizer sai là sai ' +
-      'ngay từ đầu.</div>';
+  fetch('/api/mo-khoa', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({bai_tap: BAI.id})})
+  .then(function(r){ return r.json(); }).then(function(d){
+    var h = '';
+    if (d.kieu === 'dem_token'){
+      h = '<p style="margin:16px 0 0"><b>Số thật — <code>tiktoken</code> vừa đếm, không phải AI đoán:</b></p>' +
+        '<table><thead><tr><th>Tokenizer</th><th>Số token</th><th>So với ' + d.n_tieng +
+        ' tiếng</th></tr></thead><tbody>' +
+        '<tr><td><code>o200k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4o, 4.1</span></td>' +
+        '<td class="big">' + d.o200k_base + '</td><td>' + d.ti_le_o200k + '×</td></tr>' +
+        '<tr><td><code>cl100k_base</code><br><span style="font-size:12px;color:var(--ink-3)">GPT-4, 3.5</span></td>' +
+        '<td class="big">' + d.cl100k_base + '</td><td>' + d.ti_le_cl100k + '×</td></tr></tbody></table>' +
+        '<div class="note info"><b>Đây là chỗ tính nhầm tiền thật</b>Cùng một đoạn văn, hai tokenizer chênh nhau <b>' +
+        (d.cl100k_base / d.o200k_base).toFixed(2) + ' lần</b>.</div>';
+    } else {
+      h = '<p style="margin:16px 0 0"><b>Khoảng giá trị đúng:</b> <span class="big">' +
+        d.khoang_dung[0] + ' – ' + d.khoang_dung[1] + '</span></p>' +
+        '<div class="note info"><b>Vì sao</b>' + d.giai_thich + '</div>';
+    }
+    $('truth').innerHTML = h;
+
+    $('nguonMo').innerHTML = (d.nguon || []).map(function(n){
+      return '<div class="src"><span class="ma">' + n.ma + '</span><p>"' + n.noi_dung + '"</p></div>';
+    }).join('');
+
     var ol = $('logList'); ol.innerHTML = '';
     log.forEach(function(x){ var li = document.createElement('li'); li.innerHTML = x; ol.appendChild(li); });
+
+    var i = DS.findIndex(function(b){ return b.id === BAI.id; });
+    var nxt = DS[i + 1];
+    $('nextRow').innerHTML = (nxt
+      ? '<button id="next">Sang bài tiếp theo: ' + nxt.khai_niem + '</button>' : '') +
+      '<button class="quiet" id="again">Làm lại bài này</button>';
+    if (nxt) $('next').onclick = function(){ reset(); napBai(nxt.id); };
+    $('again').onclick = reset;
     show('s5');
   });
 }
@@ -486,13 +542,14 @@ $('dem').onclick = function(){
     });
 };
 
-$('again').onclick = function(){
+function reset(){
   bac = 1; log = [];
   ['guess','why','explain','thu'].forEach(function(i){ $(i).value = ''; });
   $('explainOut').innerHTML = ''; $('demOut').innerHTML = '';
   $('refuse').hidden = true; $('cc').textContent = '0 ký tự';
+  $('submit').disabled = false;
   show('s1');
-};
+}
 </script>
 </body>
 </html>

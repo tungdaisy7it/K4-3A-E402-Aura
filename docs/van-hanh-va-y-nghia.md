@@ -76,6 +76,35 @@ gật đầu, nhưng tự đoán rồi sai thì nhớ rất lâu.
 
 ## Phần 2 · Hệ thống vận hành thế nào
 
+### 2.0 Tài liệu và bài tập nạp từ đâu
+
+**Không có nội dung nào nằm trong code.** Toàn bộ đề bài, câu hỏi, bộ nhãn lỗi và trích dẫn nằm
+trong một file duy nhất: `codebase/content/noi-dung.json`.
+
+| Khối trong file | Chứa gì |
+|---|---|
+| `nguon` | Bảng tra mã đoạn → **nội dung thật** của đoạn transcript. Mã dạng `[Txx-NNN]` để phúc khảo ngược về bản gốc trong data pack |
+| `bai_tap[]` | Mỗi phần tử là một bài tập trọn vẹn: đề bài, hai câu hỏi, bộ nhãn lỗi riêng, cơ chế đúng, danh sách mã trích dẫn được phép, từ khoá chấm bước chốt hiểu |
+
+**Thêm một bài tập = thêm một khối JSON**, không sửa dòng code nào. Hệ thống tự dựng thanh chọn bài,
+tự ghép prompt theo bộ nhãn của bài đó, tự giới hạn trích dẫn trong danh sách của bài đó.
+
+Hiện có hai bài: **Token** (phần 3.2) và **Temperature** (phần 4.1). Hai bài khác kiểu nhau để chứng
+minh khung này không chỉ chạy được với bài đếm token:
+
+| | `token-01` | `temperature-01` |
+|---|---|---|
+| Kiểu | `dem_token` — sự thật do `tiktoken` tính tại chỗ | `dap_an_khoang` — sự thật là một khoảng giá trị |
+| Đề bài | Đoạn văn 99 tiếng | Tình huống chatbot ngân hàng |
+| Đáp án | 121 token (`o200k_base`) | temperature trong khoảng 0 – 0,3 |
+| Nhãn lỗi | M1–M5 về token | M1–M5 về temperature, hoàn toàn khác |
+| Trích dẫn cho phép | 5 mã | 3 mã |
+
+**Giới hạn phải nói rõ:** `nguon` hiện là các đoạn transcript đã **chép sẵn vào file JSON**, chứ hệ
+thống chưa tự đọc thẳng từ `transcript-0x-clean.md` trong data pack. Lý do: data pack không được
+commit vào repo nộp bài. Bước tiếp theo là trỏ thẳng vào file transcript khi chạy trong môi trường
+có pack.
+
 ### 2.1 Sơ đồ khối
 
 ```mermaid
@@ -102,7 +131,7 @@ flowchart LR
 | Bước | Màn hình | Chuyện gì xảy ra bên dưới |
 |---|---|---|
 | **1 · Dự đoán** | Lời giảng bị khoá. Học viên nhập số token đoán được và **bắt buộc** viết lý do | `GET /api/bai-tap` trả đoạn văn và số tiếng. Số tiếng đếm bằng `len(text.split())`, không hardcode |
-| **2 · Chẩn đoán** | Hiện nhãn lỗi, một gợi ý, một mã trích dẫn, và dòng meta (model, độ trễ, độ tin cậy) | `POST /api/chan-doan` → `core.chan_doan()`. **Đây là lời gọi AI thật**, `temperature=0`, JSON mode |
+| **2 · Chẩn đoán** | Hiện nhãn lỗi, một gợi ý, **khối nguồn có mã đoạn kèm nguyên văn câu trích**, và dòng meta (model, độ trễ, độ tin cậy) | `POST /api/chan-doan` → `core.chan_doan()`. **Đây là lời gọi AI thật**, `temperature=0`, JSON mode |
 | **3 · Chốt hiểu** | Học viên giải thích lại bằng lời của mình | Hiện còn chấm bằng luật từ khoá trong trình duyệt — **đã khai là mock** |
 | **4 · Mở khoá** | Hiện số thật của cả hai tokenizer, công cụ tự đếm, và log phiên cho giảng viên | `POST /api/mo-khoa` và `POST /api/dem` → `tiktoken` chạy thật |
 
@@ -118,7 +147,7 @@ nằm trong HTML tải về từ đầu, nên học viên không xem được b�
 | `M3` | coi số token cố định giữa mọi model | như trên |
 | `M4` | nhầm token đầu vào với token đầu ra khi tính giá | như trên |
 | `M5` | số nằm trong khoảng đúng nhưng không nêu được cơ chế | như trên |
-| `DUNG` | nêu đúng cơ chế **và** số lệch ≤ 25% | Không gán lỗi. Hỏi một câu mở rộng để phân biệt hiểu thật và chép |
+| `DUNG` | nêu đúng cơ chế **và** số lệch ≤ 25% | **Không gán lỗi, không đưa gợi ý sửa.** Thẻ chuyển sang màu xanh "Đúng cơ chế", hệ thống hỏi một câu mở rộng để phân biệt hiểu thật với chép, và nút duy nhất là "Sang bước chốt hiểu" — bỏ qua hẳn thang gợi ý ba bậc |
 | `LOW` | bỏ trống, quá ngắn, "không biết" | **Không gán nhãn lỗi.** Hỏi lại một câu thu hẹp |
 | `OUT` | lý do rõ ràng nhưng không thuộc bộ nhãn | Nói thẳng là chưa xếp được, ghi nhận cho giảng viên |
 | `XIN` | đòi đáp án, dán nguyên đề, bảo hệ thống làm hộ | Từ chối, nói rõ vì sao, đổi bằng một câu hỏi thu hẹp |
@@ -239,12 +268,11 @@ Nói trước, không chờ bị hỏi:
    quality bar vẫn là "chưa đo". 89% chỉ nói AI phân loại đúng — **chưa nói người nào học được gì.**
 2. **Golden set do nhóm tự viết.** 11/28 case có gốc từ lượt thật trong chatlog, 17 case còn lại do
    nhóm nghĩ ra. Bộ case tự viết luôn dễ hơn học viên thật.
-3. **Bước chốt hiểu còn chạy bằng luật từ khoá**, chưa gọi AI. Ai viết trúng chữ "cắt" hoặc "cụm"
-   là qua, kể cả khi câu đó vô nghĩa.
-4. **Chỉ một khái niệm, một bài.** Token trong Day01. Chưa có gì chứng minh cách làm này mở rộng được
-   sang khái niệm khác.
-5. **Nội dung trích dẫn còn hardcode.** Mã đoạn là thật và được hậu kiểm, nhưng câu trích còn viết
-   cứng trong HTML thay vì lấy động từ file transcript.
+3. **Bước chốt hiểu còn chạy bằng luật từ khoá**, chưa gọi AI. Ai viết trúng một từ khoá trong danh
+   sách của bài là qua, kể cả khi câu đó vô nghĩa.
+4. **Mới có hai bài tập**, và **golden set chỉ phủ bài Token**. Bài Temperature đã chạy đúng trên
+   6 ca thử tay nhưng **chưa có bộ eval riêng** — nghĩa là con số 89% không nói gì về bài đó.
+5. **Trích dẫn chép sẵn trong JSON**, hệ thống chưa tự đọc thẳng từ file transcript trong data pack.
 6. **Log phiên chỉ hiện ra màn hình**, chưa ghi ra file, chưa có màn hình riêng cho giảng viên.
 
 ---

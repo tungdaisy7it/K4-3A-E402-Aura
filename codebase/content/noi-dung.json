@@ -1,0 +1,72 @@
+{
+  "_doc": "Toàn bộ nội dung bài học nạp từ file này. Thêm một bài tập = thêm một khối trong 'bai_tap', không phải sửa code. Trích dẫn trong 'nguon' là trích ngắn từ transcript bài giảng, mỗi đoạn có mã [Txx-NNN] để phúc khảo ngược về bản gốc trong data pack.",
+
+  "nguon": {
+    "[T04-049]": "Trong các mô hình ngôn ngữ lớn thì có một thuật ngữ quan trọng chúng ta cần nắm được, đấy là token.",
+    "[T04-051]": "Rồi sau token thì cũng có một khái niệm rất là quan trọng, đấy là context. Context nghĩa là bối cảnh, ngữ cảnh.",
+    "[T04-071]": "Temperature cao thì tăng độ sáng tạo đúng không? Bạn prompt cho một bài viết content marketing chẳng hạn, thì bạn tăng cái temperature.",
+    "[T04-072]": "Temperature hoạt động theo kiểu: nếu temperature bằng 0, mô hình sẽ luôn luôn lấy xác suất cao nhất. Các bạn có thể chạy thử một mô hình với temperature bằng 0 thì kết quả trả ra gần như sẽ giống nhau.",
+    "[T06-134]": "Đơn vị cơ bản của LLM là cái nãy giờ chúng ta gọi là token.",
+    "[T06-136]": "Quá trình dự báo next token: cái LLM nó không hiểu ngôn ngữ giống con người nhá, mà nó chỉ dự đoán token nào có khả năng đứng sau.",
+    "[T06-137]": "Một cái rất quan trọng nữa là cơ chế autoregressive: output token sẽ trở thành input token.",
+    "[T06-155]": "Cách tính giá của nó các bạn nhá: chúng ta tính cả input token cộng với output token thì ra total cost."
+  },
+
+  "bai_tap": [
+    {
+      "id": "token-01",
+      "khai_niem": "Token",
+      "phan": "3.2",
+      "tieu_de": "Token là gì",
+      "kieu": "dem_token",
+      "doan_van": "Mô hình ngôn ngữ lớn không đọc chữ giống như con người. Trước khi xử lý, toàn bộ câu chữ được cắt thành những mảnh nhỏ gọi là token, rồi mỗi token được chuyển thành một vectơ số. Mô hình dự đoán token tiếp theo dựa trên toàn bộ token đã có trước đó, và cứ thế sinh ra câu trả lời từng mảnh một. Số lượng token quyết định hai thứ rất thực tế: giá tiền bạn trả cho mỗi lần gọi, và lượng nội dung tối đa bạn nhét vào một câu hỏi duy nhất của mình.",
+      "cau_hoi_so": "Bạn đoán <code>tiktoken</code> đếm đoạn trên ra bao nhiêu token?",
+      "cau_hoi_ly_do": "Vì sao bạn nghĩ vậy?",
+      "don_vi": "token",
+      "co_che_dung": "tokenizer cắt theo cụm ký tự hay gặp trong dữ liệu huấn luyện, không cắt theo tiếng hay theo từ",
+      "cau_chot_hieu": "Vì sao số token khác số tiếng?",
+      "tu_khoa_chot_hieu": ["cắt", "mảnh", "cụm", "tiếng anh", "có dấu", "không theo t"],
+      "nguong_lech_phan_tram": 25,
+      "bank": {
+        "M1": "token = từ hoặc tiếng — tin rằng mỗi tiếng đúng bằng một token",
+        "M2": "token = ký tự — tin rằng token là từng chữ cái",
+        "M3": "coi số token cố định giữa mọi model, hoặc khẳng định một tỉ lệ cố định giữa tiếng Việt và tiếng Anh ở mọi model",
+        "M4": "kéo token đầu ra hoặc chi phí đầu ra vào, dù câu hỏi chỉ hỏi token của đoạn văn đầu vào",
+        "M5": "số nằm trong khoảng đúng nhưng lý do không nêu được cơ chế"
+      },
+      "trich_dan_cho_phep": ["[T04-049]", "[T04-051]", "[T06-134]", "[T06-136]", "[T06-155]"],
+      "trich_dan_mac_dinh": "[T06-134]",
+      "nguon_mo_khoa": ["[T06-134]", "[T06-155]"]
+    },
+
+    {
+      "id": "temperature-01",
+      "khai_niem": "Temperature",
+      "phan": "4.1",
+      "tieu_de": "Chọn temperature cho sản phẩm",
+      "kieu": "dap_an_khoang",
+      "doan_van": "Bạn đang xây một chatbot hỗ trợ khách hàng cho một ngân hàng. Bot trả lời các câu hỏi về phí dịch vụ, hạn mức thẻ và thủ tục mở tài khoản — toàn bộ dựa trên tài liệu chính thức của ngân hàng. Cùng một câu hỏi, hai khách hàng khác nhau hỏi vào hai thời điểm khác nhau, phải nhận được câu trả lời thống nhất.",
+      "cau_hoi_so": "Bạn sẽ đặt <code>temperature</code> bằng bao nhiêu cho chatbot này? (nhập số, ví dụ 0 hoặc 1)",
+      "cau_hoi_ly_do": "Vì sao bạn chọn giá trị đó?",
+      "don_vi": "",
+      "su_that": {
+        "khoang_dung": [0, 0.3],
+        "giai_thich": "Chatbot ngân hàng cần tính nhất quán và bám tài liệu, không cần sáng tạo. Temperature thấp (0 đến 0,3) khiến mô hình gần như luôn chọn token có xác suất cao nhất, nên cùng một câu hỏi cho ra câu trả lời ổn định. Temperature cao làm câu chữ đa dạng hơn nhưng đồng thời tăng khả năng bịa chi tiết — đúng thứ không được phép xảy ra với thông tin phí và hạn mức."
+      },
+      "co_che_dung": "temperature thấp làm mô hình luôn lấy token xác suất cao nhất nên câu trả lời nhất quán; temperature cao tăng ngẫu nhiên nên dễ bịa, không hợp với thông tin phải chính xác",
+      "cau_chot_hieu": "Temperature thay đổi cái gì bên trong mô hình, và vì sao điều đó lại quan trọng với chatbot ngân hàng?",
+      "tu_khoa_chot_hieu": ["xác suất", "xac suat", "nhất quán", "nhat quan", "ngẫu nhiên", "ngau nhien", "ổn định", "bịa"],
+      "nguong_lech_phan_tram": 0,
+      "bank": {
+        "M1": "tin rằng temperature cao thì mô hình thông minh hơn hoặc trả lời tốt hơn",
+        "M2": "nhầm temperature với độ chính xác — tin rằng temperature cao thì chính xác hơn",
+        "M3": "tin rằng temperature bằng 0 làm mô hình ngừng suy nghĩ, trả lời cứng nhắc như câu mẫu có sẵn",
+        "M4": "nhầm temperature với các tham số khác như max_tokens hoặc top_p, hoặc tin rằng nó ảnh hưởng tới chi phí",
+        "M5": "chọn đúng khoảng giá trị thấp nhưng lý do không nêu được vì sao"
+      },
+      "trich_dan_cho_phep": ["[T04-071]", "[T04-072]", "[T06-136]"],
+      "trich_dan_mac_dinh": "[T04-072]",
+      "nguon_mo_khoa": ["[T04-072]", "[T04-071]"]
+    }
+  ]
+}
