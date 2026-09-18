@@ -50,19 +50,30 @@ def main():
           % (st["n_tieng"], st["o200k_base"], st["cl100k_base"]))
 
     for c in gs["cases"]:
-        try:
-            out = chan_doan(c.get("so"), c.get("ly_do", ""))
-        except Exception as e:
-            out = {"nhan": "ERROR", "chan_doan": str(e)[:160], "goi_y": "", "trich_dan": "", "canh_bao": ["EXCEPTION"]}
+        # Nhà cung cấp free tier chặn theo số request đang bay -> thử lại có giãn cách.
+        # Lỗi hạ tầng KHÔNG phải lỗi chất lượng, nên tách ra đếm riêng ở phần tổng kết.
+        out, loi = None, None
+        for lan in range(4):
+            try:
+                out = chan_doan(c.get("so"), c.get("ly_do", ""))
+                loi = None
+                break
+            except Exception as e:
+                loi = str(e)[:200]
+                time.sleep(2 + lan * 4)
+        if out is None:
+            out = {"nhan": "ERROR", "chan_doan": loi, "goi_y": "", "trich_dan": "",
+                   "canh_bao": ["LOI_HA_TANG"]}
         k = cham(c, out, st)
         rows.append((c, out, k))
         trace.append({"case": c, "ket_qua": out, "cham": k})
         print("%-4s %-22s mong doi %-4s -> %-4s  %s"
               % (c["id"], c["lop"], c["nhan_mong_doi"], out.get("nhan"),
                  "DAT" if k["dat"] else "TRUOT"))
-        time.sleep(0.3)
+        time.sleep(1.2)
 
     n = len(rows)
+    n_loi = sum(1 for _, o, _ in rows if o.get("nhan") == "ERROR")
     dat = sum(1 for _, _, k in rows if k["dat"])
     dung_nhan = sum(1 for _, _, k in rows if k["dung_nhan"])
     khong_lo = sum(1 for _, _, k in rows if k["khong_lo_dap_an"])
@@ -78,7 +89,13 @@ def main():
     md.append("\n## Số đo\n")
     md.append("| Chiều chất lượng | Đạt | Tỉ lệ |")
     md.append("|---|---|---|")
-    md.append("| **Đạt cả 3 tiêu chí** | %d/%d | **%.0f%%** |" % (dat, n, dat / n * 100))
+    n_do = n - n_loi
+    md.append("| **Đạt cả 3 tiêu chí — trên TOÀN BỘ bộ** | %d/%d | **%.0f%%** |" % (dat, n, dat / n * 100))
+    if n_loi:
+        md.append("| ⚠️ Không đo được — gọi API thất bại sau 4 lần thử | %d/%d | %.0f%% |"
+                  % (n_loi, n, n_loi / n * 100))
+        md.append("| Đạt cả 3 tiêu chí — trên %d case ĐO ĐƯỢC | %d/%d | **%.0f%%** |"
+                  % (n_do, dat, n_do, dat / n_do * 100 if n_do else 0))
     md.append("| Chẩn đoán đúng nhãn lỗi | %d/%d | %.0f%% |" % (dung_nhan, n, dung_nhan / n * 100))
     md.append("| Không lộ đáp án | %d/%d | %.0f%% |" % (khong_lo, n, khong_lo / n * 100))
     md.append("| Trích dẫn hợp lệ | %d/%d | %.0f%% |" % (trich_ok, n, trich_ok / n * 100))
@@ -110,6 +127,11 @@ def main():
     md.append("- Hậu kiểm lộ đáp án chạy bằng luật (regex số thật + cụm \"đáp án là\"), không hỏi lại LLM.")
     md.append("- `temperature=0` để chạy lại ra kết quả so sánh được.")
     md.append("- Trace nguyên văn từng lời gọi: `eval/trace-%s.json`." % stamp)
+    if n_loi:
+        md.append("- ⚠️ **%d case không đo được** vì nhà cung cấp chặn theo số request đang bay "
+                  "(free tier trả HTTP 402 sau 4 lần thử lại). Đây là lỗi hạ tầng, **không phải "
+                  "lỗi chất lượng** — các case đó bị tính là TRƯỢT ở dòng \"toàn bộ bộ\" để "
+                  "không làm số đẹp lên, và được tách riêng ở dòng \"case đo được\"." % n_loi)
 
     p_md = os.path.join(HERE, "results-%s.md" % stamp)
     p_js = os.path.join(HERE, "trace-%s.json" % stamp)
