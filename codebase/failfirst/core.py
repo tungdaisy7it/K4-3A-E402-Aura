@@ -56,6 +56,24 @@ def dem_token(text, encoding="o200k_base"):
     return len(tiktoken.get_encoding(encoding).encode(text))
 
 
+def manh_token(text, encoding="o200k_base", gioi_han=60):
+    """Trả về từng mảnh token thật mà tokenizer cắt ra.
+
+    Thêm sau vòng validation 18/9: người thử ở phiên 4 nói nhìn con số không
+    hình dung được, phải thấy chữ bị chẻ thế nào. Một tiếng tiếng Việt có dấu
+    thường vỡ làm nhiều mảnh, và byte lẻ hiện thành dấu thay thế — chính chỗ
+    đó là bằng chứng trực quan cho cơ chế.
+    """
+    enc = tiktoken.get_encoding(encoding)
+    ids = enc.encode(text)[:gioi_han]
+    out = []
+    for i in ids:
+        b = enc.decode_single_token_bytes(i)
+        out.append({"id": i, "text": b.decode("utf-8", errors="replace"),
+                    "nguyen_ven": b.decode("utf-8", errors="ignore") == b.decode("utf-8", errors="replace")})
+    return out
+
+
 def su_that(bai_tap_id=None):
     """Sự thật của bài tập, tính tại chỗ mỗi lần chạy."""
     b = lay_bai(bai_tap_id)

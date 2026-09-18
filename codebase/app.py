@@ -17,7 +17,7 @@ from flask import Flask, jsonify, request, send_from_directory
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 from failfirst.core import (NGUON, chan_doan, danh_sach_bai_tap,  # noqa: E402
-                            dem_token, lay_bai, su_that)
+                            dem_token, lay_bai, manh_token, su_that)
 
 app = Flask(__name__, static_folder=None)  # tat static catch-all de khong nuot /api/*
 
@@ -88,6 +88,8 @@ def api_mo_khoa():
         st["ti_le_o200k"] = round(st["o200k_base"] / st["n_tieng"], 2)
         st["ti_le_cl100k"] = round(st["cl100k_base"] / st["n_tieng"], 2)
     st["nguon"] = [{"ma": m, "noi_dung": NGUON.get(m, "")} for m in b["nguon_mo_khoa"]]
+    if st["kieu"] == "dem_token":
+        st["manh_token"] = manh_token(b["doan_van"])
     return jsonify(st)
 
 
