@@ -780,10 +780,18 @@ function loadLessonDetail(lid) {
     .then(function(r){ return r.json(); })
     .then(function(d){
       currentLessonData = d;
-      $('lessonTitle').textContent = d.title;
-      $('currentLessonHeaderTitle').textContent = d.title;
+      if ($('lessonTitle')) $('lessonTitle').textContent = d.title;
+      if ($('currentLessonHeaderTitle')) $('currentLessonHeaderTitle').textContent = d.title;
       
       updateQuestionDisplay();
+
+      // Clear input fields and reset diagnosis result box when switching lessons!
+      if ($('diagInputNumber')) $('diagInputNumber').value = '';
+      if ($('diagInputReason')) $('diagInputReason').value = '';
+      if ($('diagResultBox')) {
+        $('diagResultBox').hidden = true;
+        $('diagResultBox').innerHTML = '';
+      }
 
       // PARSE MARKDOWN INTO BEAUTIFUL CLEAN HTML
       var lines = d.content.split('\n');
@@ -1032,10 +1040,17 @@ $('btnSubmitDiag').onclick = function(){
   $('diagResultBox').hidden = false;
   $('diagResultBox').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> AI Tutor đang chẩn đoán...';
 
+  var currentQ = (currentLessonData && currentLessonData.questions) ? currentLessonData.questions[currentQuestionIdx % currentLessonData.questions.length] : '';
+
   fetch('/api/chan-doan', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({so: num, ly_do: reason})
+    body: JSON.stringify({
+      so: num,
+      ly_do: reason,
+      cau_hoi: currentQ,
+      lesson_id: currentLessonId
+    })
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
