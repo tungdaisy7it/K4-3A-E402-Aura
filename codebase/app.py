@@ -26,6 +26,16 @@ def index():
     return send_from_directory("web", "index.html")
 
 
+@app.get("/slide")
+def slide_preview():
+    return send_from_directory(".", "VLearn_Pitch_Deck_Preview.html")
+
+
+@app.get("/download-slide")
+def download_slide():
+    return send_from_directory(".", "VLearn_Pitch_Deck.pptx", as_attachment=True)
+
+
 @app.get("/api/health")
 def health():
     """Cho header hiển thị đang chạy model nào, qua nhà cung cấp nào."""
