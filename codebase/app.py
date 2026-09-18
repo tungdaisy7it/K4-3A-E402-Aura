@@ -75,7 +75,16 @@ def bai_tap():
 @app.post("/api/chan-doan")
 def api_chan_doan():
     d = request.get_json(force=True) or {}
+
+    out = chan_doan(
+        d.get("so"),
+        d.get("ly_do", ""),
+        cau_hoi=d.get("cau_hoi"),
+        lesson_id=d.get("lesson_id")
+    )
+
     return jsonify(chan_doan(d.get("so"), d.get("ly_do", ""), bai_tap_id=d.get("bai_tap")))
+
 
 
 @app.post("/api/mo-khoa")

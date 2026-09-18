@@ -393,6 +393,76 @@ function veNav(){
   $('pgBar').style.width = (n ? x / n * 100 : 0) + '%';
 }
 
+
+function loadLessonDetail(lid) {
+  currentLessonId = lid;
+  currentQuestionIdx = 0;
+  completedQuestions = new Set();
+  attemptCount = 0;
+  lastDiagnosis = null;
+  
+  // Highlight active sidebar item
+  for (var i = 1; i <= 6; i++) {
+    var el = $('navItem' + i);
+    if (el) el.className = 'sub-item ' + (i === lid ? 'active' : '');
+  }
+
+  fetch('/api/bai-hoc/' + lid)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      currentLessonData = d;
+      if ($('lessonTitle')) $('lessonTitle').textContent = d.title;
+      if ($('currentLessonHeaderTitle')) $('currentLessonHeaderTitle').textContent = d.title;
+      
+      updateQuestionDisplay();
+
+      // Clear input fields and reset diagnosis result box when switching lessons!
+      if ($('diagInputNumber')) $('diagInputNumber').value = '';
+      if ($('diagInputReason')) $('diagInputReason').value = '';
+      if ($('diagResultBox')) {
+        $('diagResultBox').hidden = true;
+        $('diagResultBox').innerHTML = '';
+      }
+
+      // PARSE MARKDOWN INTO BEAUTIFUL CLEAN HTML
+      var lines = d.content.split('\n');
+      var html = '';
+      var inMeta = false;
+      var metaHtml = '';
+
+      lines.forEach(function(line){
+        var trimmed = line.trim();
+        if (!trimmed) return;
+
+        // Clean up markdown quotes > **Nguồn:** etc. into a clean info box
+        if (trimmed.startsWith('>')) {
+          inMeta = true;
+          var cleanText = trimmed.replace(/^>\s*/, '').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+          metaHtml += '<div style="margin-bottom:0.25rem;">• ' + cleanText + '</div>';
+          return;
+        }
+
+        if (inMeta && !trimmed.startsWith('>')) {
+          inMeta = false;
+          html += '<div class="transcript-meta-box"><b><i class="fa-solid fa-circle-info"></i> THÔNG TIN BÀI GIẢNG:</b><br>' + metaHtml + '</div>';
+          metaHtml = '';
+        }
+
+        if (trimmed.startsWith('#')) {
+          var level = (trimmed.match(/^#+/) || ['#'])[0].length;
+          var text = trimmed.replace(/^#+\s*/, '').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+          html += '<h' + Math.min(level+1, 4) + ' style="font-weight:800; color:var(--text-title); margin:1.5rem 0 0.75rem 0;">' + text + '</h' + Math.min(level+1, 4) + '>';
+        } else {
+          // Replace [Txx-NNN] with clickable citation badges
+          var processedLine = trimmed
+            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+            .replace(/\[(T\d+-\d+)\]/g, function(match, code){
+              return '<span class="cite-badge" onclick="highlightParagraph(\'' + code + '\')" id="cite_' + code + '">' + code + '</span>';
+            });
+
+          html += '<p class="transcript-p" id="p_' + trimmed.match(/\[(T\d+-\d+)\]/)?.[1] + '">' + processedLine + '</p>';
+        }
+
 function napBai(id){
   fetch('/api/bai-tap' + (id ? '?id=' + encodeURIComponent(id) : ''))
   .then(function(r){ return r.json(); }).then(function(d){
@@ -601,6 +671,29 @@ function moKhoa(){
         (k[0] === k[1] ? k[0] : k[0] + ' – ' + k[1]) + '</span></b></p>' +
         '<div class="note info"><b>Vì sao</b>' + esc(d.giai_thich) + '</div>';
     }
+
+  }
+
+  // First submission or needing diagnosis
+  $('diagResultBox').hidden = false;
+  $('diagResultBox').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> AI Tutor đang chẩn đoán...';
+
+  var currentQ = (currentLessonData && currentLessonData.questions) ? currentLessonData.questions[currentQuestionIdx % currentLessonData.questions.length] : '';
+
+  fetch('/api/chan-doan', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      so: num,
+      ly_do: reason,
+      cau_hoi: currentQ,
+      lesson_id: currentLessonId
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    lastDiagnosis = d;
+    renderDiagnosisStep1(d);
     $('truth').innerHTML = h;
     $('nguonMo').innerHTML = (d.nguon || []).map(function(x){
       return '<div class="src"><span class="ma">' + esc(x.ma) + '</span><p>"' +
@@ -622,6 +715,7 @@ function moKhoa(){
     if (nxt) $('next').onclick = function(){ reset(); napBai(nxt.id); };
     $('again').onclick = function(){ reset(); };
     show('s5');
+
   });
 }
 
