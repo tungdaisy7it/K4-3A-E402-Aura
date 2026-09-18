@@ -24,3 +24,9 @@ node_modules/
 # cho phép file mẫu
 !.env.example
 _para.json
+
+# Data pack cua khoa — TUYET DOI khong commit vao repo nop bai.
+# UI /vlearn doc transcript tu thu muc nay khi chay local.
+vlearn-pack/
+*.pdf
+S* tay Hackathon*

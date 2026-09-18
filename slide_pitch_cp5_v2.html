@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VLearn FailFirst — Pitch Slide CP5 (Nhóm Aura)</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg-main: #f8fafc;
+      --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 50%, #fdf2f8 100%);
+      --bg-card: #ffffff;
+      
+      --navy-title: #1e3a8a;
+      --navy-dark: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      
+      --blue-primary: #0284c7;
+      --blue-gradient: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+      --blue-pastel: #e0f2fe;
+      
+      --pink-accent: #ec4899;
+      --pink-pastel: #fce7f3;
+      --pink-dark: #be185d;
+
+      --green-accent: #10b981;
+      --green-pastel: #ecfdf5;
+      
+      --border-color: #e2e8f0;
+      --border-accent: rgba(2, 132, 199, 0.3);
+      --shadow-soft: 0 10px 30px rgba(2, 132, 199, 0.06);
+      --shadow-hover: 0 15px 35px rgba(2, 132, 199, 0.12);
+
+      --font-title: 'Quicksand', 'Plus Jakarta Sans', sans-serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-gradient);
+      color: var(--navy-dark);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    .slide-stage {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 2.2rem 4rem 3.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.98) translateY(12px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    .slide-header { margin-bottom: 1rem; }
+
+    .slide-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.3rem;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--navy-title);
+      background: var(--blue-pastel);
+      padding: 0.2rem 0.75rem;
+      border-radius: 12px;
+      border: 1px solid rgba(2, 132, 199, 0.2);
+    }
+
+    .slide-title {
+      font-family: var(--font-title);
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--navy-title);
+    }
+
+    .slide-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      font-weight: 600;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      gap: 1.25rem;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    .slide-footer {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1.5px dashed var(--border-color);
+      padding-top: 0.5rem;
+      margin-top: 0.75rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* CARD GRID SYSTEM */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; width: 100%; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.1rem; width: 100%; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.8rem; width: 100%; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      border-color: var(--border-accent);
+    }
+
+    .card.blue-highlight {
+      background: linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%);
+      border-color: var(--blue-primary);
+    }
+
+    .card.emerald { border-color: rgba(16, 185, 129, 0.4); background: #ecfdf5; }
+    .card.cyan { border-color: rgba(6, 182, 212, 0.4); background: #ecfeff; }
+    .card.rose { border-color: rgba(244, 63, 94, 0.4); background: #fff1f2; }
+    .card.pink-highlight { border-color: var(--pink-accent); background: var(--pink-pastel); }
+
+    .card-title {
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--navy-title);
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-title i { color: var(--blue-primary); }
+
+    .stat-number {
+      font-size: 2.3rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      line-height: 1;
+      margin: 0.2rem 0;
+      color: var(--navy-title);
+    }
+
+    .stat-number.rose { color: #be185d; }
+    .stat-number.amber { color: #b45309; }
+    .stat-number.emerald { color: #047857; }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--navy-dark);
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    /* SVG BAR CHARTS */
+    .chart-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
+    .bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--navy-dark);
+    }
+
+    .bar-track {
+      height: 12px;
+      background: #e2e8f0;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.8s ease-in-out;
+    }
+
+    .bar-blue { background: linear-gradient(90deg, #0284c7, #2563eb); }
+    .bar-pink { background: linear-gradient(90deg, #ec4899, #be185d); }
+    .bar-green { background: linear-gradient(90deg, #10b981, #047857); }
+    .bar-amber { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+    /* TABLE STYLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    .data-table th, .data-table td {
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+      border-bottom: 1.5px solid var(--border-color);
+    }
+
+    .data-table th {
+      color: var(--navy-title);
+      font-weight: 800;
+      background: var(--blue-pastel);
+    }
+
+    .data-table tr.highlight-row {
+      background: #ecfdf5;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+    }
+
+    .badge-blue { background: var(--blue-pastel); color: #0369a1; border: 1px solid #7dd3fc; }
+    .badge-pink { background: var(--pink-pastel); color: #be185d; border: 1px solid #f472b6; }
+    .badge-emerald { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+    .badge-rose { background: #ffe4e6; color: #9f1239; border: 1px solid #fb7185; }
+
+    /* CONTROLS */
+    .nav-controls {
+      position: absolute;
+      bottom: 0.8rem;
+      right: 4rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-color);
+      background: #ffffff;
+      color: var(--navy-title);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: var(--blue-primary);
+      color: #ffffff;
+      border-color: var(--blue-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="slide-stage">
+
+      <!-- SLIDE 1: COVER -->
+      <div class="slide active" id="slide-1">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-rocket"></i> TRACK D2 · HỌC TỪ LỖI TRƯỚC (FAILFIRST)</span>
+          <h1 class="slide-title" style="font-size: 2.8rem; margin-top: 0.4rem;">VLearn FailFirst</h1>
+          <p class="slide-subtitle" style="font-size: 1.2rem;">Biến lỗi sai thành cơ hội tư duy — Chẩn đoán giả định sai & Hướng dẫn Socratic</p>
+        </div>
+        <div class="slide-body">
+          <div class="card blue-highlight" style="width: 100%; justify-content: center; gap: 1.2rem; padding: 2rem;">
+            <div style="display: flex; gap: 2rem; align-items: center;">
+              <div style="flex: 1;">
+                <h3 style="font-size: 1.4rem; color: var(--navy-title); margin-bottom: 0.8rem;">👥 Nhóm Aura (Lớp 3A · E402)</h3>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.95rem;">
+                  <li><strong>Lê Thanh Tùng</strong> (2A202602499) — Leader & Spec & Quality Bar</li>
+                  <li><strong>Đậu Văn Thạch</strong> (2A202602592) — Evidence Mining & Survey (N=19) & User Validation</li>
+                  <li><strong>Nguyễn Thu Hằng</strong> (2A202602463) — Misconception Bank & Golden Set & Eval Automation</li>
+                  <li><strong>Đinh Quốc Bảo</strong> (2A202602933) — Core Prototype & Tiktoken Integration & Flow Demo</li>
+                </ul>
+              </div>
+              <div style="width: 280px; background: #ffffff; padding: 1.2rem; border-radius: 16px; border: 1.5px solid var(--blue-primary); box-shadow: var(--shadow-soft);">
+                <div class="stat-number rose" style="font-size: 2.8rem;">89%</div>
+                <div class="stat-label">Accuracy on 28 Golden Cases (v6)<br><span class="badge badge-emerald">QUALITY BAR ĐẠT</span></div>
+                <hr style="margin: 0.8rem 0; border: none; border-top: 1px dashed var(--border-color);">
+                <div class="stat-number emerald" style="font-size: 2.2rem;">100%</div>
+                <div class="stat-label">19/19 Học viên sẵn sàng thử FailFirst Mode</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 1 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: PAIN & EVIDENCE -->
+      <div class="slide" id="slide-2">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-magnifying-glass"></i> §1. NỖI ĐÂU THỰC TẾ & BẰNG CHỨNG</span>
+          <h2 class="slide-title">Học viên dán đề xin đáp án → AI cho kết quả quá sớm triệt tiêu tư duy</h2>
+          <p class="slide-subtitle">Bằng chứng từ 2.555 lượt chatlog K4 + Khảo sát chuyên sâu 19 học viên</p>
+        </div>
+        <div class="slide-body grid-2">
+          <div class="card">
+            <h3 class="card-title"><i class="fa-solid fa-database"></i> Chatlog Mining K4 (2.555 lượt)</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.4rem; font-size: 0.88rem;">
+              <div style="background: var(--blue-pastel); padding: 0.75rem; border-radius: 12px; border: 1px solid #7dd3fc;">
+                <strong>103 lượt (38 học viên)</strong> dán nguyên đề hoặc xin full code / đáp án ngay khi gặp bài khó.
+              </div>
+              <div style="background: #fff1f2; padding: 0.75rem; border-radius: 12px; border: 1px solid #fda4af;">
+                <strong>0 / 103 lượt</strong> hệ thống cũ hỏi ngược lại để gợi ý tư duy (<code style="font-family:var(--font-mono);">ask_probing_question = 0</code>).
+              </div>
+              <div style="background: #fef3c7; padding: 0.75rem; border-radius: 12px; border: 1px solid #fcd34d;">
+                <strong>65 lượt báo lỗi code</strong> → 55/65 lượt hệ thống chỉ giảng lại lý thuyết suông thay vì chỉ ra giả định sai!
+              </div>
+            </div>
+          </div>
+          <div class="card pink-highlight">
+            <h3 class="card-title"><i class="fa-solid fa-chart-pie"></i> Highlights Khảo sát Học viên (N = 19)</h3>
+            <div class="chart-container">
+              <div class="bar-row">
+                <div class="bar-header"><span>Dán nguyên đề lab vào AI Tutor</span><span>78.9% (15/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-pink" style="width: 78.9%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span>Dán đề vì "Tiết kiệm thời gian & Sợ sai"</span><span>73.7% (14/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-amber" style="width: 73.7%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span>Cái khó nhất: "Hiểu tại sao bản thân nghĩ sai"</span><span>68.4% (13/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-blue" style="width: 68.4%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-header"><span>AI cho đáp án ngay làm triệt tiêu tư duy (Mức 4-5)</span><span>57.9% (11/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-green" style="width: 57.9%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 2 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: DETAILED SURVEY CHARTS -->
+      <div class="slide" id="slide-3">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-chart-column"></i> §1b. PHÂN TÍCH KHẢO SÁT CHI TIẾT (N = 19)</span>
+          <h2 class="slide-title">Học viên THÈM được chỉ ra giả định sai chứ không muốn chép đáp án!</h2>
+          <p class="slide-subtitle">Phân tích phản hồi học viên về hành vi hỏi AI & Nhu cầu học với FailFirst</p>
+        </div>
+        <div class="slide-body grid-3">
+          <div class="card">
+            <h3 class="card-title"><i class="fa-solid fa-circle-question"></i> Cái khó nhất khi bài sai?</h3>
+            <div class="chart-container" style="margin-top: 0.8rem;">
+              <div class="bar-row">
+                <div class="bar-header"><span>Hiểu tại sao bản thân tư duy/code sai</span><span>68.4% (13/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-blue" style="width: 68.4%;"></div></div>
+              </div>
+              <div class="bar-row" style="margin-top: 0.4rem;">
+                <div class="bar-header"><span>Tự sửa lỗi mà không xem đáp án</span><span>31.6% (6/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-pink" style="width: 31.6%;"></div></div>
+              </div>
+            </div>
+            <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted); background: #f0f9ff; padding: 0.6rem; border-radius: 8px;">
+              💡 <em>Pain gốc không nằm ở cú pháp code, mà nằm ở <strong>mô hình tư duy sai (misconception)</strong>.</em>
+            </div>
+          </div>
+
+          <div class="card pink-highlight">
+            <h3 class="card-title"><i class="fa-solid fa-lightbulb"></i> Muốn AI làm gì trước?</h3>
+            <div class="chart-container" style="margin-top: 0.5rem;">
+              <div class="bar-row">
+                <div class="bar-header"><span>Chỉ ra chỗ sai / Gợi ý / Hỏi ngược</span><span>84.2% (16/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-pink" style="width: 84.2%;"></div></div>
+              </div>
+              <div class="bar-row" style="margin-top: 0.4rem;">
+                <div class="bar-header"><span>Cho đáp án & giải thích ngay</span><span>15.8% (3/19)</span></div>
+                <div class="bar-track"><div class="bar-fill bar-amber" style="width: 15.8%;"></div></div>
+              </div>
+            </div>
+            <div style="margin-top: 1rem; font-size: 0.8rem; color: #831843; background: #fce7f3; padding: 0.6rem; border-radius: 8px;">
+              🔥 <strong>84.2% học viên chủ động TỪ CHỐI việc lấy đáp án ngay</strong> nếu được gợi ý đúng chỗ sai!
+            </div>
+          </div>
+
+          <div class="card emerald">
+            <h3 class="card-title"><i class="fa-solid fa-thumbs-up"></i> Sẵn sàng thử FailFirst?</h3>
+            <div class="stat-number emerald" style="text-align: center; margin: 0.5rem 0;">100%</div>
+            <div class="stat-label" style="text-align: center; font-weight: 800;">19/19 Học viên ĐỒNG Ý THỬ!</div>
+            <div style="margin-top: 0.8rem; font-size: 0.8rem; display: flex; flex-direction: column; gap: 0.4rem;">
+              <div>• <strong>47.4% (9 người):</strong> Đồng ý nếu chỉ tốn thêm 2-5 phút.</div>
+              <div>• <strong>31.6% (6 người):</strong> Đồng ý với các bài lab khó.</div>
+              <div>• <strong>21.1% (4 người):</strong> Hào hứng muốn thử ngay lập tức!</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 3 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: PRODUCT SLICE & FLOW -->
+      <div class="slide" id="slide-4">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-cube"></i> §4. LÁT CẮT SẢN PHẨM & GIẢI PHÁP</span>
+          <h2 class="slide-title">VLearn FailFirst: Buộc tự thử → Chẩn đoán sai → Gợi ý → Tự sửa</h2>
+          <p class="slide-subtitle">Lát cắt một câu: Khái niệm Token trong Bài lab Day01 Foundation</p>
+        </div>
+        <div class="slide-body" style="flex-direction: column; gap: 1rem;">
+          <div class="card blue-highlight" style="padding: 1rem 1.25rem;">
+            <div style="font-weight: 800; color: var(--blue-primary); font-size: 0.85rem;">📌 LÁT CẮT MỘT CÂU (ONE-SENTENCE SLICE):</div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--navy-title); margin-top: 0.2rem;">
+              "Một học viên trước khi xem bài giảng token trả lời bài dự đoán tiếng Việt 99 tiếng → Hệ thống chẩn đoán đúng giả định sai cụ thể M1-M5 → Đưa 1 gợi ý kèm trích dẫn transcript → Học viên tự sửa và giải thích lại được cơ chế mà không cần cho đáp án."
+            </div>
+          </div>
+          
+          <div class="grid-4" style="flex: 1;">
+            <div class="card" style="background: #f0f9ff; border-color: #7dd3fc;">
+              <span class="badge badge-blue">BƯỚC 1</span>
+              <h4 style="margin-top: 0.5rem; color: var(--navy-title);">Dự đoán & Thử</h4>
+              <p style="font-size: 0.82rem; margin-top: 0.4rem; color: var(--navy-dark);">Học viên bắt buộc làm bài dự đoán token tiếng Việt trước khi được xem video/slide bài giảng.</p>
+            </div>
+            <div class="card" style="background: #fce7f3; border-color: #f472b6;">
+              <span class="badge badge-pink">BƯỚC 2</span>
+              <h4 style="margin-top: 0.5rem; color: var(--navy-title);">Chẩn đoán Lỗi</h4>
+              <p style="font-size: 0.82rem; margin-top: 0.4rem; color: var(--navy-dark);">LLM chẩn đoán giả định sai M1-M5. Phân biệt rõ DUNG / LOW / OUT / XIN để không đoán bừa.</p>
+            </div>
+            <div class="card" style="background: #f0f9ff; border-color: #7dd3fc;">
+              <span class="badge badge-blue">BƯỚC 3</span>
+              <h4 style="margin-top: 0.5rem; color: var(--navy-title);">Gợi ý Bậc 1</h4>
+              <p style="font-size: 0.82rem; margin-top: 0.4rem; color: var(--navy-dark);">Đưa 1 gợi ý ngắn + mã trích dẫn transcript. KHÔNG LỘ ĐÁP ÁN (100% Deterministic Guard Check).</p>
+            </div>
+            <div class="card" style="background: #ecfdf5; border-color: #34d399;">
+              <span class="badge badge-emerald">BƯỚC 4</span>
+              <h4 style="margin-top: 0.5rem; color: var(--navy-title);">Tự sửa & Mở giảng</h4>
+              <p style="font-size: 0.82rem; margin-top: 0.4rem; color: var(--navy-dark);">Học viên tự sửa câu trả lời. Giải thích lại đúng cơ chế mới chính thức mở khoá phần giảng đầy đủ.</p>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 4 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: TECH ARCHITECTURE & 4 CLASSES -->
+      <div class="slide" id="slide-5">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-gears"></i> §4-§5. KIẾN TRÚC KỸ THUẬT & 4 LỚP CHỖ KHÓ</span>
+          <h2 class="slide-title">Tiktoken Thật + OpenRouter GPT-4.1-mini + Hậu kiểm Luật cứng</h2>
+          <p class="slide-subtitle">Thiết kế thiên về THỪA NHẬN KHÔNG BIẾT (LOW/OUT) để bảo vệ tư duy học viên</p>
+        </div>
+        <div class="slide-body grid-2">
+          <div class="card">
+            <h3 class="card-title"><i class="fa-solid fa-code"></i> Stack Kỹ thuật (Mock+ Level)</h3>
+            <ul style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.85rem; margin-top: 0.4rem;">
+              <li><strong>Tiktoken Thật:</strong> Gọi <code style="font-family:var(--font-mono);">tiktoken</code> đếm token chính xác (<code style="font-family:var(--font-mono);">o200k_base</code> vs <code style="font-family:var(--font-mono);">cl100k_base</code>).</li>
+              <li><strong>Core Diagnostic LLM:</strong> OpenRouter API với <code style="font-family:var(--font-mono);">openai/gpt-4.1-mini</code> (temperature=0, JSON mode).</li>
+              <li><strong>Hậu kiểm bằng luật (Guardrails):</strong>
+                <ul style="margin-left: 1.2rem; margin-top: 0.2rem;">
+                  <li><em>Safety:</em> Chặn 100% lộ con số 121, 199 hay cụm "đáp án là".</li>
+                  <li><em>Factuality:</em> Chặn 100% mã trích dẫn bịa không nằm trong transcript.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+          <div class="card pink-highlight">
+            <h3 class="card-title"><i class="fa-solid fa-shield-halved"></i> 4 Lớp Chỗ Khó & Xử lý An toàn</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.55rem; font-size: 0.82rem; margin-top: 0.2rem;">
+              <div><strong>① Trả lời ĐÚNG / Lộ đáp án:</strong> Gán DUNG (chuyển câu hỏi mở rộng) / Hậu kiểm chặn LO_DAP_AN.</div>
+              <div><strong>② Mơ hồ / Thiếu thông tin:</strong> Gán LOW → Hỏi lại 1 câu thu hẹp phạm vi (Nguyên tắc G10).</div>
+              <div><strong>③ Ngoài thẩm quyền / Đòi đáp án:</strong> Gán XIN → Từ chối khéo, giải thích lý do & đổi bằng câu gợi mở.</div>
+              <div><strong>④ Đặc thù Domain & Injection:</strong> Nhận diện M3 (tỷ lệ token cố định) & bọc input trong &lt;&lt;&lt; &gt;&gt;&gt; chống injection.</div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 5 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 6: QUALITY BAR METRICS -->
+      <div class="slide" id="slide-6">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-bullseye"></i> §7. BỘ THƯỚC ĐO CHẤT LƯỢNG (QUALITY BAR)</span>
+          <h2 class="slide-title">Khóa chuẩn ĐẠT tại CP4 — 4 Tiêu chí Đo lường Khách quan</h2>
+          <p class="slide-subtitle">Đánh giá trên Golden Set 28 cases (11 case phát triển từ chatlog thật K4)</p>
+        </div>
+        <div class="slide-body grid-2">
+          <div class="card blue-highlight">
+            <span class="badge badge-blue">METRIC 1 · RELEVANCE</span>
+            <h4 style="color: var(--navy-title); margin-top: 0.4rem;">1. Chẩn đoán Đúng Nhãn</h4>
+            <p style="font-size: 0.85rem; color: var(--navy-dark); margin-top: 0.3rem;">Match exact nhãn mong đợi M1-M5, DUNG, LOW, OUT, XIN trong golden set.</p>
+            <div class="stat-number" style="font-size: 1.8rem; margin-top: 0.4rem;">Target ≥ 80%</div>
+          </div>
+          <div class="card pink-highlight">
+            <span class="badge badge-rose">METRIC 2 · SAFETY (CỨNG)</span>
+            <h4 style="color: var(--navy-title); margin-top: 0.4rem;">2. Không Lộ Đáp Án</h4>
+            <p style="font-size: 0.85rem; color: var(--navy-dark); margin-top: 0.3rem;">Deterministic Regex Check: Chặn 100% con số 121, 199 hay "đáp án là".</p>
+            <div class="stat-number rose" style="font-size: 1.8rem; margin-top: 0.4rem;">Target 100%</div>
+          </div>
+          <div class="card blue-highlight">
+            <span class="badge badge-blue">METRIC 3 · FACTUALITY (CỨNG)</span>
+            <h4 style="color: var(--navy-title); margin-top: 0.4rem;">3. Trích dẫn Hợp lệ</h4>
+            <p style="font-size: 0.85rem; color: var(--navy-dark); margin-top: 0.3rem;">Mã trích dẫn bắt buộc ∈ [T04-049], [T04-051], [T06-134], [T06-136], [T06-155].</p>
+            <div class="stat-number" style="font-size: 1.8rem; margin-top: 0.4rem;">Target 100%</div>
+          </div>
+          <div class="card emerald">
+            <span class="badge badge-emerald">METRIC 4 · LEARNING IMPACT</span>
+            <h4 style="color: var(--navy-title); margin-top: 0.4rem;">4. Chỉ số Học (User Validation)</h4>
+            <p style="font-size: 0.85rem; color: var(--navy-dark); margin-top: 0.3rem;">Học viên ngoài nhóm giải thích lại đúng cơ chế token sau khi tự sửa bài.</p>
+            <div class="stat-number emerald" style="font-size: 1.8rem; margin-top: 0.4rem;">Target ≥ 3/5 người</div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 6 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 7: EVAL RESULTS ITERATIONS -->
+      <div class="slide" id="slide-7">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-vial"></i> §7. KẾT QUẢ ĐÁNH GIÁ TEST CASE QUA CÁC LƯỢT</span>
+          <h2 class="slide-title">Model gpt-4.1-mini ĐẠT Quality Bar với 89% Accuracy (25/28)!</h2>
+          <p class="slide-subtitle">Đối chiếu kết quả thử nghiệm công khai qua 6 iterations trên bộ 28 Golden Cases</p>
+        </div>
+        <div class="slide-body">
+          <div class="card" style="width: 100%; overflow: auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Lượt</th>
+                  <th>Bộ Case & Cấu hình</th>
+                  <th>Đạt cả 3 (%)</th>
+                  <th>Safety (Không lộ)</th>
+                  <th>Factuality (Trích)</th>
+                  <th>Đánh giá Quality Bar</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>v1</td>
+                  <td>21 case · Prompt cơ bản</td>
+                  <td>71% (15/21)</td>
+                  <td>100% (21/21)</td>
+                  <td>100% (21/21)</td>
+                  <td><span class="badge badge-rose">❌ Chưa đạt (&lt;80%)</span></td>
+                </tr>
+                <tr>
+                  <td>v2</td>
+                  <td>21 case · Tối ưu prompt v2</td>
+                  <td>95% (20/21)</td>
+                  <td>100% (21/21)</td>
+                  <td>100% (21/21)</td>
+                  <td><span class="badge badge-emerald">✅ Đạt bar cũ</span></td>
+                </tr>
+                <tr>
+                  <td>v3</td>
+                  <td>28 case (thêm 11 case từ chatlog thật)</td>
+                  <td>89% (25/28)</td>
+                  <td>100% (28/28)</td>
+                  <td>100% (28/28)</td>
+                  <td><span class="badge badge-emerald">✅ ĐẠT BAR</span></td>
+                </tr>
+                <tr>
+                  <td>v4</td>
+                  <td>28 case · OpenRouter gpt-4o-mini</td>
+                  <td>86% (24/28)</td>
+                  <td>96% (27/28) ❌</td>
+                  <td>100% (28/28)</td>
+                  <td><span class="badge badge-rose">❌ Lộ 1 case Safety</span></td>
+                </tr>
+                <tr>
+                  <td>v5</td>
+                  <td>28 case · Sửa Schema (đặt nhãn trước)</td>
+                  <td>57% (16/28) ❌</td>
+                  <td>100% (28/28)</td>
+                  <td>89% (25/28) ❌</td>
+                  <td><span class="badge badge-rose">❌ Prompt Bug!</span></td>
+                </tr>
+                <tr class="highlight-row">
+                  <td>v6</td>
+                  <td>28 case · OpenRouter gpt-4.1-mini</td>
+                  <td><strong>89% (25/28)</strong></td>
+                  <td><strong>100% (28/28)</strong> ✅</td>
+                  <td><strong>100% (28/28)</strong> ✅</td>
+                  <td><span class="badge badge-emerald">🏆 ĐẠT BAR CP5 CHÍNH THỨC</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 7 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 8: FAILURE CASE ANALYSIS -->
+      <div class="slide" id="slide-8">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-bug"></i> §7b. PHÂN TÍCH CA TRƯỢT & PHƯƠNG ÁN KHẮC PHỤC</span>
+          <h2 class="slide-title">Minh bạch nguyên nhân 3/28 ca trượt tại lượt v6 & Hướng xử lý</h2>
+          <p class="slide-subtitle">Không giấu giếm failure cases — Học trực tiếp từ lỗi để cải tiến kiến trúc</p>
+        </div>
+        <div class="slide-body grid-2">
+          <div class="card rose">
+            <h3 class="card-title" style="color: #be185d;"><i class="fa-solid fa-triangle-exclamation"></i> Chi tiết 3 Ca Trượt ở v6</h3>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem; font-size: 0.82rem; margin-top: 0.4rem;">
+              <div><strong>1. Case G18 (DUNG → OUT):</strong> Đoán 130 token (lệch 7.4% &lt; 25%) & giải thích đúng cơ chế. LLM vẫn đẩy về OUT vì coi trả lời đúng là ngoài bank.</div>
+              <div><strong>2. Case G23 (DUNG → OUT - Gốc T11253):</strong> Nêu đúng Byte Pair Encoding, đoán 118 token (lệch 2.5%). LLM vẫn ngần ngại không gán DUNG.</div>
+              <div><strong>3. Case G24 (M1 → OUT - Gốc T10807):</strong> Nhắc tên model <code style="font-family:var(--font-mono);">o200k_base</code> rồi bảo "mã hoá mỗi chữ thành 1 token". LLM bị nhiễu bởi tên model.</div>
+            </div>
+          </div>
+          <div class="card blue-highlight">
+            <h3 class="card-title"><i class="fa-solid fa-wrench"></i> Nguyên nhân Gốc & Giải pháp Tách Luồng</h3>
+            <div style="font-size: 0.85rem; color: var(--navy-dark); display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.4rem;">
+              <div>
+                <strong>📌 Nguyên nhân Gốc:</strong><br>
+                Cả 3 ca đều rơi về OUT, trong đó 2/3 ca là nhãn DUNG. LLM có xu hướng coi "học viên trả lời đúng" là nằm ngoài bank chẩn đoán lỗi nên đẩy ra OUT.
+              </div>
+              <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 12px; border: 1px solid #7dd3fc;">
+                <strong>🛠️ Giải pháp Tách luồng (Decoupled Flow):</strong><br>
+                1. <em>Bước 1:</em> Kiểm tra câu trả lời có đúng cơ chế/con số không (Correctness Checker).<br>
+                2. <em>Bước 2:</em> CHỈ KHI SAI mới đẩy vào Misconception Classifier để gán M1-M5.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 8 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 9: FUTURE IMPROVEMENTS -->
+      <div class="slide" id="slide-9">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-wand-magic-sparkles"></i> §8. KẾ HOẠCH CẢI TIẾN & MỞ RỘNG</span>
+          <h2 class="slide-title">Định hướng nâng cấp nếu có thêm thời gian phát triển dự án</h2>
+          <p class="slide-subtitle">Mở rộng từ Prototype 1 khái niệm Token thành Hệ thống Học tập Thích ứng Toàn diện</p>
+        </div>
+        <div class="slide-body grid-3">
+          <div class="card">
+            <span class="badge badge-blue">CẢI TIẾN 1</span>
+            <h4 style="color: var(--navy-title); margin-top: 0.4rem;">1. Decoupled Validator</h4>
+            <p style="font-size: 0.82rem; color: var(--navy-dark); margin-top: 0.3rem;">Tách bước kiểm tra đúng/sai ra trước. Giảm tỷ lệ gán OUT cho câu trả lời đúng xuống 0%.</p>
+          </div>
+          <div class="card pink-highlight">
+            <span class="badge badge-pink">CẢI TIẾN 2</span>
+            <h4 style="color: var(--navy-title); margin-top: 0.4rem;">2. Multi-Concept Bank</h4>
+            <p style="font-size: 0.82rem; color: var(--navy-dark); margin-top: 0.3rem;">Mở rộng Misconception Bank cho 10+ bài lab (Prompting, RAG, Fine-tuning, Agent Architecture).</p>
+          </div>
+          <div class="card emerald">
+            <span class="badge badge-emerald">CẢI TIẾN 3</span>
+            <h4 style="color: var(--navy-title); margin-top: 0.4rem;">3. Instructor Dashboard</h4>
+            <p style="font-size: 0.82rem; color: var(--navy-dark); margin-top: 0.3rem;">Xây dựng Dashboard cho Giảng viên xem bản đồ nhiệt (heatmap) các misconceptions lớp K4 đang kẹt.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 9 / 10</span>
+        </div>
+      </div>
+
+      <!-- SLIDE 10: CONCLUSION & DEMO CTA -->
+      <div class="slide" id="slide-10">
+        <div class="slide-header">
+          <span class="slide-meta"><i class="fa-solid fa-flag-checkered"></i> §9. KẾT LUẬN & DEMO CALL TO ACTION</span>
+          <h2 class="slide-title">VLearn FailFirst — Giải pháp AI Giáo dục Thực chất</h2>
+          <p class="slide-subtitle">Bằng chứng thật · Quality Bar ĐẠT 89% · Sẵn sàng tích hợp VLearn</p>
+        </div>
+        <div class="slide-body">
+          <div class="card blue-highlight" style="width: 100%; justify-content: center; padding: 2rem;">
+            <h3 style="font-size: 1.5rem; color: var(--navy-title); margin-bottom: 1rem;">🎯 TẠI SAO BGL NÊN CHỌN VLEARN FAILFIRST?</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.95rem;">
+              <div><strong>1. BẰNG CHỨNG & NHU CẦU THỰC TẾ RÕ RÀNG:</strong> Mining 2.555 lượt chatlog K4 + Khảo sát 19 học viên (100% đồng ý thử FailFirst, 84.2% muốn gợi ý/chỉ chỗ sai thay vì đáp án).</div>
+              <div><strong>2. CHẤT LƯỢNG KỸ THUẬT ĐƯỢC CHỨNG MINH BẰNG CON SỐ:</strong> Quality Bar ĐẠT 89% accuracy trên 28 Golden Cases; 100% Safety (chặn lộ đáp án) & 100% Factuality (trích dẫn chuẩn).</div>
+              <div><strong>3. TRIỂN VỌNG MỞ RỘNG KHẢ THI:</strong> Sẵn sàng tích hợp vào VLearn Tutor, mở rộng ngân hàng lỗi cho toàn bộ khóa học AI Foundation.</div>
+            </div>
+            <div style="margin-top: 1.5rem; text-align: center; font-weight: 800; color: var(--pink-dark); font-size: 1.2rem;">
+              🚀 XIN CHÂN THÀNH CẢM ƠN BAN GIÁM KHẢO & HỌC VIÊN LỚP 3A!
+            </div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>VLearn Pitch Deck CP5 — Aura Team</span>
+          <span>Trang 10 / 10</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NAVIGATION CONTROLS -->
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn" title="Trang trước (Phím Mũi tên Trái)"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="nav-btn" id="nextBtn" title="Trang sau (Phím Mũi tên Phải)"><i class="fa-solid fa-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 10;
+
+    function showSlide(n) {
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(`slide-${n}`);
+      if (target) {
+        target.classList.add('active');
+        currentSlide = n;
+      }
+    }
+
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (currentSlide > 1) showSlide(currentSlide - 1);
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+      } else if (e.key === 'ArrowLeft') {
+        if (currentSlide > 1) showSlide(currentSlide - 1);
+      }
+    });
+  </script>
+</body>
+</html>
