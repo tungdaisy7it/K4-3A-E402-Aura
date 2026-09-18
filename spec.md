@@ -307,11 +307,22 @@ case gốc thật là 2/11, trên nhóm case nhóm tự nghĩ là 1/17.
 
 **Willing users đã đồng ý** *(tiêu chí 5)*: ① **Bùi Đăng Khoa** · ② **Nguyễn Trung Kiên** — cả hai ngoài nhóm.
 
-**Kế hoạch vòng validation (R6, bonus).** Track D yêu cầu **≥5 người học thật một đoạn**, không phải
-chỉ bấm thử giao diện. Kế hoạch: 5 người × ~10 phút, mỗi người **thực sự làm bài dự đoán** rồi học
-tiếp; Hằng ghi log (nhãn hệ thống gán, học viên có sửa được không, có giải thích lại được không),
-Thạch điều phối. Hai người trong nhóm chấm độc lập chiều "Học được" rồi so — lệch từ 2/5 case trở
-lên thì định nghĩa chưa đủ rõ và phải viết lại.
+**Kế hoạch vòng validation (R6, bonus +8).** Khung và script đã dựng xong trong
+[`validation/`](validation/) — **nhưng chưa chạy buổi test nào**, mọi ô trong log còn trống.
+
+| File | Là gì |
+|---|---|
+| `validation/README.md` | Yêu cầu R6, script phiên 10 phút 5 nhịp, thang bằng chứng 4 tầng, 4 thứ đặc thù track D phải quan sát |
+| `validation/feedback-log.md` | Bảng nhật ký 5 người + chi tiết từng phiên + đối chiếu quality bar điều kiện 4 |
+| `validation/phieu-ghi.md` | Phiếu ghi một phiên, in 5 bản |
+
+Track D yêu cầu ≥5 người **thực sự học một đoạn**, không phải chỉ bấm thử giao diện. Phân công:
+Thạch điều phối và tuyển người, Hằng ghi log và chấm chiều "Học được"; hai người chấm độc lập rồi
+so — lệch từ 2/5 người trở lên thì định nghĩa chưa đủ rõ và phải viết lại (guide §2.6 bước 4).
+
+Bốn thứ mỗi phiên phải ghi được: (1) số họ đoán và lý do nguyên văn · (2) hệ thống gán nhãn gì và
+nhãn đó có đúng với điều họ đang nghĩ · (3) họ tự sửa được ở bậc mấy · (4) ở bước chốt hiểu họ
+giải thích lại đúng cơ chế hay chỉ nhắc lại kết quả — **mục 4 chính là chỉ số học ở §7 điều kiện 4**.
 
 ---
 
@@ -326,6 +337,10 @@ lên thì định nghĩa chưa đủ rõ và phải viết lại.
 | 16/9 ~20:10 | **Lượt eval v2: 20/21 (95%)** | Sau khi sửa |
 | 17/9 | Vẽ lại sơ đồ luồng: bỏ ký hiệu, gom 3 nhánh quay lại vào một điểm, duỗi thẳng thang bậc 1–2–3 | Nhánh đi loạn, và sơ đồ cũ chưa khớp 5 nhãn thật trong code |
 | **17/9 09:15** | **Chốt quality bar §7** (commit `7d65c2e`) | CP4. Bar chốt **trước** khi chạy bộ 28 case — kiểm bằng thứ tự commit |
+| 17/9 19:5x | Tách nội dung ra `content/noi-dung.json`, mở rộng **2 → 8 bài học**, thêm kiểu bài trắc nghiệm, dựng lại giao diện thành app khoá học có sidebar và tiến độ | Phản hồi trong nhóm: một bài cho cả buổi học thì không đủ để đánh giá; và bốn câu hỏi về chức năng (tài liệu nạp từ đâu · trả lời đúng thì hiện gì · thêm bài được không · trích nguồn ở đâu) đều chỉ vào cùng một chỗ yếu là nội dung bị hardcode |
+| 18/9 | **Merge nhánh `vlearn-ui`** — giữ cả hai giao diện: UI 8 bài ở `/`, UI của Bảo ở `/vlearn`; endpoint `/api/bai-hoc` đọc 6 transcript thật | Nhánh đó rút `DOAN_VAN` xuống một câu, nhận vào thì đoạn văn không còn 99 tiếng / 121 token, golden set và bar đã khoá mất hiệu lực → **từ chối thay đổi đó**, giữ `core.py` bản main |
+| 18/9 | `run_eval.py` thử lại 4 lần có giãn cách, tách **lỗi hạ tầng** khỏi lỗi chất lượng trong bảng kết quả | Lượt chạy sau merge có 4 case không đo được vì free tier chặn theo số request đang bay (HTTP 402). Case không đo được vẫn tính TRƯỢT ở dòng "toàn bộ bộ" để không làm số đẹp lên |
+| ⬜ **chưa có** | **Thay đổi từ feedback người thử** — R6 yêu cầu ≥1 dòng | Chưa chạy buổi validation nào. Dòng này để trống có chủ đích, **không điền trước** |
 | 17/9 09:16 | Mở rộng golden set 21 → **28 case**, trong đó **11 case có gốc thật** dẫn `turn_id`; chốt ngưỡng `DUNG` = sai lệch ≤25% | Bịt lỗ hổng R4 "≥10 case từ chatlog thật" đã tự khai ở §10 mục 2 |
 | 17/9 09:16 | **Lượt eval v3: 25/28 (89%)** — đạt bar | Chạy **sau** khi bar đã khoá |
 
@@ -345,7 +360,7 @@ lên thì định nghĩa chưa đủ rõ và phải viết lại.
 | 4 | **Nội dung trích dẫn transcript** | ✅ **ĐÃ SỬA.** Mã đoạn và nguyên văn câu trích nay nạp từ `content/noi-dung.json`, hiện ở cả khối chẩn đoán lẫn màn mở khoá. **Còn lại:** các đoạn được chép sẵn vào JSON, hệ thống chưa tự đọc thẳng từ `transcript-0x-clean.md` vì pack không được commit | R3 lớp ① |
 | 4b | **Golden set cho 7 bài còn lại** | **CHƯA CÓ.** Hệ thống nay có **8 bài học** (5 bài Day 01 + 3 bài Day 02), nhưng golden set 28 case **chỉ phủ bài Token**. Bảy bài kia mới thử tay: 12/12 ca đúng trên 6 bài, 6/6 trên bài Temperature. **Con số 93% chỉ nói về bài Token** | R4 — phát sinh sau khi chốt bar, khai thêm để không giấu |
 | 5 | **Log phiên cho giảng viên** | **CHỈ HIỆN RA MÀN HÌNH**, chưa ghi ra file, chưa có màn hình riêng cho giảng viên | Đích xa của D2, đã khai trong non-goals |
-| 6 | **Vòng validation 5 người học thật** | **CHƯA CHẠY.** Có 2 willing user đã đồng ý, còn thiếu 3 người | R6 (bonus +8) và **chỉ số học ở quality bar §7 điều kiện 4** — nếu không chạy được thì nhóm khai là không đo được, không tự cho điểm |
+| 6 | **Vòng validation 5 người học thật** | **CHƯA CHẠY.** Thư mục `validation/` đã có khung, script phiên và phiếu ghi — nhưng **không có một dòng dữ liệu thật nào**. Có 2 willing user đã đồng ý (Khoa, Kiên), còn thiếu 3 người. Nhóm **không điền sẵn quote** vì bịa lời của người có tên thì nặng hơn mất điểm | R6 (bonus +8, đang **0/8**) và **chỉ số học ở quality bar §7 điều kiện 4** — nếu không chạy được thì khai là không đo được, không tự cho điểm |
 | 7 | **Ngưỡng "số hợp lý"** | ✅ **ĐÃ CHỐT** — sai lệch ≤25% so với số thật, ghi vào prompt và `golden_set.json`. Nhưng **ngưỡng đúng mà model vẫn không gán `DUNG`**: `G18` và `G23` vẫn trượt ở v3. Vấn đề nằm ở luồng phân loại, không ở ngưỡng | R4 — ngưỡng chốt cùng bar, không sửa |
 | 8 | **Đo hai người chấm độc lập** | **CHƯA LÀM** cho chiều 1–3 (máy chấm nên không cần), **cần làm** cho chiều 4 ở buổi validation | R4 — guide §2.6 bước 4 |
 | 9 | **Bước chốt hiểu vẫn chấm bằng luật** | **CÒN MOCK.** Nay dùng danh sách từ khoá riêng cho từng bài trong `noi-dung.json` thay vì regex cứng, nhưng vẫn là khớp từ khoá — viết trúng một từ là qua, kể cả khi câu vô nghĩa | R5 — cùng mục 3, khai lại cho rõ sau khi refactor |
