@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VLearn FailFirst — Pitch Slide CP5 (Nhóm Aura)</title>
+  
+  <!-- Google Fonts: Quicksand & Plus Jakarta Sans & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* PASTEL PINK LIGHT THEME DESIGN SYSTEM */
+    :root {
+      --bg-main: #fff5f8;
+      --bg-gradient: linear-gradient(135deg, #fff0f5 0%, #fff5f8 50%, #fdf2f8 100%);
+      --bg-card: #ffffff;
+      
+      --pink-primary: #ec4899;
+      --pink-gradient: linear-gradient(135deg, #f43f5e 0%, #ec4899 50%, #d946ef 100%);
+      --pink-dark: #be185d;
+      --pink-medium: #f472b6;
+      --pink-light: #fce7f3;
+      
+      --border-color: rgba(244, 114, 182, 0.25);
+      --border-strong: rgba(236, 72, 153, 0.4);
+      --shadow-soft: 0 10px 30px rgba(236, 72, 153, 0.08);
+      --shadow-hover: 0 15px 35px rgba(236, 72, 153, 0.15);
+
+      --text-main: #27272a;
+      --text-title: #831843;
+      --text-muted: #701a75;
+      --text-sub: #64748b;
+      
+      --font-title: 'Quicksand', 'Plus Jakarta Sans', sans-serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      user-select: none;
+    }
+
+    /* APP CONTAINER */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    /* SLIDE STAGE - FULL HEIGHT */
+    .slide-stage {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 2.8rem 4.5rem 4rem 4.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.98) translateY(12px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    /* SLIDE HEADER & FOOTER */
+    .slide-header {
+      margin-bottom: 1.2rem;
+    }
+
+    .slide-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--pink-dark);
+      background: var(--pink-light);
+      padding: 0.25rem 0.85rem;
+      border-radius: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .slide-title {
+      font-family: var(--font-title);
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--text-title);
+    }
+
+    .slide-subtitle {
+      font-size: 1rem;
+      color: var(--text-sub);
+      margin-top: 0.35rem;
+      font-weight: 500;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      gap: 1.5rem;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
+    .slide-footer {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1.5px dashed var(--pink-light);
+      padding-top: 0.6rem;
+      margin-top: 1rem;
+      font-size: 0.84rem;
+      color: var(--text-sub);
+      font-weight: 600;
+    }
+
+    /* CARD GRID SYSTEM */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; width: 100%; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; width: 100%; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; }
+    .grid-60-40 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.4rem; width: 100%; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.4rem;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-hover);
+      border-color: var(--border-strong);
+    }
+
+    .card.pink-highlight {
+      background: linear-gradient(145deg, #ffffff 0%, #fff0f6 100%);
+      border-color: var(--pink-medium);
+    }
+
+    .card.emerald { border-color: rgba(16, 185, 129, 0.4); background: #f0fdf4; }
+    .card.cyan { border-color: rgba(6, 182, 212, 0.4); background: #ecfeff; }
+    .card.rose { border-color: rgba(244, 63, 94, 0.4); background: #fff1f2; }
+
+    .card-title {
+      font-family: var(--font-title);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-title);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .card-title i {
+      color: var(--pink-primary);
+    }
+
+    .stat-number {
+      font-size: 2.6rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      line-height: 1;
+      margin: 0.3rem 0;
+      color: var(--pink-dark);
+    }
+
+    .stat-number.rose { color: #e11d48; }
+    .stat-number.amber { color: #d97706; }
+
+    .stat-label {
+      font-size: 0.84rem;
+      color: var(--text-main);
+      line-height: 1.4;
+      font-weight: 500;
+    }
+
+    /* BADGES & PILLS */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 12px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    .badge-pink { background: #fce7f3; color: #be185d; border: 1px solid #f472b6; }
+    .badge-emerald { background: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+    .badge-amber { background: #fef3c7; color: #92400e; border: 1px solid #fbbf24; }
+    .badge-rose { background: #ffe4e6; color: #9f1239; border: 1px solid #fb7185; }
+    .badge-cyan { background: #cff4fc; color: #055160; border: 1px solid #6edff6; }
+
+    .code-pill {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      background: #fdf2f8;
+      padding: 0.15rem 0.45rem;
+      border-radius: 6px;
+      color: #9d174d;
+      border: 1px solid #fbcfe8;
+      font-weight: 600;
+    }
+
+    /* LIST & TABLES */
+    ul.custom-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    ul.custom-list li {
+      position: relative;
+      padding-left: 1.5rem;
+      font-size: 0.91rem;
+      color: #3f3f46;
+      line-height: 1.45;
+    }
+
+    ul.custom-list li::before {
+      content: "🌸";
+      position: absolute;
+      left: 0;
+      font-size: 0.88rem;
+    }
+
+    ul.custom-list li strong {
+      color: var(--text-title);
+    }
+
+    .quote-box {
+      border-left: 3.5px solid var(--pink-primary);
+      background: #fff0f6;
+      padding: 0.65rem 0.95rem;
+      border-radius: 0 12px 12px 0;
+      margin: 0.4rem 0;
+      font-style: italic;
+      color: #831843;
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .data-table th, .data-table td {
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+      border-bottom: 1px solid var(--pink-light);
+    }
+
+    .data-table th {
+      color: var(--text-title);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.74rem;
+      letter-spacing: 0.04em;
+      background: #fdf2f8;
+    }
+
+    /* SLIDE 1 COVER LAYOUT */
+    .cover-layout {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+
+    .cover-title {
+      font-family: var(--font-title);
+      font-size: 3.8rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.8rem;
+      background: var(--pink-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .cover-subtitle {
+      font-size: 1.35rem;
+      color: var(--text-muted);
+      margin-bottom: 1.6rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.1rem;
+      margin-top: 1.2rem;
+    }
+
+    .member-card {
+      background: #ffffff;
+      border: 1.5px solid var(--border-color);
+      border-radius: 18px;
+      padding: 1.1rem;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .member-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--pink-primary);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .member-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--pink-light);
+      color: var(--pink-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.5rem auto;
+      font-size: 1.25rem;
+    }
+
+    .member-name {
+      font-weight: 700;
+      font-size: 0.98rem;
+      color: var(--text-title);
+    }
+
+    .member-role {
+      font-size: 0.8rem;
+      color: var(--pink-primary);
+      font-weight: 700;
+      margin: 0.15rem 0 0.4rem 0;
+    }
+
+    .member-task {
+      font-size: 0.76rem;
+      color: var(--text-sub);
+      line-height: 1.35;
+    }
+
+    /* SLIDE 4 FLOW DIAGRAM */
+    .flow-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      width: 100%;
+    }
+
+    .flow-item {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      background: #ffffff;
+      padding: 0.7rem 0.95rem;
+      border-radius: 12px;
+      border: 1.5px solid var(--pink-light);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .flow-badge {
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .flow-desc {
+      font-size: 0.85rem;
+      color: #3f3f46;
+      font-weight: 500;
+    }
+
+    /* MINIMAL FLOATING BOTTOM CONTROLS */
+    .floating-nav {
+      position: fixed;
+      bottom: 12px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.92);
+      border: 1.5px solid var(--pink-light);
+      padding: 0.4rem 0.9rem;
+      border-radius: 30px;
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.15);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+    }
+
+    .nav-btn-group {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .btn-nav {
+      background: #ffffff;
+      border: 1px solid var(--pink-light);
+      color: var(--pink-dark);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .btn-nav:hover:not(:disabled) {
+      background: var(--pink-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .dots-container {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #fbcfe8;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      width: 22px;
+      border-radius: 10px;
+      background: var(--pink-gradient);
+    }
+
+    .btn-floating-action {
+      background: var(--pink-light);
+      border: 1px solid var(--border-color);
+      color: var(--pink-dark);
+      padding: 0.3rem 0.7rem;
+      border-radius: 15px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s;
+    }
+
+    .btn-floating-action:hover {
+      background: var(--pink-gradient);
+      color: #ffffff;
+    }
+
+    /* PRINT STYLES */
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
+
+      body {
+        overflow: visible !important;
+        background: #fff5f8 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .floating-nav {
+        display: none !important;
+      }
+
+      .app-container {
+        height: auto !important;
+        display: block !important;
+      }
+
+      .slide-stage {
+        display: block !important;
+      }
+
+      .slide {
+        position: relative !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        padding: 2.5rem 3.5rem !important;
+        box-sizing: border-box !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- SLIDE STAGE -->
+  <main class="slide-stage">
+
+    <!-- SLIDE 1: COVER -->
+    <section class="slide active" id="slide-1">
+      <div class="cover-layout">
+        <div style="display: flex; gap: 0.6rem; margin-bottom: 0.8rem;">
+          <span class="badge badge-pink"><i class="fa-solid fa-sparkles"></i> Mini Hackathon AI Batch 04</span>
+          <span class="badge badge-emerald"><i class="fa-solid fa-heart"></i> CP5 Slide &amp; Video Backup</span>
+          <span class="badge badge-cyan"><i class="fa-solid fa-ribbon"></i> Track D2 · Lớp 3A · E402</span>
+        </div>
+        
+        <h1 class="cover-title">VLearn FailFirst ✨</h1>
+        <p class="cover-subtitle">
+          Chẩn đoán giả định sai &amp; Gợi ý không lộ đáp án cho học viên làm Lab AI<br>
+          <span style="font-size: 1.05rem; color: #ec4899; font-weight: 700;">
+            "Đảm bảo học viên tự thử và chỉ ra chỗ nghĩ sai trước khi xem lời giải"
+          </span>
+        </p>
+
+        <div style="background: #ffffff; border: 2px dashed var(--pink-medium); border-radius: 18px; padding: 1.1rem; margin-bottom: 1rem; box-shadow: var(--shadow-soft);">
+          <div style="font-size: 0.82rem; color: var(--pink-dark); font-weight: 800; text-transform: uppercase; margin-bottom: 0.3rem;">
+            🎯 Lát cắt một câu (Single-Sentence Cut)
+          </div>
+          <p style="font-size: 0.95rem; color: #3f3f46; line-height: 1.45; font-weight: 500;">
+            Một học viên <strong>trước khi xem phần giảng về token</strong>, làm bài dự đoán số token tiếng Việt 99 tiếng &rarr; Hệ thống chẩn đoán <strong>giả định sai cụ thể (M1–M5)</strong> kèm trích dẫn transcript, tuyệt đối <strong>không đưa đáp án</strong> &rarr; Học viên <strong>tự sửa và giải thích lại được</strong> cơ chế tokenizer.
+          </p>
+        </div>
+
+        <div class="team-grid">
+          <div class="member-card">
+            <div class="member-avatar"><i class="fa-solid fa-crown"></i></div>
+            <div class="member-name">Lê Thanh Tùng</div>
+            <div class="member-role">Nhóm trưởng / Spec</div>
+            <div class="member-task">Viết spec.md §1–§9, chốt lát cắt, khoá quality bar, nộp CP1–CP5</div>
+          </div>
+          <div class="member-card">
+            <div class="member-avatar"><i class="fa-solid fa-chart-pie"></i></div>
+            <div class="member-name">Đậu Văn Thạch</div>
+            <div class="member-role">Evidence &amp; Users</div>
+            <div class="member-task">Mining 2.555 lượt chatlog K4, quy tắc đếm, tuyển 5 người validation</div>
+          </div>
+          <div class="member-card">
+            <div class="member-avatar"><i class="fa-solid fa-brain"></i></div>
+            <div class="member-name">Nguyễn Thu Hằng</div>
+            <div class="member-role">AI Diagnosis &amp; Eval</div>
+            <div class="member-task">Dựng bank M1–M5, prompt 2 bậc, golden set 28 case &amp; eval v1–v6</div>
+          </div>
+          <div class="member-card">
+            <div class="member-avatar"><i class="fa-solid fa-laptop-code"></i></div>
+            <div class="member-name">Đinh Quốc Bảo</div>
+            <div class="member-role">Prototype &amp; Media</div>
+            <div class="member-task">Dựng web app, đếm tiktoken thật, quay video CP3 &amp; demo dự phòng CP5</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="slide-footer">
+        <span>Slide 1 / 6 💖</span>
+        <span>Phòng E402 · Track D2 (Học từ lỗi trước) · Nhóm Aura 🎀</span>
+      </footer>
+    </section>
+
+    <!-- SLIDE 2: PAIN POINT & EVIDENCE -->
+    <section class="slide" id="slide-2">
+      <header class="slide-header">
+        <div class="slide-meta"><i class="fa-solid fa-magnifying-glass"></i> Bằng chứng thực tế · Data Mining</div>
+        <h2 class="slide-title">Nỗi đau: Có đáp án quá sớm làm triệt tiêu bước tự thử 💔</h2>
+        <p class="slide-subtitle">Mining từ 2.555 lượt tự gõ của 384 học viên K4 (09/09–15/09/2026) trong chatlog VLearn Tutor</p>
+      </header>
+
+      <div class="slide-body grid-60-40">
+        <div class="card pink-highlight">
+          <div class="card-title" style="color: #be185d;">
+            <i class="fa-solid fa-circle-exclamation" style="color: #f43f5e;"></i> Thống kê hành vi thực tế từ Chatlog K4
+          </div>
+
+          <div class="grid-2" style="margin-bottom: 0.9rem;">
+            <div style="background: #ffe4e6; padding: 0.8rem; border-radius: 14px; border: 1px solid #f472b6;">
+              <div class="stat-number rose">103</div>
+              <div class="stat-label">Lượt (38 học viên) <strong>dán nguyên đề bài hoặc đòi full code / đáp án</strong> ngay từ đầu.</div>
+            </div>
+            <div style="background: #fef3c7; padding: 0.8rem; border-radius: 14px; border: 1px solid #fcd34d;">
+              <div class="stat-number amber">55 / 65</div>
+              <div class="stat-label">Lượt học viên báo bài chạy sai nhưng AI Tutor chỉ <strong>giảng lại khái niệm chung chung</strong>.</div>
+            </div>
+          </div>
+
+          <ul class="custom-list">
+            <li><strong>AI Tutor hiện tại không chẩn đoán lỗi:</strong> <span class="code-pill">ask_probing_question</span> chỉ xuất hiện <strong>28 / 13.494 lượt (0,2%)</strong> trong toàn pack.</li>
+            <li><strong>Hậu quả cốt lõi:</strong> Học viên qua được bài lab nhưng <strong>không biết mình sai ở đâu</strong>. Kiến thức nền tảng (Token, Context, API Cost) bị hổng ở các bài sau.</li>
+            <li><strong>Giảng viên mù thông tin:</strong> Hệ thống không ghi nhận nhãn lỗi hay mức độ hiểu bài của từng cá nhân.</li>
+          </ul>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <div class="card">
+            <div class="card-title" style="font-size: 0.95rem;">
+              <i class="fa-solid fa-comments" style="color: #ec4899;"></i> Trích dẫn nguyên văn chatlog
+            </div>
+            <div class="quote-box">
+              "gửi full code luôn đi" <br><span style="font-size: 0.72rem; color: #9d174d; font-weight: 700;">&mdash; Turn T10972</span>
+            </div>
+            <div class="quote-box">
+              "chỉ tôi chi tiết từng bước làm" <br><span style="font-size: 0.72rem; color: #9d174d; font-weight: 700;">&mdash; Turn T10971</span>
+            </div>
+            <div class="quote-box">
+              "tiktoken là gì... sao task lại tốn token chi phí" <br><span style="font-size: 0.72rem; color: #9d174d; font-weight: 700;">&mdash; Turn T11169 &amp; T13070</span>
+            </div>
+          </div>
+
+          <div class="card emerald">
+            <div class="card-title" style="color: #047857; font-size: 0.95rem;">
+              <i class="fa-solid fa-seedling" style="color: #10b981;"></i> Định hướng Productive Failure
+            </div>
+            <p style="font-size: 0.84rem; color: #064e3b; line-height: 1.45; font-weight: 500;">
+              Buộc học viên <strong>phải thử đoán và mắc lỗi trước</strong>. Khi sai, AI không cho đáp án mà đưa ra <strong>chẩn đoán đúng giả định sai</strong> để họ tự suy luận lại.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="slide-footer">
+        <span>Slide 2 / 6 🌸</span>
+        <span>Evidence: Nguồn data/vlearn-pack/chatlog/tutor_turns.csv</span>
+      </footer>
+    </section>
+
+    <!-- SLIDE 3: SOLUTION & DESIGN -->
+    <section class="slide" id="slide-3">
+      <header class="slide-header">
+        <div class="slide-meta"><i class="fa-solid fa-shapes"></i> Giải pháp &amp; Nguyên tắc thiết kế</div>
+        <h2 class="slide-title">VLearn FailFirst: Chẩn đoán 2 Bậc &amp; Trích dẫn Nguồn 🎀</h2>
+        <p class="slide-subtitle">Không chấm điểm, không khoá học viên — Thiết kế theo nguyên tắc HAX &amp; Google PAIR</p>
+      </header>
+
+      <div class="slide-body grid-3">
+        <!-- Col 1: Misconception Bank -->
+        <div class="card pink-highlight">
+          <div class="card-title" style="color: #be185d;">
+            <i class="fa-solid fa-tags" style="color: #ec4899;"></i> Misconception Bank (M1–M5)
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 0.5rem; font-weight: 600;">Dựng từ 67 lượt hỏi về Token thật:</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.8rem;">
+            <div style="background: #ffffff; padding: 0.45rem 0.6rem; border-radius: 8px; border-left: 3.5px solid #ec4899; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+              <strong style="color: #be185d;">M1:</strong> Đếm token theo từ/tiếng (1 tiếng = 1 token).
+            </div>
+            <div style="background: #ffffff; padding: 0.45rem 0.6rem; border-radius: 8px; border-left: 3.5px solid #06b6d4; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+              <strong style="color: #0e7490;">M2:</strong> Đếm token theo ký tự/byte.
+            </div>
+            <div style="background: #ffffff; padding: 0.45rem 0.6rem; border-radius: 8px; border-left: 3.5px solid #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+              <strong style="color: #b45309;">M3:</strong> Nhầm tỉ lệ token tiếng Việt luôn gấp 2 lần tiếng Anh (nhầm <span class="code-pill">cl100k</span> &amp; <span class="code-pill">o200k</span>).
+            </div>
+            <div style="background: #ffffff; padding: 0.45rem 0.6rem; border-radius: 8px; border-left: 3.5px solid #a855f7; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+              <strong style="color: #7e22ce;">M4:</strong> Nhầm token đầu vào vs token đầu ra.
+            </div>
+            <div style="background: #ffffff; padding: 0.45rem 0.6rem; border-radius: 8px; border-left: 3.5px solid #10b981; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+              <strong style="color: #047857;">M5:</strong> Nhầm token với từ ghép / cú pháp lập trình.
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 2: 2-Tier Probing Flow -->
+        <div class="card cyan">
+          <div class="card-title" style="color: #0e7490;">
+            <i class="fa-solid fa-list-check" style="color: #06b6d4;"></i> Quy trình Gợi ý 2 Bậc
+          </div>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.83rem;">
+            <div style="background: #ffffff; padding: 0.65rem; border-radius: 10px; border: 1px solid #6edff6;">
+              <div style="font-weight: 700; color: #0891b2; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-1"></i> Bậc 1: Gợi ý trích dẫn
+              </div>
+              Gắn nhãn M1–M5 &rarr; Đưa 1 gợi ý ngắn kèm mã trích dẫn transcript <span class="code-pill">[T04-049]</span>. KHÔNG cho con số đáp án.
+            </div>
+
+            <div style="background: #ffffff; padding: 0.65rem; border-radius: 10px; border: 1px solid #a5b4fc;">
+              <div style="font-weight: 700; color: #4f46e5; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-2"></i> Bậc 2: Câu hỏi thu hẹp
+              </div>
+              Nếu học viên vẫn kẹt &rarr; Đưa 1 câu hỏi dẫn dắt cụ thể hơn để kiểm tra suy luận.
+            </div>
+
+            <div style="background: #ffffff; padding: 0.65rem; border-radius: 10px; border: 1px solid #6ee7b7;">
+              <div style="font-weight: 700; color: #059669; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-lock-open"></i> Bậc 3: Mở lời giảng đầy đủ
+              </div>
+              Sau 2 lần thử không thành công &rarr; Mở khoá bài giảng gốc (học viên không bao giờ bị tắc kẹt).
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 3: HAX / PAIR Principles -->
+        <div class="card emerald">
+          <div class="card-title" style="color: #047857;">
+            <i class="fa-solid fa-shield-heart" style="color: #10b981;"></i> Nguyên tắc HAX &amp; PAIR
+          </div>
+
+          <ul class="custom-list" style="font-size: 0.82rem;">
+            <li><strong>G1 (Rõ năng lực):</strong> Ô khoá ghi rõ "Trả lời dự đoán trước — sai không sao, đó là chủ đích".</li>
+            <li><strong>G2 (Rõ độ tin cậy):</strong> Hiện <span class="code-pill">model · ms · score</span> và cờ hậu kiểm <span class="code-pill">LO_DAP_AN</span>.</li>
+            <li><strong>G9 (Dễ sửa):</strong> Nút <strong>"Chẩn đoán sai rồi"</strong> huỷ nhãn ngay lập tức, không phạt học viên.</li>
+            <li><strong>G10 (Thu hẹp):</strong> Thà trả nhãn <span class="code-pill">LOW</span> hay <span class="code-pill">OUT</span> chứ không gán lỗi bừa bãi.</li>
+            <li><strong>G11 (Giải thích):</strong> Mọi gợi ý bắt buộc kèm mã trích dẫn thật từ bài giảng.</li>
+          </ul>
+        </div>
+      </div>
+
+      <footer class="slide-footer">
+        <span>Slide 3 / 6 🌷</span>
+        <span>Thiết kế tuân thủ Microsoft HAX Guidelines &amp; Google PAIR Guidebook</span>
+      </footer>
+    </section>
+
+    <!-- SLIDE 4: PROTOTYPE & PATHS -->
+    <section class="slide" id="slide-4">
+      <header class="slide-header">
+        <div class="slide-meta"><i class="fa-solid fa-code"></i> Kiến trúc Prototype &amp; Luồng thực thi</div>
+        <h2 class="slide-title">Lõi AI Thật: Tiktoken + GPT-4.1-mini + Guardrails ⚡</h2>
+        <p class="slide-subtitle">Mức Mock+: AI thật ở lõi chẩn đoán, đếm token thật, kiểm soát an toàn bằng 3 lớp Guardrail</p>
+      </header>
+
+      <div class="slide-body grid-60-40">
+        <!-- Left: 4 Experience Paths -->
+        <div class="card pink-highlight">
+          <div class="card-title" style="color: #be185d;">
+            <i class="fa-solid fa-route" style="color: #ec4899;"></i> 4 Đường đi của trải nghiệm (Experience Paths)
+          </div>
+
+          <div class="flow-container">
+            <div class="flow-item">
+              <div class="flow-badge"><span class="badge badge-emerald">Happy Path</span></div>
+              <div class="flow-desc">Gán nhãn M1–M5 &rarr; Gợi ý Bậc 1 có trích dẫn &rarr; Học viên tự sửa đúng &rarr; Mở bài giảng.</div>
+            </div>
+
+            <div class="flow-item">
+              <div class="flow-badge"><span class="badge badge-amber">Low-Conf (LOW)</span></div>
+              <div class="flow-desc">Học viên gõ thiếu thông tin / "ko biết" &rarr; Hệ thống không đoán bừa, hỏi 1 câu thu hẹp.</div>
+            </div>
+
+            <div class="flow-item">
+              <div class="flow-badge"><span class="badge badge-rose">Failure (OUT)</span></div>
+              <div class="flow-desc">Lỗi ngoài bank &rarr; Nói thẳng "Chưa xếp được lỗi", ghi log giảng viên, không ép vào bank.</div>
+            </div>
+
+            <div class="flow-item">
+              <div class="flow-badge"><span class="badge badge-pink">Correction</span></div>
+              <div class="flow-desc">Học viên bấm <strong>"Chẩn đoán sai rồi"</strong> &rarr; Huỷ nhãn cũ lập tức, cho xếp lại từ đầu.</div>
+            </div>
+
+            <div class="flow-item" style="border-color: rgba(236, 72, 153, 0.4);">
+              <div class="flow-badge"><span class="badge badge-cyan">Đòi đáp án (XIN)</span></div>
+              <div class="flow-desc">Học viên đòi đáp án / Injection &rarr; Nhãn <span class="code-pill">XIN</span>, từ chối khéo, chuyển thành câu hỏi thu hẹp.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Technical Stack & Guardrails -->
+        <div class="card cyan">
+          <div class="card-title" style="color: #0e7490;">
+            <i class="fa-solid fa-microchip" style="color: #06b6d4;"></i> Stack Kỹ thuật &amp; Guardrails
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.83rem;">
+            <div style="background: #ffffff; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: #047857; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-calculator"></i> Đếm Token Chuẩn
+              </div>
+              Thư viện <span class="code-pill">tiktoken</span> chạy mã hoá <span class="code-pill">o200k_base</span> (GPT-4o) &amp; <span class="code-pill">cl100k_base</span> (GPT-4) thật.
+            </div>
+
+            <div style="background: #ffffff; padding: 0.7rem; border-radius: 10px; border: 1px solid var(--border-color);">
+              <div style="font-weight: 700; color: #4f46e5; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-robot"></i> Chẩn đoán LLM Lõi
+              </div>
+              OpenRouter API gọi <span class="code-pill">openai/gpt-4.1-mini</span>, JSON mode, <span class="code-pill">temperature=0</span>. Reasoning trước, chọn nhãn sau.
+            </div>
+
+            <div style="background: #ffe4e6; padding: 0.7rem; border-radius: 10px; border: 1px solid #fb7185;">
+              <div style="font-weight: 700; color: #9f1239; margin-bottom: 0.2rem;">
+                <i class="fa-solid fa-ban"></i> Luật Hậu Kiểm (Determinism)
+              </div>
+              <ul style="padding-left: 1.1rem; color: #881337; line-height: 1.45;">
+                <li><strong>Chặn lộ số đáp án:</strong> Quét regex số <span class="code-pill">121</span> hoặc <span class="code-pill">199</span> trong câu trả lời.</li>
+                <li><strong>Chặn trích dẫn bịa:</strong> Ép mã trích dẫn phải thuộc 5 mã transcript chuẩn.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="slide-footer">
+        <span>Slide 4 / 6 🍓</span>
+        <span>Codebase Python Flask backend + Frontend Vanilla JS / HTML5</span>
+      </footer>
+    </section>
+
+    <!-- SLIDE 5: QUALITY BAR & EVAL RESULTS -->
+    <section class="slide" id="slide-5">
+      <header class="slide-header">
+        <div class="slide-meta"><i class="fa-solid fa-square-poll-vertical"></i> Quality Bar &amp; Kết quả Thực đo</div>
+        <h2 class="slide-title">Đánh giá trên 28 Case Golden Set (89% Đạt Chuẩn) 🎯</h2>
+        <p class="slide-subtitle">Quality Bar được khoá từ 21:00 17/9 (CP4) trước khi chạy Eval bộ 28 case có 11 case chatlog thật</p>
+      </header>
+
+      <div class="slide-body grid-60-40">
+        <!-- Left: Results Table -->
+        <div class="card pink-highlight">
+          <div class="card-title" style="color: #be185d;">
+            <i class="fa-solid fa-clipboard-check" style="color: #ec4899;"></i> Kết quả Đối chiếu Quality Bar (Lượt v6)
+          </div>
+
+          <table class="data-table" style="margin-bottom: 0.75rem;">
+            <thead>
+              <tr>
+                <th>Tiêu chí đánh giá</th>
+                <th>Cam kết Bar</th>
+                <th>Thực đo v6</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Đạt cả 3 tiêu chí máy</strong></td>
+                <td>&ge; 80% case</td>
+                <td><strong style="color: #059669; font-size: 1rem;">89% (25/28)</strong></td>
+                <td><span class="badge badge-emerald">ĐẠT</span></td>
+              </tr>
+              <tr>
+                <td><strong>2. Điều kiện cứng: KHÔNG lộ đáp án</strong></td>
+                <td><strong>100%</strong> (tuyệt đối)</td>
+                <td><strong style="color: #059669; font-size: 1rem;">100% (28/28)</strong></td>
+                <td><span class="badge badge-emerald">ĐẠT</span></td>
+              </tr>
+              <tr>
+                <td><strong>3. Điều kiện cứng: Trích dẫn hợp lệ</strong></td>
+                <td><strong>100%</strong> (tuyệt đối)</td>
+                <td><strong style="color: #059669; font-size: 1rem;">100% (28/28)</strong></td>
+                <td><span class="badge badge-emerald">ĐẠT</span></td>
+              </tr>
+              <tr>
+                <td><strong>4. Chỉ số học (User Validation)</strong></td>
+                <td>&ge; 3/5 người thử</td>
+                <td>Sẵn sàng ở CP5/CP6</td>
+                <td><span class="badge badge-amber">CHỜ VALIDATE</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="background: #ffffff; padding: 0.65rem 0.85rem; border-radius: 10px; border: 1px solid var(--border-color); font-size: 0.81rem; color: #4b5563;">
+            <i class="fa-solid fa-database" style="color: #ec4899;"></i> <strong>Golden Set structure:</strong> 28 cases tổng cộng, trong đó có <strong>11 cases dựng từ Chatlog K4 thật</strong> (dẫn mã <span class="code-pill">T10971</span>, <span class="code-pill">T11037</span>, <span class="code-pill">T11169</span>, <span class="code-pill">T11253</span>...).
+          </div>
+        </div>
+
+        <!-- Right: Iteration History v1-v6 -->
+        <div class="card cyan">
+          <div class="card-title" style="color: #0e7490;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #06b6d4;"></i> Tiến trình Iteration Eval (v1 &rarr; v6)
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.48rem; font-size: 0.8rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 0.45rem 0.65rem; border-radius: 8px; border: 1px solid var(--border-color);">
+              <span>v1 (21 cases gốc)</span>
+              <span class="badge badge-amber">71% (15/21)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 0.45rem 0.65rem; border-radius: 8px; border: 1px solid var(--border-color);">
+              <span>v2 (Sửa prompt + thêm nhãn DUNG)</span>
+              <span class="badge badge-emerald">95% (20/21)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 0.45rem 0.65rem; border-radius: 8px; border: 1px solid var(--border-color);">
+              <span>v3 (Mở rộng 28 cases - 11 real)</span>
+              <span class="badge badge-emerald">89% (25/28)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffe4e6; padding: 0.45rem 0.65rem; border-radius: 8px; border: 1px solid #fb7185;">
+              <span>v4 (Đổi provider &rarr; lộ lỗi schema)</span>
+              <span class="badge badge-rose">86% (Lộ số 96% ❌)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #ffe4e6; padding: 0.45rem 0.65rem; border-radius: 8px; border: 1px solid #fb7185;">
+              <span>v5 (Sửa schema nhầm thứ tự)</span>
+              <span class="badge badge-rose">57% (Trượt nặng ❌)</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #d1fae5; padding: 0.5rem 0.65rem; border-radius: 8px; border: 1.5px solid #34d399;">
+              <span><strong>v6 (gpt-4.1-mini + Reason First)</strong></span>
+              <span class="badge badge-emerald" style="font-size: 0.85rem;">89% (25/28) ✅</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="slide-footer">
+        <span>Slide 5 / 6 💖</span>
+        <span>File kết quả chi tiết: codebase/eval/results-20260917-1112.md</span>
+      </footer>
+    </section>
+
+    <!-- SLIDE 6: LESSONS, HONESTY & BACKUP -->
+    <section class="slide" id="slide-6">
+      <header class="slide-header">
+        <div class="slide-meta"><i class="fa-solid fa-graduation-cap"></i> Bài học, Tự khai &amp; Phương án Dự phòng</div>
+        <h2 class="slide-title">Bài học Kinh nghiệm &amp; Phương án Pitch An toàn 💗</h2>
+        <p class="slide-subtitle">Thành thực với hạn chế, học từ sai sót kỹ thuật và chuẩn bị sẵn sàng cho buổi Pitch 5-7 phút</p>
+      </header>
+
+      <div class="slide-body grid-3">
+        <!-- Col 1: Key Lessons -->
+        <div class="card pink-highlight">
+          <div class="card-title" style="color: #be185d;">
+            <i class="fa-solid fa-heart-crack" style="color: #ec4899;"></i> 3 Bài học Kinh nghiệm Lớn
+          </div>
+
+          <ul class="custom-list" style="font-size: 0.82rem;">
+            <li><strong>Thứ tự JSON Schema quyết định suy luận:</strong> Đặt nhãn <span class="code-pill">nhan</span> trước lý giải khiến LLM đoán mò. Đổi sang <strong>Reasoning trước &rarr; Chọn nhãn sau</strong> giúp tăng từ 57% lên 89%.</li>
+            <li><strong>Đổi provider làm lộ lỗi prompt:</strong> Chuyển sang OpenRouter khiến model copy nguyên ví dụ cú pháp. Cần hậu kiểm luật cứng.</li>
+            <li><strong>Năng lực Model là giới hạn thật:</strong> GPT-4o-mini chỉ đạt 2/6 case khó; nâng lên <span class="code-pill">gpt-4.1-mini</span> đạt 5/6 case.</li>
+          </ul>
+        </div>
+
+        <!-- Col 2: Self-Honesty -->
+        <div class="card rose">
+          <div class="card-title" style="color: #9f1239;">
+            <i class="fa-solid fa-clipboard-check" style="color: #f43f5e;"></i> Minh bạch Tự khai (Chưa xong)
+          </div>
+
+          <ul class="custom-list" style="font-size: 0.82rem;">
+            <li><strong>Evidence:</strong> Có Mining chuẩn B (2.555 lượt), chưa làm Khảo sát chuẩn A (&ge;20 người).</li>
+            <li><strong>Chấm "giải thích lại":</strong> Dùng luật từ khoá Mock frontend, chưa gọi AI chấm tự do.</li>
+            <li><strong>Nội dung trích dẫn:</strong> Mã trích dẫn thật và được hậu kiểm, nhưng văn bản chi tiết còn hardcode.</li>
+            <li><strong>Willing Users:</strong> Có 2 học viên ngoài nhóm đồng ý thử nghiệm (Bùi Đăng Khoa, Nguyễn Trung Kiên).</li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Pitch Backup Plan -->
+        <div class="card emerald">
+          <div class="card-title" style="color: #047857;">
+            <i class="fa-solid fa-video" style="color: #10b981;"></i> Phương án Dự phòng CP5
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 0.7rem; font-size: 0.83rem;">
+            <div style="background: #ffffff; padding: 0.65rem; border-radius: 10px; border: 1px solid #6ee7b7;">
+              <strong style="color: #047857;"><i class="fa-solid fa-file-pdf"></i> Slide PDF 6 trang:</strong>
+              Xuất trực tiếp từ HTML này theo đúng quy chuẩn 02-guide.md §5.1 (không gửi link).
+            </div>
+
+            <div style="background: #ffffff; padding: 0.65rem; border-radius: 10px; border: 1px solid #a5b4fc;">
+              <strong style="color: #4338ca;"><i class="fa-solid fa-film"></i> Video Demo Dự phòng:</strong>
+              Quay sẵn toàn bộ thao tác 4 đường trải nghiệm end-to-end (Đinh Quốc Bảo thực hiện).
+            </div>
+
+            <p style="font-size: 0.8rem; color: #065f46; line-height: 1.4; margin-top: 0.2rem; font-weight: 600;">
+              <i class="fa-solid fa-sparkles" style="color: #f59e0b;"></i> Dù hôm pitch rớt mạng hay máy hỏng, buổi thuyết trình vẫn diễn ra trơn tru 100%!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="slide-footer">
+        <span>Slide 6 / 6 💖</span>
+        <span>Cảm ơn Ban Giám Khảo &amp; Các Học Viên đã lắng nghe!</span>
+      </footer>
+    </section>
+
+  </main>
+
+  <!-- MINIMAL FLOATING BOTTOM CONTROLS -->
+  <aside class="floating-nav">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--pink-dark); font-family: var(--font-mono);">
+      <span id="slideCounter" style="color: var(--pink-primary); font-size: 1rem;">1</span>/6
+    </div>
+
+    <div class="dots-container" id="dotsContainer">
+      <div class="dot active" onclick="goToSlide(0)"></div>
+      <div class="dot" onclick="goToSlide(1)"></div>
+      <div class="dot" onclick="goToSlide(2)"></div>
+      <div class="dot" onclick="goToSlide(3)"></div>
+      <div class="dot" onclick="goToSlide(4)"></div>
+      <div class="dot" onclick="goToSlide(5)"></div>
+    </div>
+
+    <div class="nav-btn-group">
+      <button class="btn-nav" onclick="prevSlide()" id="btnPrev" title="Trở về (Arrow Left)">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="btn-nav" onclick="nextSlide()" id="btnNext" title="Tiếp theo (Arrow Right)">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <button class="btn-floating-action" onclick="window.print()">
+      <i class="fa-solid fa-file-pdf"></i> PDF
+    </button>
+  </aside>
+</div>
+
+<script>
+  let currentSlide = 0;
+  const totalSlides = 6;
+
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+  const slideCounter = document.getElementById('slideCounter');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnNext = document.getElementById('btnNext');
+
+  function updateSlideUI() {
+    slides.forEach((slide, idx) => {
+      if (idx === currentSlide) {
+        slide.classList.add('active');
+      } else {
+        slide.classList.remove('active');
+      }
+    });
+
+    dots.forEach((dot, idx) => {
+      if (idx === currentSlide) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+
+    slideCounter.textContent = currentSlide + 1;
+
+    btnPrev.disabled = (currentSlide === 0);
+    btnNext.disabled = (currentSlide === totalSlides - 1);
+  }
+
+  function nextSlide() {
+    if (currentSlide < totalSlides - 1) {
+      currentSlide++;
+      updateSlideUI();
+    }
+  }
+
+  function prevSlide() {
+    if (currentSlide > 0) {
+      currentSlide--;
+      updateSlideUI();
+    }
+  }
+
+  function goToSlide(index) {
+    if (index >= 0 && index < totalSlides) {
+      currentSlide = index;
+      updateSlideUI();
+    }
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'PageDown') {
+      e.preventDefault();
+      nextSlide();
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      prevSlide();
+    } else if (e.key >= '1' && e.key <= '6') {
+      goToSlide(parseInt(e.key) - 1);
+    }
+  });
+
+  // Initialize
+  updateSlideUI();
+</script>
+
+</body>
+</html>
