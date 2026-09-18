@@ -27,11 +27,11 @@ def index():
     return send_from_directory("web", "index.html")
 
 
+
 @app.get("/vlearn")
 def vlearn():
     """Giao diện VLearn (nhánh vlearn-ui) — đọc transcript thật từ vlearn-pack."""
     return send_from_directory("web", "vlearn.html")
-
 
 @app.get("/slide")
 def slide_preview():
