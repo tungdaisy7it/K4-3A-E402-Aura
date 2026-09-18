@@ -16,7 +16,8 @@ from flask import Flask, jsonify, request, send_from_directory
 
 load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
-from failfirst.core import DOAN_VAN, dem_token, chan_doan, su_that  # noqa: E402
+from failfirst.core import (NGUON, chan_doan, danh_sach_bai_tap,  # noqa: E402
+                            dem_token, lay_bai, manh_token, su_that)
 
 app = Flask(__name__, static_folder=None)  # tat static catch-all de khong nuot /api/*
 
@@ -25,6 +26,12 @@ app = Flask(__name__, static_folder=None)  # tat static catch-all de khong nuot 
 def index():
     return send_from_directory("web", "index.html")
 
+
+
+@app.get("/vlearn")
+def vlearn():
+    """Giao diện VLearn (nhánh vlearn-ui) — đọc transcript thật từ vlearn-pack."""
+    return send_from_directory("web", "vlearn.html")
 
 @app.get("/slide")
 def slide_preview():
@@ -49,28 +56,49 @@ def health():
 
 @app.get("/api/bai-tap")
 def bai_tap():
-    st = su_that()
-    return jsonify({"doan_van": DOAN_VAN, "n_tieng": st["n_tieng"]})
+    """Danh sách bài + nội dung một bài. Không bao giờ kèm đáp án."""
+    b = lay_bai(request.args.get("id"))
+    return jsonify({
+        "danh_sach": danh_sach_bai_tap(),
+        "bai": {
+            "id": b["id"], "buoi": b.get("buoi", ""), "phan": b["phan"],
+            "khai_niem": b["khai_niem"], "tieu_de": b["tieu_de"],
+            "bang_chung": b.get("bang_chung", ""), "kieu": b["kieu"],
+            "doan_van": b["doan_van"], "lua_chon": b.get("lua_chon", []),
+            "cau_hoi_so": b["cau_hoi_so"], "cau_hoi_ly_do": b["cau_hoi_ly_do"],
+            "cau_chot_hieu": b["cau_chot_hieu"], "tu_khoa_chot_hieu": b["tu_khoa_chot_hieu"],
+            "co_che_dung": b["co_che_dung"], "n_tieng": len(b["doan_van"].split()),
+        },
+    })
 
 
 @app.post("/api/chan-doan")
 def api_chan_doan():
     d = request.get_json(force=True) or {}
+
     out = chan_doan(
         d.get("so"),
         d.get("ly_do", ""),
         cau_hoi=d.get("cau_hoi"),
         lesson_id=d.get("lesson_id")
     )
-    return jsonify(out)
+
+    return jsonify(chan_doan(d.get("so"), d.get("ly_do", ""), bai_tap_id=d.get("bai_tap")))
+
 
 
 @app.post("/api/mo-khoa")
 def api_mo_khoa():
-    """Chỉ gọi khi học viên đã qua bước chẩn đoán — lúc này mới được thấy sự thật."""
-    st = su_that()
-    st["ti_le_o200k"] = round(st["o200k_base"] / st["n_tieng"], 2)
-    st["ti_le_cl100k"] = round(st["cl100k_base"] / st["n_tieng"], 2)
+    """Chỉ gọi sau khi học viên đã qua bước chẩn đoán — lúc này mới được thấy sự thật."""
+    d = request.get_json(force=True) or {}
+    b = lay_bai(d.get("bai_tap"))
+    st = su_that(b["id"])
+    if st["kieu"] == "dem_token":
+        st["ti_le_o200k"] = round(st["o200k_base"] / st["n_tieng"], 2)
+        st["ti_le_cl100k"] = round(st["cl100k_base"] / st["n_tieng"], 2)
+    st["nguon"] = [{"ma": m, "noi_dung": NGUON.get(m, "")} for m in b["nguon_mo_khoa"]]
+    if st["kieu"] == "dem_token":
+        st["manh_token"] = manh_token(b["doan_van"])
     return jsonify(st)
 
 
@@ -168,14 +196,27 @@ def danh_sach_bai_hoc():
 def chi_tiet_bai_hoc(lid):
     """Trả về nội dung transcript sạch bài học từ vlearn-pack."""
     info = LESSONS_MAP.get(lid, LESSONS_MAP[1])
-    pack_dir = os.path.join(os.path.dirname(__file__), "..", "vlearn-pack", "transcript")
+    # Data pack KHÔNG được commit vào repo (quy định bảo mật của khoá). Ai chạy máy mình
+    # thì trỏ VLEARN_PACK vào thư mục transcript của pack, hoặc copy pack vào
+    # <repo>/vlearn-pack/transcript/ — .gitignore đã chặn thư mục đó.
+    pack_dir = os.environ.get("VLEARN_PACK") or os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "vlearn-pack", "transcript")
     fpath = os.path.join(pack_dir, info["file"])
-    content = ""
-    if os.path.exists(fpath):
+    content, co_pack = "", os.path.exists(fpath)
+    if co_pack:
         with open(fpath, "r", encoding="utf-8") as f:
             content = f.read()
+    else:
+        content = (
+            "> **Chua tim thay transcript bai giang.**\n\n"
+            "Data pack cua khoa khong duoc commit vao repo nop bai. De xem noi dung that, "
+            "dat bien moi truong VLEARN_PACK tro toi thu muc transcript cua pack, "
+            "hoac copy pack vao <repo>/vlearn-pack/transcript/.\n\n"
+            "Phan chan doan loi o trang chu / van chay binh thuong ma khong can pack."
+        )
     
     return jsonify({
+        "co_pack": co_pack,
         "id": lid,
         "title": info["title"],
         "module": info.get("module", "MODULE CHUNG"),

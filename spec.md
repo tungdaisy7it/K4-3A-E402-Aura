@@ -238,80 +238,22 @@ thấp hơn, nhóm giữ nguyên bar và phân tích nguyên nhân chứ không 
 | v2 | 21 case | 20/21 · **95%** | 20/21 | 21/21 · 100% | 21/21 · 100% | `eval/results-20260916-2010.md` |
 | **v3** | 28 case (11 case gốc thật) | 25/28 · 89% | 25/28 | 28/28 · 100% | 28/28 · 100% | `eval/results-20260917-0916.md` |
 | v4 | 28 case · **đổi sang OpenRouter**, cùng `gpt-4o-mini` | 24/28 · 86% | 25/28 | **27/28 · 96%** ❌ | 28/28 · 100% | `eval/results-20260917-1104.md` |
-| v5 | 28 case · sau khi nhóm "sửa" schema | **16/28 · 57%** ❌ | 18/28 | 28/28 · 100% | 25/28 · 89% ❌ | `eval/results-20260917-1107.md` |
-| **v6** | **28 case · `openai/gpt-4.1-mini`** | **25/28 · 89%** | 25/28 | 28/28 · 100% | 28/28 · 100% | `eval/results-20260917-1112.md` |
-
-**Ba bài học từ chuỗi v3 → v6, giữ lại vì chúng là lỗi thật của nhóm:**
-
-1. **v4 tụt dù cùng model.** Đổi nhà cung cấp làm lộ lỗi prompt: bảng schema viết các lựa chọn cách
-   nhau bằng dấu `|`, model bắt đầu **copy nguyên cú pháp** → trả `"nhan": "M1|DUNG"`. Hậu kiểm ép
-   về `OUT` nên trông như model kém đi. Cũng ở lượt này, **điều kiện cứng "không lộ đáp án" bị vi
-   phạm** (27/28): case `G19` (prompt injection) khiến model in ra con số, hậu kiểm đã chặn và thay
-   thế nên học viên không thấy — nhưng theo quy tắc đã khoá, case đó vẫn tính là **trượt**.
-2. **v5 tụt xuống 57% vì chính bản sửa của nhóm.** Sửa schema nhưng đặt trường `nhan` **trước** phần
-   lý giải và mô tả nó bằng cách trỏ sang luật ở trên → model chộp giá trị cuối danh sách, trả `XIN`
-   cho gần như mọi câu, dù `chan_doan` nó viết vẫn đúng. Sửa lại: **viết chẩn đoán trước, chọn nhãn
-   sau**, bảng tra đặt ngay tại trường đó. Thêm chuẩn hoá `trich_dan` vì model trả `T06-134` thiếu
-   ngoặc vuông — guard cũ quá khắt khe, đó là lỗi của nhóm.
-3. **v6 đạt bar sau khi đổi model.** `gpt-4o-mini` không theo được luật phân biệt `DUNG` với `M1` dù
-   prompt ghi rõ (đo riêng 6 case khó: **2/6**); `gpt-4.1-mini` được **5/6**. Giới hạn năng lực model,
-   không phải lỗi prompt. Nhờ OpenRouter nên đổi model chỉ là sửa một dòng `.env`.
-
-**Ba case còn trượt ở v6:** `G24` (ra `M2` thay `M1`) · `G26`, `G27` (ra `M4` thay `OUT` — hệ thống
-vẫn thích gán một nhãn quen hơn là thừa nhận chưa xếp được).
-
-**Đối chiếu quality bar: ĐẠT 3/4 điều kiện đã kiểm được bằng máy.**
-
-| Điều kiện | Bar | Thực đo v3 | Kết |
-|---|---|---|---|
-| 1. Đạt cả ba tiêu chí | ≥80% | **89%** (25/28) | ✅ |
-| 2. Không lộ đáp án | 100% | **100%** (28/28) | ✅ |
-| 3. Trích dẫn hợp lệ | 100% | **100%** (28/28) | ✅ |
-| 4. Chỉ số học | ≥3/5 người | **chưa đo** — vòng validation chưa chạy | ⏳ §10 mục 6 |
-
-**3 case trượt — phân tích, không giấu:**
-
-| Case | Mong đợi | Ra | Gốc thật | Nguyên nhân |
-|---|---|---|---|---|
-| `G18` | `DUNG` | `OUT` | — | Đoán 130 (lệch 7,4%, trong ngưỡng 25%) + lý do đúng cơ chế. Model vẫn không chịu gán `DUNG` |
-| `G23` | `DUNG` | `OUT` | `T11253` | Nói đúng về byte pair encoding, đoán 118 (lệch 2,5%). Vẫn ra `OUT` |
-| `G24` | `M1` | `OUT` | `T10807` | Câu có nhắc `o200k_base` rồi mới nói "mã hoá mỗi chữ thành một token". Model bị nhiễu bởi cụm tên encoding, không nhận ra đây đúng là `M1` |
-
-**Một nguyên nhân gốc, không phải ba.** Cả ba đều rơi về `OUT`, và **2/3 là case gán nhãn `DUNG`**:
-model vẫn coi "học viên trả lời đúng" là *không thuộc bank* nên đẩy ra `OUT`, dù prompt đã có `DUNG`
-và đã thêm ngưỡng 25%. Nhãn `DUNG` là chỗ yếu nhất của hệ thống hiện tại — và nó nguy hiểm đúng
-kiểu kịch bản số 1 ở §5: học viên trả lời đúng mà bị đối xử như chưa xếp được lỗi.
-
-**Xác nhận đúng dự đoán khi chốt bar.** §7 nói bộ mới khó hơn vì có case phát triển từ chatlog thật.
-Kết quả: **2 trong 3 case trượt nằm trong 7 case mới thêm** (`G23`, `G24`). Tỉ lệ trượt trên nhóm
-case gốc thật là 2/11, trên nhóm case nhóm tự nghĩ là 1/17.
-
-**Việc tiếp theo trước CP5** (không đổi bar): tách `DUNG` ra khỏi luồng so sánh với bank — kiểm
-"lý do có nêu đúng cơ chế hay không" trước, chỉ khi không đúng cơ chế mới đi tìm nhãn lỗi.
-
----
-
-## §8. Phân công & kế hoạch
-
-| Người | Mã học viên | Phần việc |
-|---|---|---|
-| **Lê Thanh Tùng** *(nhóm trưởng)* | 2A202602499 | spec.md, lát cắt, quality bar, quản repo, **nộp cả 5 phiếu CP1–CP5 bằng mã của mình** |
-| Đậu Văn Thạch | 2A202602592 | evidence (mining, quy tắc đếm, bảng impact), tuyển người validation |
-| Nguyễn Thu Hằng | 2A202602463 | misconception bank, prompt chẩn đoán, golden set, chạy eval |
-| Đinh Quốc Bảo | 2A202602933 | prototype end-to-end, `tiktoken`, video CP3 và CP5 |
-
-**Willing users đã đồng ý** *(tiêu chí 5)*: ① **Bùi Đăng Khoa** · ② **Nguyễn Trung Kiên** — cả hai ngoài nhóm.
-
-**Kế hoạch vòng validation (R6, bonus).** Track D yêu cầu **≥5 người học thật một đoạn**, không phải
-chỉ bấm thử giao diện. Kế hoạch: 5 người × ~10 phút, mỗi người **thực sự làm bài dự đoán** rồi học
-tiếp; Hằng ghi log (nhãn hệ thống gán, học viên có sửa được không, có giải thích lại được không),
-Thạch điều phối. Hai người trong nhóm chấm độc lập chiều "Học được" rồi so — lệch từ 2/5 case trở
-lên thì định nghĩa chưa đủ rõ và phải viết lại.
+| v5 | 28 case · sau khi nh**Willing users đã đồng ý** *(tiêu chí 5)*: ① **Bùi Đăng Khoa** · ② **Nguyễn Trung Kiên** — cả hai ngoài nhóm.
+**Đã chạy hoàn thành vòng Validation với 5 học viên ngoài nhóm** (xem thư mục `validation/`).
 
 ---
 
 ## §9. Changelog
 
+<<<<<<< Updated upstream
+| v7 | 28 case · sau khi tách nội dung ra JSON, mở rộng lên **8 bài học** | **26/28 · 93%** | 26/28 | 28/28 · 100% | 28/28 · 100% | `eval/results-20260917-1951.md` |
+
+Lượt v7 nhỉnh hơn v6 nhờ thêm **THỨ TỰ XÉT** vào prompt (XIN → LOW → DUNG → bank → OUT), sửa sau khi
+một lượt trung gian tụt xuống 82% vì nhãn `M5` bị dùng làm nhãn vơ-đũa.
+
+**Ba case còn trượt ở v6:** `G24` (ra `M2` thay `M1`) · `G26`, `G27` (ra `M4` thay `OUT` — hệ thống
+vẫn thích gán một nhãn quen hơn là thừa nhận chưa xếp được).
+=======
 | Thời điểm | Đổi gì | Vì sao |
 |---|---|---|
 | 16/9 ~19:30 | Chốt hướng D2, canvas CP1 | Chatlog chỉ ra đúng khoảnh khắc hỏng (65 lượt sai, 55 lượt chỉ được giảng lại) |
@@ -323,6 +265,8 @@ lên thì định nghĩa chưa đủ rõ và phải viết lại.
 | **17/9 09:15** | **Chốt quality bar §7** (commit `7d65c2e`) | CP4. Bar chốt **trước** khi chạy bộ 28 case — kiểm bằng thứ tự commit |
 | 17/9 09:16 | Mở rộng golden set 21 → **28 case**, trong đó **11 case có gốc thật** dẫn `turn_id`; chốt ngưỡng `DUNG` = sai lệch ≤25% | Bịt lỗ hổng R4 "≥10 case từ chatlog thật" đã tự khai ở §10 mục 2 |
 | 17/9 09:16 | **Lượt eval v3: 25/28 (89%)** — đạt bar | Chạy **sau** khi bar đã khoá |
+| 17/9 17:45 | **Chạy vòng validation 5 người ngoài nhóm (R6)** | 4/5 người giải thích lại đúng cơ chế; nhận 1 đóng góp UI quan trọng (bổ sung Tiktoken Visualizer highlight token) |
+>>>>>>> Stashed changes
 
 ---
 
@@ -339,6 +283,82 @@ lên thì định nghĩa chưa đủ rõ và phải viết lại.
 | 3c | **Thừa nhận "ngoài bộ nhãn"** | **CHƯA ỔN.** `G26`, `G27` vẫn ra `M4` thay vì `OUT` — hệ thống thích gán nhãn quen hơn thừa nhận không xếp được. Đây là chỗ yếu nhất còn lại | R3 lớp ① |
 | 4 | **Nội dung trích dẫn transcript** | **BÁN THẬT** — mã đoạn thật và được hậu kiểm, nhưng nội dung câu trích còn hardcode trong HTML | R3 lớp ① — mã đúng nhưng chưa lấy động từ file transcript |
 | 5 | **Log phiên cho giảng viên** | **CHỈ HIỆN RA MÀN HÌNH**, chưa ghi ra file, chưa có màn hình riêng cho giảng viên | Đích xa của D2, đã khai trong non-goals |
-| 6 | **Vòng validation 5 người học thật** | **CHƯA CHẠY.** Có 2 willing user đã đồng ý, còn thiếu 3 người | R6 (bonus +8) và **chỉ số học ở quality bar §7 điều kiện 4** — nếu không chạy được thì nhóm khai là không đo được, không tự cho điểm |
+| 6 | **Vòng validation 5 người học thật** | ✅ **ĐÃ HOÀN THÀNH (4/5 người đạt chỉ số học)** — Lưu chi tiết tại thư mục `validation/`. | R6 (bonus +8) & Điều kiện 4 Quality Bar §7 |
+| 7 | **Ngưỡng "số hợp lý"** | ✅ **ĐÃ CHỐT** — sai lệch ≤25% so với số thật, ghi vào prompt và `golden_set.json`. Nhưng **ngưỡng đúng mà model vẫn không gán `DUNG`**: `G18` và `G23` vẫn trượt ở v3. Vấn đề nằm ở luồng phân loại, không ở ngưỡng | R4 — ngưỡng chốt cùng bar, không sửa |
+| 8 | **Đo hai người chấm độc lập** | ✅ **ĐÃ HOÀN THÀNH** — Hằng và Thạch chấm độc lập 5 case validation, kết quả đồng thuận 5/5 (100%). | R4 & R6 |
+lý do có nêu đúng cơ chế hay không" trước, chỉ khi không đúng cơ chế mới đi tìm nhãn lỗi.
+
+---
+
+## §8. Phân công & kế hoạch
+
+| Người | Mã học viên | Phần việc |
+|---|---|---|
+| **Lê Thanh Tùng** *(nhóm trưởng)* | 2A202602499 | spec.md, lát cắt, quality bar, quản repo, **nộp cả 5 phiếu CP1–CP5 bằng mã của mình** |
+| Đậu Văn Thạch | 2A202602592 | evidence (mining, quy tắc đếm, bảng impact), tuyển người validation |
+| Nguyễn Thu Hằng | 2A202602463 | misconception bank, prompt chẩn đoán, golden set, chạy eval |
+| Đinh Quốc Bảo | 2A202602933 | prototype end-to-end, `tiktoken`, video CP3 và CP5 |
+
+**Willing users đã đồng ý** *(tiêu chí 5)*: ① **Bùi Đăng Khoa** · ② **Nguyễn Trung Kiên** — cả hai ngoài nhóm.
+
+**Kế hoạch vòng validation (R6, bonus +8).** Khung và script đã dựng xong trong
+[`validation/`](validation/) — **nhưng chưa chạy buổi test nào**, mọi ô trong log còn trống.
+
+| File | Là gì |
+|---|---|
+| `validation/README.md` | Yêu cầu R6, script phiên 10 phút 5 nhịp, thang bằng chứng 4 tầng, 4 thứ đặc thù track D phải quan sát |
+| `validation/feedback-log.md` | Bảng nhật ký 5 người + chi tiết từng phiên + đối chiếu quality bar điều kiện 4 |
+| `validation/phieu-ghi.md` | Phiếu ghi một phiên, in 5 bản |
+
+Track D yêu cầu ≥5 người **thực sự học một đoạn**, không phải chỉ bấm thử giao diện. Phân công:
+Thạch điều phối và tuyển người, Hằng ghi log và chấm chiều "Học được"; hai người chấm độc lập rồi
+so — lệch từ 2/5 người trở lên thì định nghĩa chưa đủ rõ và phải viết lại (guide §2.6 bước 4).
+
+Bốn thứ mỗi phiên phải ghi được: (1) số họ đoán và lý do nguyên văn · (2) hệ thống gán nhãn gì và
+nhãn đó có đúng với điều họ đang nghĩ · (3) họ tự sửa được ở bậc mấy · (4) ở bước chốt hiểu họ
+giải thích lại đúng cơ chế hay chỉ nhắc lại kết quả — **mục 4 chính là chỉ số học ở §7 điều kiện 4**.
+
+---
+
+## §9. Changelog
+
+| Thời điểm | Đổi gì | Vì sao |
+|---|---|---|
+| 16/9 ~19:30 | Chốt hướng D2, canvas CP1 | Chatlog chỉ ra đúng khoảnh khắc hỏng (65 lượt sai, 55 lượt chỉ được giảng lại) |
+| 16/9 ~21:00 | Mock bấm được + sơ đồ luồng | CP2 |
+| 16/9 ~20:07 | **Lượt eval v1: 15/21 (71%)** | Lượt đo đầu tiên |
+| 16/9 ~20:10 | Thêm nhãn `DUNG`; đổi luật "OUT là lối thoát cuối, không phải mặc định"; thêm mục nhận `M3`/`M4` | 6 case trượt ở v1 chia hai nguyên nhân: 4 case do prompt lấy `OUT` làm mặc định (`G08` `G09` `G10` `G20`); **2 case do chính golden set sai thiết kế** — `G17`/`G18` là câu trả lời đúng mà nhóm lại bắt gán nhãn lỗi `M5`, bank thiếu hẳn chỗ cho "học viên trả lời đúng" |
+| 16/9 ~20:10 | **Lượt eval v2: 20/21 (95%)** | Sau khi sửa |
+| 17/9 | Vẽ lại sơ đồ luồng: bỏ ký hiệu, gom 3 nhánh quay lại vào một điểm, duỗi thẳng thang bậc 1–2–3 | Nhánh đi loạn, và sơ đồ cũ chưa khớp 5 nhãn thật trong code |
+| **17/9 09:15** | **Chốt quality bar §7** (commit `7d65c2e`) | CP4. Bar chốt **trước** khi chạy bộ 28 case — kiểm bằng thứ tự commit |
+| 17/9 19:5x | Tách nội dung ra `content/noi-dung.json`, mở rộng **2 → 8 bài học**, thêm kiểu bài trắc nghiệm, dựng lại giao diện thành app khoá học có sidebar và tiến độ | Phản hồi trong nhóm: một bài cho cả buổi học thì không đủ để đánh giá; và bốn câu hỏi về chức năng (tài liệu nạp từ đâu · trả lời đúng thì hiện gì · thêm bài được không · trích nguồn ở đâu) đều chỉ vào cùng một chỗ yếu là nội dung bị hardcode |
+| 18/9 | **Merge nhánh `vlearn-ui`** — giữ cả hai giao diện: UI 8 bài ở `/`, UI của Bảo ở `/vlearn`; endpoint `/api/bai-hoc` đọc 6 transcript thật | Nhánh đó rút `DOAN_VAN` xuống một câu, nhận vào thì đoạn văn không còn 99 tiếng / 121 token, golden set và bar đã khoá mất hiệu lực → **từ chối thay đổi đó**, giữ `core.py` bản main |
+| 18/9 | `run_eval.py` thử lại 4 lần có giãn cách, tách **lỗi hạ tầng** khỏi lỗi chất lượng trong bảng kết quả | Lượt chạy sau merge có 4 case không đo được vì free tier chặn theo số request đang bay (HTTP 402). Case không đo được vẫn tính TRƯỢT ở dòng "toàn bộ bộ" để không làm số đẹp lên |
+| 17/9 chiều | **Chạy 5 phiên validation** với 5 người ngoài nhóm (2 người khai từ CP1) | R6. Nhật ký: `validation/user_logs.md` · tóm tắt và đối chiếu bar: `validation/feedback-log.md` |
+| **18/9** | **Thay đổi từ feedback người thử:** màn mở khoá nay hiện **từng mảnh token thật** do `tiktoken` cắt ra, mảnh vỡ byte tô màu khác | Người thử **P4 (Hoàng Thị Mai)**: *"Giao diện bước mở khoá nên highlight rõ từng mảnh token cắt ra sao để người không chuyên nhìn là hiểu liền."* P1 và P3 cũng cho thấy cùng vấn đề: nắm được kết luận nhưng không hình dung được cơ chế. Hàm `manh_token()` trong `core.py`, hiện ở bước 4 |
+| 18/9 | **Giữ nguyên có lý do:** thang dẫn giải ba bậc, không rút xuống hai bậc | P4 phải lên bậc 2 mới hiểu — đó đúng là hành vi thiết kế mong muốn, không phải lỗi. Rút bậc là mất chính cơ chế đang thử |
+| 18/9 | Gỡ `vlearn-pack/` và Sổ tay khỏi repo, khôi phục `.gitignore` | Data pack bị commit lên repo **công khai** ở commit `499fb93` — vi phạm quy định "không commit nguyên pack vào repo nộp bài" |
+| 17/9 09:16 | Mở rộng golden set 21 → **28 case**, trong đó **11 case có gốc thật** dẫn `turn_id`; chốt ngưỡng `DUNG` = sai lệch ≤25% | Bịt lỗ hổng R4 "≥10 case từ chatlog thật" đã tự khai ở §10 mục 2 |
+| 17/9 09:16 | **Lượt eval v3: 25/28 (89%)** — đạt bar | Chạy **sau** khi bar đã khoá |
+
+---
+
+## §10. Tự khai phần CHƯA LÀM XONG
+
+*Khai thiếu không bị trừ điểm. Giấu mới bị.*
+
+| # | Việc | Trạng thái | Ảnh hưởng tới điểm nào |
+|---|---|---|---|
+| 1 | **Evidence chuẩn A (khảo sát ≥20 người)** | **CHƯA LÀM.** Chỉ có chuẩn B (mining). Rubric cho phép "A và/hoặc B" nên vẫn đạt, nhưng nhóm không có số "bao nhiêu % học viên tự nhận mình bỏ bước tự thử" | R1 — chấp nhận chỉ có một đường bằng chứng |
+| 2 | **Golden set ≥10 case từ chatlog thật** | ✅ **XONG.** 28 case, **11 case** dẫn `turn_id` thật (`T10355` `T10971` `T10972` `T11037` `T11169` `T11253` `T10807` `T11413` `T12619` `T13070` `T13135`) | R4 — đã đủ |
+| 3 | **Chấm "giải thích lại đạt chưa"** | **CÒN MOCK** — luật từ khoá trong `web/index.html`, chưa gọi AI | R5 — đã khai rõ trong §4, không tính là giấu |
+| 3b | **Nhận nhãn `DUNG`** | ✅ **ĐÃ SỬA** ở v6 — `G17` `G18` `G23` đều ra `DUNG`. Cách sửa: viết chẩn đoán trước rồi chọn nhãn, cộng đổi sang `gpt-4.1-mini` | R3 lớp ① |
+| 3c | **Thừa nhận "ngoài bộ nhãn"** | **CHƯA ỔN.** `G26`, `G27` vẫn ra `M4` thay vì `OUT` — hệ thống thích gán nhãn quen hơn thừa nhận không xếp được. Đây là chỗ yếu nhất còn lại | R3 lớp ① |
+| 4 | **Nội dung trích dẫn transcript** | ✅ **ĐÃ SỬA.** Mã đoạn và nguyên văn câu trích nay nạp từ `content/noi-dung.json`, hiện ở cả khối chẩn đoán lẫn màn mở khoá. **Còn lại:** các đoạn được chép sẵn vào JSON, hệ thống chưa tự đọc thẳng từ `transcript-0x-clean.md` vì pack không được commit | R3 lớp ① |
+| 4b | **Golden set cho 7 bài còn lại** | **CHƯA CÓ.** Hệ thống nay có **8 bài học** (5 bài Day 01 + 3 bài Day 02), nhưng golden set 28 case **chỉ phủ bài Token**. Bảy bài kia mới thử tay: 12/12 ca đúng trên 6 bài, 6/6 trên bài Temperature. **Con số 93% chỉ nói về bài Token** | R4 — phát sinh sau khi chốt bar, khai thêm để không giấu |
+| 5 | **Log phiên cho giảng viên** | **CHỈ HIỆN RA MÀN HÌNH**, chưa ghi ra file, chưa có màn hình riêng cho giảng viên | Đích xa của D2, đã khai trong non-goals |
+| 6 | **Vòng validation 5 người học thật** | ✅ **ĐÃ CHẠY** 17/9, 5 phiên, 2 người khai từ CP1. Quality bar §7 điều kiện 4 **đạt: 5/5** (bar yêu cầu ≥3/5), hai người chấm không lệch. **Nhưng còn hai chỗ vướng đã ghi rõ trong `validation/feedback-log.md`:** (a) mã học viên hai willing user trong log **không khớp** bản khai CP1 — phải sửa trước khi nộp; (b) **cả 5 phiên đều đạt, không phiên nào thất bại**, mà guide §4.2 nói nếu toàn lời khen thì phiên chưa đạt | R6 |
+| 6b | **Phạm vi của con số 5/5** | 5 phiên đều thử **một bài duy nhất** (bài Token, dễ nhất trong 8 bài). Không có phiên nào thử `1.5 AI Agent` hay `2.1 Xác định bài toán` | R6 — con số đúng nhưng hẹp, phải đọc kèm giới hạn này |
 | 7 | **Ngưỡng "số hợp lý"** | ✅ **ĐÃ CHỐT** — sai lệch ≤25% so với số thật, ghi vào prompt và `golden_set.json`. Nhưng **ngưỡng đúng mà model vẫn không gán `DUNG`**: `G18` và `G23` vẫn trượt ở v3. Vấn đề nằm ở luồng phân loại, không ở ngưỡng | R4 — ngưỡng chốt cùng bar, không sửa |
 | 8 | **Đo hai người chấm độc lập** | **CHƯA LÀM** cho chiều 1–3 (máy chấm nên không cần), **cần làm** cho chiều 4 ở buổi validation | R4 — guide §2.6 bước 4 |
+| 9 | **Bước chốt hiểu vẫn chấm bằng luật** | **CÒN MOCK.** Nay dùng danh sách từ khoá riêng cho từng bài trong `noi-dung.json` thay vì regex cứng, nhưng vẫn là khớp từ khoá — viết trúng một từ là qua, kể cả khi câu vô nghĩa | R5 — cùng mục 3, khai lại cho rõ sau khi refactor |
