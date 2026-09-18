@@ -24,13 +24,27 @@ app = Flask(__name__, static_folder=None)  # tat static catch-all de khong nuot 
 
 @app.get("/")
 def index():
+    """Giao diện chính — bản VLearn (nhánh vlearn-ui / -final).
+
+    Học theo 6 bài giảng thật, đoạn văn bị làm mờ, trả lời đúng mới mở ra.
+    """
+    return send_from_directory("web", "vlearn.html")
+
+
+@app.get("/failfirst")
+def failfirst():
+    """Giao diện 8 bài tập có bank nhãn lỗi riêng.
+
+    Đây là giao diện mà golden set 28 case và quality bar §7 đo trên đó —
+    giữ lại để số đo trong spec vẫn trỏ được vào thứ chạy được.
+    """
     return send_from_directory("web", "index.html")
 
 
 
 @app.get("/vlearn")
 def vlearn():
-    """Giao diện VLearn (nhánh vlearn-ui) — đọc transcript thật từ vlearn-pack."""
+    """Giữ đường cũ cho khỏi vỡ link đã chia sẻ — trùng với trang chủ."""
     return send_from_directory("web", "vlearn.html")
 
 @app.get("/slide")
@@ -74,17 +88,43 @@ def bai_tap():
 
 @app.post("/api/chan-doan")
 def api_chan_doan():
+    """MỘT lời gọi AI cho mỗi request.
+
+    Merge nhánh đã để lại hai lời gọi chồng nhau ở đây: gọi lần đầu có cau_hoi
+    rồi bỏ kết quả, gọi lần hai theo bai_tap rồi trả về lần hai. Vừa tốn gấp
+    đôi tiền và độ trễ, vừa trả kết quả của đường sai. Nay chỉ còn một lời gọi.
+
+    Gọi API thất bại thì KHÔNG để Flask trả 500 — trả về một khối hiển thị
+    được, để giao diện nói rõ chuyện gì xảy ra thay vì sập giữa buổi demo.
+    """
     d = request.get_json(force=True) or {}
-
-    out = chan_doan(
-        d.get("so"),
-        d.get("ly_do", ""),
-        cau_hoi=d.get("cau_hoi"),
-        lesson_id=d.get("lesson_id")
-    )
-
-    return jsonify(chan_doan(d.get("so"), d.get("ly_do", ""), bai_tap_id=d.get("bai_tap")))
-
+    try:
+        return jsonify(chan_doan(
+            d.get("so"),
+            d.get("ly_do", ""),
+            bai_tap_id=d.get("bai_tap"),
+            cau_hoi=d.get("cau_hoi"),
+            lesson_id=d.get("lesson_id"),
+        ))
+    except Exception as e:
+        msg = str(e)
+        if "402" in msg or "credit" in msg.lower():
+            ly_do = ("Tài khoản OpenRouter đã hết credit nên không gọi được mô hình. "
+                     "Nạp thêm tại openrouter.ai/settings/credits rồi thử lại.")
+        elif "429" in msg or "rate" in msg.lower():
+            ly_do = "Nhà cung cấp đang chặn vì gọi quá nhanh. Chờ một chút rồi thử lại."
+        else:
+            ly_do = "Không gọi được mô hình: " + msg[:180]
+        app.logger.warning("chan-doan that bai: %s", msg[:300])
+        return jsonify({
+            "nhan": "LOI",
+            "chan_doan": ly_do,
+            "goi_y": "Trong lúc chờ, bạn cứ viết ra suy nghĩ của mình — câu trả lời "
+                     "vẫn được giữ lại khi hệ thống gọi lại được.",
+            "trich_dan": "", "trich_dan_noi_dung": "",
+            "do_tin": 0, "canh_bao": ["LOI_GOI_API"],
+            "_meta": {"model": os.environ.get("OPENAI_MODEL", "?"), "ms": 0},
+        })
 
 
 @app.post("/api/mo-khoa")

@@ -186,9 +186,26 @@ def _client():
     )
 
 
-def _lo_dap_an(text, st):
+def _su_that_trong_cau_hoi(cau_hoi):
+    """Câu hỏi của /vlearn nhúng sẵn đoạn văn trong dấu ngoặc kép.
+
+    Rút đoạn đó ra và đếm token THẬT bằng tiktoken, rồi đưa con số vào prompt.
+    Vẫn giữ nguyên tắc: không bao giờ để LLM tự đếm token. Không tìm thấy đoạn
+    nào thì trả về rỗng — lúc đó module chỉ chẩn đoán cách nghĩ, không chấm số.
+    """
+    m = re.search(r"[\"“”']([^\"“”']{25,})[\"“”']", cau_hoi or "")
+    if not m:
+        return "(câu hỏi này không kèm đoạn văn để đếm — chỉ chẩn đoán cách nghĩ)", []
+    doan = m.group(1)
+    a, b2 = dem_token(doan, "o200k_base"), dem_token(doan, "cl100k_base")
+    mo_ta = ("- Doan trong cau hoi co %d tieng.\n- o200k_base: %d token.\n- cl100k_base: %d token."
+             % (len(doan.split()), a, b2))
+    return mo_ta, [a, b2]
+
+
+def _lo_dap_an(text, st, so_giau=None):
     """Hậu kiểm: gợi ý có lộ đáp án không? Chạy bằng luật, không hỏi lại LLM."""
-    for so in _so_can_giau(st):
+    for so in (so_giau if so_giau is not None else _so_can_giau(st)):
         if re.search(r"\b%d\b" % so, text):
             return True
     if _lo_dap_an_chon(text, st):
@@ -204,6 +221,9 @@ Học viên phải TỰ SUY NGHĨ TRƯỚC KHI ĐƯỢC XEM PHẦN GIẢNG CHI T
 
 CÂU HỎI HỌC VIÊN ĐANG LÀM:
 "{cau_hoi}"
+
+SỰ THẬT (TUYỆT ĐỐI KHÔNG ĐƯỢC TIẾT LỘ con số cho học viên ở bước này):
+{su_that}
 
 CÁCH CHẨN ĐOÁN:
 1. Đọc câu trả lời của học viên với câu hỏi trên.
@@ -240,12 +260,17 @@ def chan_doan(so_doan, ly_do, model=None, bai_tap_id=None, cau_hoi=None, lesson_
     cites = b["trich_dan_cho_phep"]
     model = model or os.environ.get("OPENAI_MODEL", "openai/gpt-4.1-mini")
 
-    # Câu hỏi tự do khi có `cau_hoi` và KHÔNG chỉ đích danh một bài tập có bank.
-    tu_do = bool(cau_hoi) and bai_tap_id is None and not (
-        (lesson_id in (None, 1)) and "token" in str(cau_hoi).lower())
+    # Câu hỏi đến từ giao diện /vlearn: đề bài nằm ngay trong câu hỏi, KHÔNG phải
+    # đoạn văn của bài tập trên trang chủ. Trước đây có nhánh đặc biệt cho câu hỏi
+    # chứa chữ "token" ở lesson 1 -> nó đẩy sang prompt mô tả đoạn 99 tiếng / 121
+    # token, trong khi câu hỏi hỏi về đoạn 16 tiếng. Sai sự thật, đã bỏ.
+    tu_do = bool(cau_hoi) and bai_tap_id is None
+    so_giau = _so_can_giau(st)
 
     if tu_do:
-        sys_prompt = SYSTEM_TU_DO.format(cau_hoi=cau_hoi, cites=", ".join(cites))
+        st_tu_do, so_giau = _su_that_trong_cau_hoi(cau_hoi)
+        sys_prompt = SYSTEM_TU_DO.format(
+            cau_hoi=cau_hoi, su_that=st_tu_do, cites=", ".join(cites))
     else:
         sys_prompt = SYSTEM.format(
             khai_niem=b["khai_niem"],
@@ -287,7 +312,8 @@ def chan_doan(so_doan, ly_do, model=None, bai_tap_id=None, cau_hoi=None, lesson_
     # -------------------- hậu kiểm bằng luật --------------------
     out["canh_bao"] = []
 
-    if _lo_dap_an(str(out.get("goi_y", "")) + " " + str(out.get("chan_doan", "")), st):
+    if _lo_dap_an(str(out.get("goi_y", "")) + " " + str(out.get("chan_doan", "")),
+                  st, so_giau):
         out["canh_bao"].append("LO_DAP_AN")
         out["goi_y"] = ("Mình giữ lại con số cho bạn tự tìm. Câu hỏi thay thế: "
                         "theo bạn thì yếu tố nào quyết định con số đó?")
